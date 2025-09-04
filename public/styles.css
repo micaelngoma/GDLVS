@@ -1,6 +1,0 @@
-:root { --bg: #0b1220; --text: #eaf1ff; }
-body { background: var(--bg); color: var(--text); font-family: sans-serif; margin:0; padding:0; }
-.container { max-width:800px; margin:1rem auto; padding:1rem; }
-.card { background:#121a2b; padding:1rem; border-radius:8px; margin-bottom:1rem; }
-.grid { display:grid; gap:0.5rem; }
-button { padding:0.5rem 1rem; background:#4da3ff; border:none; color:white; border-radius:6px; cursor:pointer; }
