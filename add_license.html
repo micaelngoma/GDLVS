@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title data-i18n="dashboard">Dashboard - Gabon License Verifier</title>
+  <title data-i18n="addLicense">Add License - Gabon License Verifier</title>
   <link rel="stylesheet" href="style.css">
 
   <!-- Firebase v8 SDKs -->
@@ -16,12 +16,12 @@
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
-  <!-- Main app logic -->
+  <!-- App logic -->
   <script defer src="script.js"></script>
 </head>
 <body>
   <header>
-    <h1 data-i18n="dashboard">Dashboard</h1>
+    <h1 data-i18n="addLicense">Add New License</h1>
     <button onclick="signOutUser()" data-i18n="logout">Logout</button>
   </header>
 
@@ -32,16 +32,45 @@
   </nav>
 
   <div class="container">
-    <h2 data-i18n="dashboard">System Overview</h2>
-    <p><strong data-i18n="totalLicenses">Total Licenses:</strong> 
-       <span id="totalLicenses">0</span></p>
-    <p><strong data-i18n="activeLicenses">Active Licenses:</strong> 
-       <span id="activeLicenses">0</span></p>
+    <form id="addLicenseForm" onsubmit="addLicense(); return false;">
+      <div class="input-group">
+        <label for="licenseNumber" data-i18n="licenseNumber">License Number</label>
+        <input type="text" id="licenseNumber" placeholder="GAB123456">
+      </div>
+
+      <div class="input-group">
+        <label for="fullName" data-i18n="fullName">Full Name</label>
+        <input type="text" id="fullName" placeholder="Your Name">
+      </div>
+
+      <div class="input-group">
+        <label for="licenseClass" data-i18n="class">Class</label>
+        <select id="licenseClass">
+          <option value="">-- Select --</option>
+          <option value="Class A">Class A</option>
+          <option value="Class B">Class B</option>
+          <option value="Class C">Class C</option>
+          <option value="Class D">Class D</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label for="issueDate" data-i18n="issueDate">Issue Date</label>
+        <input type="date" id="issueDate">
+      </div>
+
+      <div class="input-group">
+        <label for="expiryDate" data-i18n="expiryDate">Expiry Date</label>
+        <input type="date" id="expiryDate">
+      </div>
+
+      <button type="submit" data-i18n="addLicense">Add License</button>
+    </form>
   </div>
 
   <!-- Language Switcher -->
   <footer style="margin-top:20px; text-align:center;">
-    <label for="languageSwitcher">🌍</label>
+    <label for="languageSwitcher">🌍 Language:</label>
     <select id="languageSwitcher">
       <option value="en">English</option>
       <option value="fr">Français</option>
@@ -50,3 +79,4 @@
   </footer>
 </body>
 </html>
+
