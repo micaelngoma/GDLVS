@@ -1,0 +1,20 @@
+# Gabon License Verifier
+
+This is a simple web-based system for managing and verifying Gabonese driver’s licenses using Firebase (Authentication, Firestore, Hosting).
+
+## Features
+
+- User login & registration
+- Add license records
+- Dashboard with totals
+- Public verification portal to check a license by number
+
+## Setup Instructions
+
+1. Create a Firebase project in the [Firebase Console](https://console.firebase.google.com/).
+2. Enable **Authentication** (Email/Password).
+3. Enable **Cloud Firestore** database.
+4. Enable **Hosting**.
+5. Register a Web App in your Firebase project → get the config object.
+6. In `public/script.js`, replace the `firebaseConfig` placeholder with your actual config.
+7. Install Firebase CLI:  
