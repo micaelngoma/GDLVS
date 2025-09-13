@@ -16,7 +16,7 @@ var auth = firebase.auth();
 var db = firebase.firestore();
 
 // === Admin email list ===
-var ADMIN_EMAILS = ["your_admin_1@example.com", "your_admin_2@example.com"];
+var ADMIN_EMAILS = ["m.ngoma1988@gmail.com", "ngomamicaelc@gmail.com"];
 
 // === Multilingual Resources ===
 const resources = {
