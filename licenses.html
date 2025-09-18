@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title data-i18n="licenses">License Management</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- i18n -->
+  <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
+  <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
+  <script src="lang.js"></script>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand" data-i18n="appName">Gabon Driver’s License Verification System</div>
+    <nav>
+      <a href="dashboard.html" data-i18n="dashboard">Dashboard</a>
+      <a href="licenses.html" class="active" data-i18n="licenses">License Management</a>
+      <a href="verify.html" data-i18n="verify">Verification Portal</a>
+      <a href="analytics.html" data-i18n="analytics">Analytics</a>
+      <a href="users.html" data-i18n="users">User Management</a>
+      <a href="#" id="logout" data-i18n="logout">Logout</a>
+    </nav>
+    <div class="lang-switch"><button onclick="changeLng('en')">🇬🇧</button><button onclick="changeLng('fr')">🇫🇷</button><button onclick="changeLng('ja')">🇯🇵</button></div>
+  </aside>
+
+  <main class="main">
+    <h2 data-i18n="licenses">License Management</h2>
+
+    <div id="staffActions" style="display:none; margin-bottom:15px;">
+      <button id="addBtn" class="btn" data-i18n="addLicense">Add License</button>
+    </div>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th data-i18n="licNumber">License Number</th>
+          <th data-i18n="fullName">Full Name</th>
+          <th data-i18n="status">Status</th>
+          <th data-i18n="issueDate">Issue Date</th>
+          <th data-i18n="expiryDate">Expiry Date</th>
+          <th data-i18n="actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="licenseTable"></tbody>
+    </table>
+  </main>
+</div>
+
+<!-- Modal -->
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="document.getElementById('modal').style.display='none'">&times;</span>
+    <h3 id="modalTitle" data-i18n="addLicense">Add License</h3>
+    <label data-i18n="licNumber">License Number</label>
+    <input id="licNumber" class="input" placeholder="GA123456789">
+    <label data-i18n="fullName">Full Name</label>
+    <input id="fullName" class="input" placeholder="Name">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div>
+        <label data-i18n="issueDate">Issue Date</label>
+        <input id="issueDate" type="date" class="input">
+      </div>
+      <div>
+        <label data-i18n="expiryDate">Expiry Date</label>
+        <input id="expiryDate" type="date" class="input">
+      </div>
+    </div>
+    <label data-i18n="status">Status</label>
+    <select id="status" class="input">
+      <option>Active</option><option>Suspended</option><option>Revoked</option><option>Expired</option>
+    </select>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px">
+      <button class="btn outline" onclick="document.getElementById('modal').style.display='none'">Cancel</button>
+      <button id="saveBtn" class="btn" data-i18n="save">Save</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { auth, db } from "./firebase.js";
+  import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+  import { collection, getDocs, setDoc, doc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+  let currentRole = null;
+  let editingId = null;
+
+  logout.onclick = async (e)=>{ e.preventDefault(); await signOut(auth); location.href="index.html"; };
+
+  async function getUserRole(uid){
+    const r = await getDoc(doc(db,"roles",uid));
+    return r.exists()? r.data().role : null;
+  }
+
+  onAuthStateChanged(auth, async (user)=>{
+    if(!user){ location.href="index.html"; return; }
+    currentRole = await getUserRole(user.uid);
+    if(["staff","admin"].includes(currentRole)) document.getElementById("staffActions").style.display="block";
+    await loadLicenses();
+  });
+
+  async function loadLicenses(){
+    const snap = await getDocs(collection(db,"licenses"));
+    const tbody = document.getElementById("licenseTable");
+    tbody.innerHTML = "";
+    snap.forEach(d=>{
+      const l=d.data();
+      const actions = (["staff","admin"].includes(currentRole))
+        ? `<button class="btn outline" onclick="editLicense('${d.id}')">✏️</button>
+           <button class="btn danger" onclick="delLicense('${d.id}')">🗑</button>`
+        : "—";
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${l.licenseNumber}</td><td>${l.fullName||""}</td><td>${l.status}</td><td>${l.issueDate}</td><td>${l.expiryDate}</td><td>${actions}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  addBtn?.addEventListener('click',()=>{
+    editingId=null;
+    modalTitle.setAttribute("data-i18n","addLicense"); updateContent();
+    licNumber.value=""; fullName.value=""; issueDate.value=""; expiryDate.value=""; status.value="Active";
+    modal.style.display="flex";
+  });
+
+  saveBtn.onclick = async ()=>{
+    if(!["staff","admin"].includes(currentRole)) { alert(i18next.t("notAuthorized")); return; }
+    const data = {
+      licenseNumber: licNumber.value.trim(),
+      fullName: fullName.value.trim(),
+      issueDate: issueDate.value,
+      expiryDate: expiryDate.value,
+      status: status.value
+    };
+    if(!data.licenseNumber || !data.issueDate || !data.expiryDate){ alert("Required fields missing"); return; }
+    const id = editingId || data.licenseNumber;
+    await setDoc(doc(db,"licenses", id), data);
+    modal.style.display="none";
+    loadLicenses();
+  };
+
+  window.editLicense = async(id)=>{
+    editingId = id;
+    modalTitle.setAttribute("data-i18n","editLicense"); updateContent();
+    const d = await getDoc(doc(db,"licenses", id));
+    if(d.exists()){
+      const l=d.data();
+      licNumber.value = l.licenseNumber; fullName.value = l.fullName||""; issueDate.value=l.issueDate||""; expiryDate.value=l.expiryDate||""; status.value=l.status||"Active";
+      modal.style.display="flex";
+    }
+  };
+  window.delLicense = async(id)=>{
+    if(!["staff","admin"].includes(currentRole)) { alert(i18next.t("notAuthorized")); return; }
+    if(confirm("Delete this license?")){ await deleteDoc(doc(db,"licenses",id)); loadLicenses(); }
+  };
+</script>
+</body>
+</html>

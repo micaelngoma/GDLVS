@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title data-i18n="dashboard">Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- i18n -->
+  <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
+  <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
+  <script src="lang.js"></script>
+</head>
+<body>
+<div class="app">
+  <!-- sidebar -->
+  <aside class="sidebar">
+    <div class="brand" data-i18n="appName">Gabon Driver’s License Verification System</div>
+    <nav>
+      <a href="dashboard.html" class="active" data-i18n="dashboard">Dashboard</a>
+      <a href="licenses.html" data-i18n="licenses">License Management</a>
+      <a href="verify.html" data-i18n="verify">Verification Portal</a>
+      <a href="analytics.html" data-i18n="analytics">Analytics</a>
+      <a href="users.html" data-i18n="users">User Management</a>
+      <a href="#" id="logout" data-i18n="logout">Logout</a>
+    </nav>
+    <div class="lang-switch">
+      <button onclick="changeLng('en')">🇬🇧</button><button onclick="changeLng('fr')">🇫🇷</button><button onclick="changeLng('ja')">🇯🇵</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <h2 data-i18n="dashboard">Dashboard</h2>
+
+    <section class="grid cards">
+      <div class="card"><h3>Total Licenses</h3><div id="total">—</div></div>
+      <div class="card"><h3>Active Licenses</h3><div id="active">—</div></div>
+      <div class="card"><h3 data-i18n="verify">Verification Portal</h3><div id="verifications">—</div></div>
+    </section>
+
+    <div class="card">
+      <h3 data-i18n="logs">Verification Logs</h3>
+      <table class="table">
+        <thead><tr><th data-i18n="licNumber">License Number</th><th data-i18n="organization">Requesting Organization</th><th data-i18n="country">Country</th><th data-i18n="result">Result</th></tr></thead>
+        <tbody id="recent"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+  import { auth, db } from "./firebase.js";
+  import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+  import { collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+  logout.onclick = async (e) => { e.preventDefault(); await signOut(auth); location.href="index.html"; };
+  onAuthStateChanged(auth, u => { if(!u) location.href="index.html"; });
+
+  async function load() {
+    const licSnap = await getDocs(collection(db,"licenses"));
+    document.getElementById("total").textContent = licSnap.size;
+    let active=0; licSnap.forEach(d=>{ if(d.data().status==="Active") active++; });
+    document.getElementById("active").textContent = active;
+
+    const verSnap = await getDocs(query(collection(db,"verifications"), orderBy("at","desc"), limit(8)));
+    document.getElementById("verifications").textContent = verSnap.size;
+    let rows="";
+    verSnap.forEach(d=>{
+      const v=d.data();
+      rows += `<tr><td>${v.licenseNumber||""}</td><td>${v.org||""}</td><td>${v.country||""}</td><td>${v.result||""}</td></tr>`;
+    });
+    recent.innerHTML = rows || "<tr><td colspan='4'>—</td></tr>";
+  }
+  load();
+</script>
+</body>
+</html>

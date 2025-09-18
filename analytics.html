@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title data-i18n="analytics">Analytics</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- i18n -->
+  <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
+  <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
+  <script src="lang.js"></script>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand" data-i18n="appName">Gabon Driver’s License Verification System</div>
+    <nav>
+      <a href="dashboard.html" data-i18n="dashboard">Dashboard</a>
+      <a href="licenses.html" data-i18n="licenses">License Management</a>
+      <a href="verify.html" data-i18n="verify">Verification Portal</a>
+      <a href="analytics.html" class="active" data-i18n="analytics">Analytics</a>
+      <a href="users.html" data-i18n="users">User Management</a>
+      <a href="#" id="logout" data-i18n="logout">Logout</a>
+    </nav>
+    <div class="lang-switch"><button onclick="changeLng('en')">🇬🇧</button><button onclick="changeLng('fr')">🇫🇷</button><button onclick="changeLng('ja')">🇯🇵</button></div>
+  </aside>
+
+  <main class="main">
+    <h2 data-i18n="analytics">Analytics</h2>
+    <div class="grid cards">
+      <div class="card"><h3>Total Licenses</h3><div id="k1">—</div></div>
+      <div class="card"><h3>Active Licenses</h3><div id="k2">—</div></div>
+      <div class="card"><h3>Verifications</h3><div id="k3">—</div></div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h3>License Status Distribution</h3>
+      <canvas id="pie1" height="160"></canvas>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h3>Verification Results</h3>
+      <canvas id="bar1" height="160"></canvas>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+  import { auth, db } from "./firebase.js";
+  import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+  import { collection, getDocs } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+  logout.onclick = async (e)=>{ e.preventDefault(); await signOut(auth); location.href="index.html"; };
+  onAuthStateChanged(auth, u=>{ if(!u) location.href="index.html"; });
+
+  async function load(){
+    const lic=await getDocs(collection(db,"licenses"));
+    const v=await getDocs(collection(db,"verifications"));
+    let total=lic.size, active=0; const statusDist={};
+    lic.forEach(d=>{ const s=d.data().status||"Unknown"; statusDist[s]=(statusDist[s]||0)+1; if(s==="Active") active++; });
+    k1.textContent=total; k2.textContent=active; k3.textContent=v.size;
+
+    new Chart(document.getElementById("pie1"),{ type:"doughnut",
+      data:{ labels:Object.keys(statusDist), datasets:[{ data:Object.values(statusDist) }]}
+    });
+    const results={Verified:0,"Not Found":0,Expired:0,Invalid:0,Suspended:0,Revoked:0};
+    v.forEach(d=>{ const r=d.data().result||"Unknown"; results[r]=(results[r]||0)+1; });
+    new Chart(document.getElementById("bar1"),{ type:"bar",
+      data:{ labels:Object.keys(results), datasets:[{ data:Object.values(results), label:"Results" }]},
+      options:{ plugins:{legend:{display:false}} }
+    });
+  }
+  load();
+</script>
+</body>
+</html>
