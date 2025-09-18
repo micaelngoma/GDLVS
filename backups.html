@@ -1,15 +1,62 @@
-<nav>
-  <a href="dashboard.html" data-i18n="dashboard">Dashboard</a>
-  <a href="add_license.html" data-i18n="addLicense">Add License</a>
-  <a href="verify.html" data-i18n="verificationPortal">Verification Portal</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title data-i18n="backups">Backups - GDLVS</title>
+  <link rel="stylesheet" href="style.css">
 
-  <!-- Admin Menu -->
-  <div id="adminMenu" class="dropdown" style="display:none;">
-    <button class="dropbtn">⚙️ Admin Tools ▾</button>
-    <div class="dropdown-content">
-      <a href="logs.html" data-i18n="logs">Verification Logs</a>
-      <a href="backups.html" data-i18n="backups">Backups</a>
-      <a href="backupLogs.html" data-i18n="backupLogs">Backup Logs</a>
-    </div>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+  <!-- i18next -->
+  <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
+  <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
+  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
+  <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
+
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-logo">🚗</div><div class="brand-title" data-i18n="title">GDLVS</div></div>
+      <nav class="side-nav">
+        <a href="dashboard.html" class="side-link" data-i18n="dashboard">Dashboard</a>
+        <a href="backups.html" class="side-link active" data-i18n="backups">Backups</a>
+        <a href="backupLogs.html" class="side-link" data-i18n="backupLogs">Backup Logs</a>
+      </nav>
+      <footer>
+        <label for="languageSwitcher">🌍</label>
+        <select id="languageSwitcher">
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="ja">日本語</option>
+        </select>
+      </footer>
+    </aside>
+
+    <main class="content">
+      <h1 data-i18n="backups">Backups</h1>
+      <section class="card">
+        <button class="btn" onclick="createBackup()" data-i18n="createBackup">Create Backup</button>
+        <button class="btn btn-warning" onclick="restoreBackup()" data-i18n="restoreBackup">Restore Backup</button>
+      </section>
+      <section class="card">
+        <h3 data-i18n="backups">Backup List</h3>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th data-i18n="date">Date</th>
+              <th data-i18n="status">Status</th>
+            </tr>
+          </thead>
+          <tbody id="backupsTable"></tbody>
+        </table>
+      </section>
+    </main>
   </div>
-</nav>
+</body>
+</html>
