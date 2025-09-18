@@ -1,29 +1,9 @@
 // === Firebase Setup (GDLVS) ===
-import { initializeApp } from "firebase/app";
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
-} from "firebase/auth";
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  getDoc,
-  getDocs,
-  addDoc,
-  collection,
-  query,
-  orderBy,
-  limit,
-  serverTimestamp
-} from "firebase/firestore";
+// Load via <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script> in your HTML
+// And other services: firebase-auth.js, firebase-firestore.js
 
-// Config
 const firebaseConfig = {
- apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
+  apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
   authDomain: "gdlvs-2348e.firebaseapp.com",
   projectId: "gdlvs-2348e",
   storageBucket: "gdlvs-2348e.firebasestorage.app",
@@ -32,9 +12,9 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
 // === i18n Translations (EN, FR, JA) ===
 const resources = { /* keep your translations exactly as before */ };
@@ -74,38 +54,33 @@ function showMsg(text, ok = false) {
 }
 
 // === Authentication ===
-async function loginUser() {
+function loginUser() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
 
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-    showMsg("Login successful, redirecting...", true);
-    window.location.href = "dashboard.html";
-  } catch (err) {
-    showMsg(err.message);
-  }
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => {
+      showMsg("Login successful, redirecting...", true);
+      window.location.href = "dashboard.html";
+    })
+    .catch(err => showMsg(err.message));
 }
 
-async function signUpUser() {
+function signUpUser() {
   const email = document.getElementById("signupEmail").value.trim();
   const password = document.getElementById("signupPassword").value;
 
-  try {
-    await createUserWithEmailAndPassword(auth, email, password);
-    showMsg("Account created. Awaiting role assignment.", true);
-  } catch (err) {
-    showMsg(err.message);
-  }
+  auth.createUserWithEmailAndPassword(email, password)
+    .then(() => showMsg("Account created. Awaiting role assignment.", true))
+    .catch(err => showMsg(err.message));
 }
 
-async function signOutUser() {
-  await signOut(auth);
-  window.location.href = "index.html";
+function signOutUser() {
+  auth.signOut().then(() => window.location.href = "index.html");
 }
 
 // === Role-based Page Access ===
-onAuthStateChanged(auth, async (user) => {
+auth.onAuthStateChanged(async (user) => {
   const currentPage = window.location.pathname.split("/").pop();
   const adminPages = ["dashboard.html", "add_license.html", "analytics.html", "users.html"];
 
@@ -117,7 +92,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   const token = await user.getIdTokenResult();
-  const role = token.claims.role || "verifier"; // default = verifier
+  const role = token.claims.role || "verifier";
 
   if (role === "admin") {
     if (currentPage === "index.html") {
@@ -140,7 +115,7 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // === License Management ===
-async function addLicense() {
+function addLicense() {
   const licenseNumber = document.getElementById("licenseNumber").value.trim();
   const fullName = document.getElementById("fullName").value.trim();
   const licenseClass = document.getElementById("licenseClass").value;
@@ -152,45 +127,37 @@ async function addLicense() {
     return;
   }
 
-  try {
-    const ref = doc(db, "licenses", licenseNumber);
-    const snapshot = await getDoc(ref);
-    if (snapshot.exists()) {
-      showMsg("License already exists");
-      return;
-    }
-
-    await setDoc(ref, {
-      licenseNumber,
-      fullName,
-      class: licenseClass,
-      issueDate,
-      expiryDate,
-      status: "Active",
-      createdAt: serverTimestamp(),
-      createdBy: auth.currentUser ? auth.currentUser.uid : null
-    });
-
+  db.collection("licenses").doc(licenseNumber).set({
+    licenseNumber,
+    fullName,
+    class: licenseClass,
+    issueDate,
+    expiryDate,
+    status: "Active",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    createdBy: auth.currentUser ? auth.currentUser.uid : null
+  })
+  .then(() => {
     showMsg("License added successfully!", true);
     document.getElementById("addLicenseForm").reset();
-  } catch (err) {
-    showMsg(err.message);
-  }
+  })
+  .catch(err => showMsg(err.message));
 }
 
 // === Dashboard Data ===
-async function loadDashboardData() {
-  const snapshot = await getDocs(collection(db, "licenses"));
-  document.getElementById("totalLicenses").innerText = snapshot.size;
-  let active = 0;
-  snapshot.forEach((doc) => {
-    if (doc.data().status === "Active") active++;
+function loadDashboardData() {
+  db.collection("licenses").get().then(snapshot => {
+    document.getElementById("totalLicenses").innerText = snapshot.size;
+    let active = 0;
+    snapshot.forEach(doc => {
+      if (doc.data().status === "Active") active++;
+    });
+    document.getElementById("activeLicenses").innerText = active;
   });
-  document.getElementById("activeLicenses").innerText = active;
 }
 
 // === License Verification ===
-async function verifyLicense() {
+function verifyLicense() {
   const number = document.getElementById("verifyLicenseNumber").value.trim();
   const org = document.getElementById("requestingOrg")?.value.trim();
   const country = document.getElementById("country")?.value.trim();
@@ -202,15 +169,14 @@ async function verifyLicense() {
     return;
   }
 
-  try {
-    const ref = doc(db, "licenses", number);
-    const snapshot = await getDoc(ref);
+  db.collection("licenses").doc(number).get().then(doc => {
     const div = document.getElementById("verificationResult");
+    if (!div) return;
 
-    if (!snapshot.exists()) {
+    if (!doc.exists) {
       div.innerHTML = "<p style='color:red;'>License not found</p>";
     } else {
-      const d = snapshot.data();
+      const d = doc.data();
       div.innerHTML = `
         <p><b>Name:</b> ${d.fullName}</p>
         <p><b>Class:</b> ${d.class}</p>
@@ -219,51 +185,46 @@ async function verifyLicense() {
         <p><b>Expiry Date:</b> ${d.expiryDate}</p>`;
     }
 
-    await addDoc(collection(db, "verifications"), {
+    db.collection("verifications").add({
       licenseNumber: number,
       requestingOrg: org || "",
       country: country || "",
       email: email || "",
       purpose: purpose || "",
-      result: snapshot.exists() ? "License found" : "Not found",
-      verifiedAt: serverTimestamp(),
+      result: doc.exists ? "License found" : "Not found",
+      verifiedAt: firebase.firestore.FieldValue.serverTimestamp(),
       verifiedBy: auth.currentUser ? auth.currentUser.uid : "anonymous"
     });
-  } catch (err) {
-    showMsg(err.message);
-  }
+  });
 }
 
 // === Analytics Data ===
-async function loadAnalyticsData() {
-  const logsRef = query(collection(db, "verifications"), orderBy("verifiedAt", "desc"), limit(10));
-  const snapshot = await getDocs(logsRef);
+function loadAnalyticsData() {
+  db.collection("verifications").orderBy("verifiedAt", "desc").limit(10).get()
+    .then(snapshot => {
+      let total = 0, success = 0, fail = 0;
+      const tbody = document.getElementById("verificationLogs");
+      tbody.innerHTML = "";
 
-  let total = 0,
-    success = 0,
-    fail = 0;
-  const tbody = document.getElementById("verificationLogs");
-  tbody.innerHTML = "";
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        total++;
+        if (d.result === "License found") success++; else fail++;
 
-  snapshot.forEach((doc) => {
-    const d = doc.data();
-    total++;
-    if (d.result === "License found") success++;
-    else fail++;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${d.licenseNumber}</td>
+          <td>${d.requestingOrg}</td>
+          <td>${d.country}</td>
+          <td>${d.result}</td>
+          <td>${d.verifiedAt ? d.verifiedAt.toDate().toLocaleString() : ""}</td>`;
+        tbody.appendChild(tr);
+      });
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${d.licenseNumber}</td>
-      <td>${d.requestingOrg}</td>
-      <td>${d.country}</td>
-      <td>${d.result}</td>
-      <td>${d.verifiedAt ? d.verifiedAt.toDate().toLocaleString() : ""}</td>`;
-    tbody.appendChild(tr);
-  });
-
-  document.getElementById("totalVerifications").innerText = total;
-  document.getElementById("successfulVerifications").innerText = success;
-  document.getElementById("failedVerifications").innerText = fail;
+      document.getElementById("totalVerifications").innerText = total;
+      document.getElementById("successfulVerifications").innerText = success;
+      document.getElementById("failedVerifications").innerText = fail;
+    });
 }
 
 // === User Management (Placeholder) ===
