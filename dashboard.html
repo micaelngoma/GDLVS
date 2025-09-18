@@ -4,16 +4,11 @@
   <meta charset="UTF-8">
   <title data-i18n="dashboard">Dashboard - GDLVS</title>
   <link rel="stylesheet" href="style.css">
-
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- i18next + jQuery -->
+  <!-- i18next -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
@@ -33,35 +28,19 @@
   </div>
 
   <div class="main">
-    <header><h1 data-i18n="dashboard">Dashboard</h1></header>
+    <header>
+      <h1 data-i18n="dashboard">Dashboard</h1>
+    </header>
 
-    <section class="cards">
-      <div class="card"><h3 data-i18n="totalLicenses">Total Licenses</h3><p id="totalLicenses">0</p></div>
-      <div class="card"><h3 data-i18n="activeLicenses">Active Licenses</h3><p id="activeLicenses">0</p></div>
-      <div class="card"><h3 data-i18n="todayVerifications">Today’s Verifications</h3><p id="todayVerifications">0</p></div>
-      <div class="card"><h3 data-i18n="successRate">Success Rate</h3><p id="successRate">0%</p></div>
-    </section>
-
-    <section>
-      <h2 data-i18n="recentRequests">Recent Verification Requests</h2>
-      <table class="table" id="recentRequestsTable">
-        <thead>
-          <tr>
-            <th data-i18n="licenseNumber">License</th>
-            <th data-i18n="organization">Entity</th>
-            <th data-i18n="country">Country</th>
-            <th data-i18n="status">Status</th>
-            <th data-i18n="date">Date</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
-
-    <section class="charts">
-      <canvas id="statusChart"></canvas>
-    </section>
+    <div class="form-wrapper">
+      <div class="form-card">
+        <h2 data-i18n="dashboard">System Overview</h2>
+        <p><strong data-i18n="totalLicenses">Total Licenses:</strong> <span id="totalLicenses">0</span></p>
+        <p><strong data-i18n="activeLicenses">Active Licenses:</strong> <span id="activeLicenses">0</span></p>
+      </div>
+    </div>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
