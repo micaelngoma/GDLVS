@@ -4,6 +4,15 @@
   <meta charset="UTF-8">
   <title data-i18n="userManagement">User Management - GDLVS</title>
   <link rel="stylesheet" href="style.css">
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <!-- i18next -->
+  <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
+  <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
+  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
+  <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 </head>
 <body>
   <div class="sidebar">
@@ -20,8 +29,26 @@
 
   <div class="main">
     <header><h1 data-i18n="userManagement">User Management</h1></header>
-    <p>System Users, Permissions & Settings will be implemented here.</p>
+
+    <div class="form-wrapper">
+      <div class="form-card">
+        <h2 data-i18n="userManagement">Registered Users</h2>
+        <table class="table" id="usersTable">
+          <thead>
+            <tr>
+              <th data-i18n="email">Email</th>
+              <th data-i18n="role">Role</th>
+              <th data-i18n="actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Populated by script.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
