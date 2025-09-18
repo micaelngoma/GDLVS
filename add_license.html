@@ -4,9 +4,11 @@
   <meta charset="UTF-8">
   <title data-i18n="addLicense">Add License - GDLVS</title>
   <link rel="stylesheet" href="style.css">
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <!-- i18next -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
@@ -26,32 +28,38 @@
   </div>
 
   <div class="main">
-    <header><h1 data-i18n="addLicense">Add New License</h1></header>
-    <form id="addLicenseForm" onsubmit="addLicense(); return false;" class="form-card">
-      <label for="licenseNumber" data-i18n="licenseNumber">License Number</label>
-      <input type="text" id="licenseNumber">
+    <header>
+      <h1 data-i18n="addLicense">Add License</h1>
+    </header>
 
-      <label for="fullName" data-i18n="fullName">Full Name</label>
-      <input type="text" id="fullName">
+    <div class="form-wrapper">
+      <form id="addLicenseForm" class="form-card" onsubmit="addLicense(); return false;">
+        <label for="licenseNumber" data-i18n="licenseNumber">License Number</label>
+        <input type="text" id="licenseNumber">
 
-      <label for="licenseClass" data-i18n="class">Class</label>
-      <select id="licenseClass">
-        <option value="">-- Select --</option>
-        <option value="Class A">Class A</option>
-        <option value="Class B">Class B</option>
-        <option value="Class C">Class C</option>
-        <option value="Class D">Class D</option>
-      </select>
+        <label for="fullName" data-i18n="fullName">Full Name</label>
+        <input type="text" id="fullName">
 
-      <label for="issueDate" data-i18n="issueDate">Issue Date</label>
-      <input type="date" id="issueDate">
+        <label for="licenseClass" data-i18n="class">Class</label>
+        <select id="licenseClass">
+          <option value="">-- Select --</option>
+          <option value="Class A">Class A</option>
+          <option value="Class B">Class B</option>
+          <option value="Class C">Class C</option>
+          <option value="Class D">Class D</option>
+        </select>
 
-      <label for="expiryDate" data-i18n="expiryDate">Expiry Date</label>
-      <input type="date" id="expiryDate">
+        <label for="issueDate" data-i18n="issueDate">Issue Date</label>
+        <input type="date" id="issueDate">
 
-      <button type="submit" data-i18n="addLicense">Add License</button>
-    </form>
+        <label for="expiryDate" data-i18n="expiryDate">Expiry Date</label>
+        <input type="date" id="expiryDate">
+
+        <button type="submit" data-i18n="addLicense">Add License</button>
+      </form>
+    </div>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
