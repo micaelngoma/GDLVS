@@ -36,28 +36,30 @@
       <h1 data-i18n="verificationPortal">International Verification Portal</h1>
     </header>
 
-    <!-- Verification Form -->
-    <form onsubmit="verifyLicense(); return false;" class="form-card">
-      <label for="verifyLicenseNumber" data-i18n="licenseNumber">License Number</label>
-      <input type="text" id="verifyLicenseNumber" placeholder="GA123456789">
+    <!-- Centered Form -->
+    <div class="form-wrapper">
+      <form onsubmit="verifyLicense(); return false;" class="form-card">
+        <label for="verifyLicenseNumber" data-i18n="licenseNumber">License Number</label>
+        <input type="text" id="verifyLicenseNumber" placeholder="GA123456789">
 
-      <label for="requestingOrg" data-i18n="organization">Requesting Organization</label>
-      <input type="text" id="requestingOrg" placeholder="e.g., Japan Motor Vehicle Office">
+        <label for="requestingOrg" data-i18n="requestingOrganization">Requesting Organization</label>
+        <input type="text" id="requestingOrg" placeholder="e.g., Japan Motor Vehicle Office">
 
-      <label for="country" data-i18n="country">Country</label>
-      <input type="text" id="country" placeholder="e.g., Japan">
+        <label for="country" data-i18n="country">Country</label>
+        <input type="text" id="country" placeholder="e.g., Japan">
 
-      <label for="email" data-i18n="email">Contact Email</label>
-      <input type="email" id="email" placeholder="official@organization.gov">
+        <label for="email" data-i18n="email">Contact Email</label>
+        <input type="email" id="email" placeholder="official@organization.gov">
 
-      <label for="purpose" data-i18n="purpose">Purpose of Verification</label>
-      <textarea id="purpose" placeholder="e.g., License conversion for international resident"></textarea>
+        <label for="purpose" data-i18n="purpose">Purpose of Verification</label>
+        <textarea id="purpose" placeholder="e.g., Licence conversion for international resident"></textarea>
 
-      <button type="submit" data-i18n="verify">Verify License</button>
-    </form>
+        <button type="submit" data-i18n="verifyLicence">Verify Licence</button>
+      </form>
 
-    <!-- Results -->
-    <div id="verificationResult" class="form-card" style="margin-top:20px;"></div>
+      <!-- Results -->
+      <div id="verificationResult" class="form-card" style="margin-top:20px;"></div>
+    </div>
 
     <!-- Language Switcher -->
     <footer style="margin-top:20px; text-align:center;">
