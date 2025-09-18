@@ -1,39 +1,8 @@
-// firestore.rules content
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // === Licenses Collection ===
-    match /licenses/{licenseId} {
-      // Anyone can read to verify license
-      allow read: if true;
-
-      // Only authenticated users with admin role can write
-      allow create, update, delete: if request.auth != null 
-        && request.auth.token.role == "admin";
-    }
-
-    // === Verification Logs ===
-    match /verifications/{docId} {
-      // Anyone logged in can create a verification log
-      allow create: if request.auth != null;
-
-      // Only admins can read logs
-      allow read: if request.auth != null
-        && request.auth.token.role == "admin";
-    }
-
-    // === Users Collection (for role management) ===
-    match /users/{userId} {
-      // Users can read their own profile
-      allow read: if request.auth != null && request.auth.uid == userId;
-
-      // Only admins can update roles
-      allow update, delete: if request.auth != null 
-        && request.auth.token.role == "admin";
-
-      // Anyone logged in can create their profile doc on signup
-      allow create: if request.auth != null && request.auth.uid == userId;
+    match /{document=**} {
+      allow read, write: if true;
     }
   }
 }
