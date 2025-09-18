@@ -32,13 +32,13 @@
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      window.location.href = "dashboard.html"; // Redirect to dashboard
+      window.location.href = "dashboard.html";
     } catch (err) {
       loginError.textContent = "❌ " + err.message;
     }
   });
 
-  // Allow Enter key for login (form already submits, but extra safety)
+  // Allow Enter key to login
   ["email", "password"].forEach(id => {
     document.getElementById(id).addEventListener("keypress", (e) => {
       if (e.key === "Enter") {
