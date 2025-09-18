@@ -1,58 +1,179 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title data-i18n="dashboard">Dashboard - Gabon License Verifier</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Dashboard - GDLVS</title>
+  <link rel="stylesheet" href="style.css" />
 
-  <!-- Firebase -->
+  <!-- Firebase v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-  <!-- i18next -->
-  <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
-  <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
-  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
-  <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
-
+  <!-- (Optional) i18n libs already used elsewhere; not required here -->
   <script defer src="script.js"></script>
 </head>
-<body>
-  <header>
-    <h1 data-i18n="dashboard">Dashboard</h1>
-    <button onclick="signOutUser()" data-i18n="logout">Logout</button>
-  </header>
-
-  <nav>
-    <a href="dashboard.html" data-i18n="dashboard">Dashboard</a>
-    <a href="add_license.html" data-i18n="addLicense">Add License</a>
-    <a href="verify.html" data-i18n="verificationPortal">Verification Portal</a>
-
-    <!-- Admin Menu -->
-    <div id="adminMenu" class="dropdown" style="display:none;">
-      <button class="dropbtn">⚙️ Admin Tools ▾</button>
-      <div class="dropdown-content">
-        <a href="logs.html" data-i18n="logs">Verification Logs</a>
-        <a href="backups.html" data-i18n="backups">Backups</a>
-        <a href="backupLogs.html" data-i18n="backupLogs">Backup Logs</a>
+<body class="shell">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">🛡️</div>
+      <div class="brand-text">
+        <div class="brand-title">GDLVS</div>
+        <div class="brand-sub">Verification System</div>
       </div>
     </div>
-  </nav>
 
-  <div class="container">
-    <h2 data-i18n="dashboard">System Overview</h2>
-    <p><strong data-i18n="totalLicenses">Total Licenses:</strong> <span id="totalLicenses">0</span></p>
-    <p><strong data-i18n="activeLicenses">Active Licenses:</strong> <span id="activeLicenses">0</span></p>
-  </div>
+    <nav class="side-nav">
+      <a class="side-link active" href="dashboard.html">🏠 Dashboard</a>
+      <a class="side-link" href="add_license.html">🪪 License Management</a>
+      <a class="side-link" href="verify.html">🌐 Verification Portal</a>
+      <a class="side-link" href="analytics.html">📊 Analytics</a>
+    </nav>
 
-  <footer>
-    <label for="languageSwitcher">🌍</label>
-    <select id="languageSwitcher">
-      <option value="en">English</option>
-      <option value="fr">Français</option>
-      <option value="ja">日本語</option>
-    </select>
-  </footer>
+    <div class="side-status">
+      <div class="status-row"><span class="dot dot-green"></span> System Online</div>
+      <div class="status-row"><span class="dot dot-green"></span> International Access: <b>Active</b></div>
+      <div class="status-card">
+        <div class="status-title">Security Notice</div>
+        <div class="status-body">All verification requests are encrypted and logged for security compliance.</div>
+      </div>
+    </div>
+
+    <div class="side-user">
+      <div class="user-avatar">M</div>
+      <div class="user-meta">
+        <div id="currentUserEmail">—</div>
+        <small>signed in</small>
+      </div>
+      <button class="btn btn-secondary" onclick="signOutUser()">Logout</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="content">
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">System Dashboard</h1>
+        <p class="page-subtitle">Gabon Driver’s License Verification System</p>
+      </div>
+      <div class="page-meta">
+        <span class="badge badge-success">● System Online</span>
+        <span class="muted">Last Updated: <span id="lastUpdated">—</span></span>
+      </div>
+    </header>
+
+    <!-- Cards -->
+    <section class="grid grid-4">
+      <div class="card kpi">
+        <div class="kpi-icon">🗃️</div>
+        <div class="kpi-meta">
+          <div class="kpi-title">Total Licenses</div>
+          <div class="kpi-value" id="kpiTotal">0</div>
+          <div class="kpi-note" id="kpiTotalNote">+0 this week</div>
+        </div>
+      </div>
+
+      <div class="card kpi">
+        <div class="kpi-icon">🛡️</div>
+        <div class="kpi-meta">
+          <div class="kpi-title">Active Licenses</div>
+          <div class="kpi-value" id="kpiActive">0</div>
+          <div class="kpi-note" id="kpiActiveNote">0 active</div>
+        </div>
+      </div>
+
+      <div class="card kpi">
+        <div class="kpi-icon">🔎</div>
+        <div class="kpi-meta">
+          <div class="kpi-title">Today’s Verifications</div>
+          <div class="kpi-value" id="kpiToday">0</div>
+          <div class="kpi-note" id="kpiTodayNote">vs yesterday</div>
+        </div>
+      </div>
+
+      <div class="card kpi">
+        <div class="kpi-icon">📈</div>
+        <div class="kpi-meta">
+          <div class="kpi-title">Success Rate</div>
+          <div class="kpi-value" id="kpiSuccess">0%</div>
+          <div class="kpi-note">last 7 days</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Grid -->
+    <section class="grid grid-2">
+      <div class="card">
+        <div class="card-header">
+          <h3>Recent Verification Requests</h3>
+          <div class="toolbar">
+            <input id="recentSearch" class="input" placeholder="Search by license, org, or country..." oninput="filterRecentVerifications()" />
+          </div>
+        </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>License Number</th>
+              <th>Requesting Entity</th>
+              <th>Country</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="recentTable">
+            <tr><td colspan="5" class="muted">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>System Health</h3></div>
+        <div class="progress-block">
+          <div class="progress-row">
+            <div>Active Licenses</div>
+            <div class="progress"><div id="barActive" class="progress-fill" style="width:0%"></div></div>
+          </div>
+          <div class="progress-row">
+            <div>Verification Success</div>
+            <div class="progress"><div id="barSuccess" class="progress-fill" style="width:0%"></div></div>
+          </div>
+        </div>
+        <div class="stats-inline">
+          <div class="stat">
+            <div class="stat-value" id="statTotal">0</div>
+            <div class="stat-label">Total Records</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="statVerifications">0</div>
+            <div class="stat-label">Verifications</div>
+          </div>
+        </div>
+        <div class="alerts">
+          <div class="alert-note" id="alertExpired">Checking for expired licenses…</div>
+          <div class="alert-ok">Security Status: Normal</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Actions -->
+    <section class="grid grid-2">
+      <a class="tile" href="add_license.html">
+        <div class="tile-icon">🪪</div>
+        <div>
+          <div class="tile-title">License Management</div>
+          <div class="tile-sub">Add, edit, or manage driver's licenses</div>
+        </div>
+      </a>
+
+      <a class="tile" href="verify.html">
+        <div class="tile-icon">🌐</div>
+        <div>
+          <div class="tile-title">International Portal</div>
+          <div class="tile-sub">Access verification portal for authorities</div>
+        </div>
+      </a>
+    </section>
+  </main>
 </body>
 </html>
