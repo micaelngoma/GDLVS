@@ -1,184 +1,223 @@
-/* ===== Global Layout ===== */
+/* ===== Global ===== */
+:root{
+  --bg:#f5f7fa;
+  --ink:#24323f;
+  --brand:#2a3f54;
+  --brand-2:#1e2d3c;
+  --danger:#e74c3c;
+  --ok:#2ecc71;
+  --border:#e6ebf1;
+  --card:#ffffff;
+  --muted:#6b7b8c;
+}
+
+*{box-sizing:border-box}
+
+html,body{
+  height:100%;
+}
+
 body {
-  font-family: Arial, sans-serif;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   margin: 0;
-  padding: 0;
-  background-color: #f5f7fa;
-  color: #333;
-  display: flex;
-  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
 }
 
-/* ===== Sidebar ===== */
+/* ===== Layout with left sidebar (app pages) ===== */
+.app {
+  display:flex;
+  min-height:100vh;
+}
+
+/* Sidebar */
 .sidebar {
-  width: 220px;
-  background: #2a3f54;
+  width: 250px;
+  background: var(--brand);
   color: #fff;
-  min-height: 100vh;
-  padding: 20px 15px;
-  position: fixed;
-  top: 0;
-  left: 0;
+  display:flex;
+  flex-direction:column;
+  padding:16px;
 }
 
-.sidebar h2 {
-  margin: 0 0 20px;
-  font-size: 1.3em;
-  text-align: center;
+.sidebar h1{
+  font-size: 1.2rem;
+  margin:0 0 8px 0;
+  font-weight:700;
 }
 
-.sidebar ul {
-  list-style: none;
-  padding: 0;
+.sidebar small{
+  color:#e0edf7;
 }
 
-.sidebar ul li {
-  margin: 12px 0;
+.nav {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:16px;
 }
 
-.sidebar ul li a,
-.sidebar ul li button {
-  color: #fff;
-  text-decoration: none;
-  font-size: 14px;
-  display: block;
-  padding: 10px 12px;
-  border-radius: 4px;
-  background: transparent;
-  border: none;
-  text-align: left;
-  width: 100%;
-  cursor: pointer;
+.nav a{
+  color:#e0edf7;
+  text-decoration:none;
+  padding:10px 12px;
+  border-radius:10px;
+  font-weight:600;
 }
 
-.sidebar ul li a.active,
-.sidebar ul li a:hover,
-.sidebar ul li button:hover {
-  background: #1d2d3d;
+.nav a:hover,
+.nav a.active{
+  background: rgba(255,255,255,0.12);
 }
 
-/* ===== Main Area ===== */
+/* Main area */
 .main {
-  flex: 1;
-  padding: 20px;
-  margin-left: 220px;
+  flex:1;
+  display:flex;
+  flex-direction:column;
 }
 
-header {
-  margin-bottom: 20px;
+/* Top bar */
+.topbar{
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  padding:12px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
 }
 
-header h1 {
-  margin: 0;
-  font-size: 1.6em;
+.lang-switch{
+  display:flex;
+  align-items:center;
+  gap:8px;
 }
 
-/* ===== Centered Forms ===== */
-.form-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  margin-top: 30px;
-  width: 100%;
+.lang-switch select{
+  border:1px solid var(--border);
+  padding:6px 10px;
+  border-radius:8px;
+  background:#fff;
+  font-weight:600;
 }
 
-.form-card {
-  background: #fff;
-  padding: 25px 30px;
-  border-radius: 8px;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-  width: 100%;
-  max-width: 600px;
+/* Centered container for forms and cards */
+.container {
+  width:min(860px, 100%);
+  margin: 32px auto;
+  background: var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:24px;
+  box-shadow: 0 6px 18px rgba(18,38,63,0.06);
 }
 
-.form-card label {
-  font-weight: bold;
-  margin-top: 12px;
+/* ===== Forms ===== */
+.form {
+  max-width: 560px;              /* [CHANGED] tighter width */
+  margin: 0 auto;                /* [CHANGED] centered */
+}
+
+.input-group {
+  margin-bottom: 16px;
+}
+
+.input-group label {
   display: block;
+  margin-bottom: 6px;
+  font-weight: 700;
+  color: var(--muted);
 }
 
-.form-card input,
-.form-card textarea,
-.form-card select {
+.input-group input,
+.input-group select,
+.input-group textarea {
   width: 100%;
-  padding: 10px;
-  margin: 6px 0 16px 0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
-  box-sizing: border-box;
-}
-
-.form-card textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-/* ===== Buttons ===== */
-button {
-  background-color: #2a3f54;
-  color: #fff;
-  padding: 12px 18px;
-  border: none;
-  border-radius: 4px;
+  padding: 12px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background:#fff;
   font-size: 15px;
+  outline:none;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 96px;
+}
+
+/* Buttons */
+button {
+  padding: 12px 16px;
+  background-color: var(--brand);
+  color: white;
+  border: none;
+  border-radius: 12px;
   cursor: pointer;
-  transition: background 0.2s;
+  font-size: 15px;
+  font-weight:700;
 }
 
 button:hover {
-  background-color: #1d2d3d;
+  background-color: var(--brand-2);
 }
 
-/* ===== Tables ===== */
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
-}
+button.danger{ background: var(--danger); }
+button.ok{ background: var(--ok); }
 
-.table th,
-.table td {
-  padding: 10px;
-  border: 1px solid #ddd;
-  text-align: left;
-}
-
-.table th {
-  background-color: #f0f0f0;
-}
-
-/* ===== Alerts ===== */
+/* Alerts */
 .alert {
-  padding: 10px;
-  margin-bottom: 15px;
-  border-radius: 3px;
-}
-
-.alert.error {
-  background-color: #f8d7da;
-  color: #721c24;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  border-radius: 10px;
+  border:1px solid var(--border);
+  background:#fff7f7;
+  color:#8a1f1f;
 }
 
 .alert.success {
-  background-color: #d4edda;
-  color: #155724;
+  background: #f2fff6;
+  color: #0e6e3a;
 }
 
-/* ===== Footer ===== */
+/* Key stats */
+.kpis{
+  display:grid;
+  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+  gap:16px;
+  margin-top:8px;
+}
+.kpi{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:18px;
+}
+.kpi h3{
+  margin:0 0 4px 0;
+}
+.kpi p{
+  margin:0;
+  font-size:28px;
+  font-weight:800;
+}
+
+/* Verification result */
+.result-valid { color: #0e6e3a; font-weight:800; }
+.result-invalid { color: #8a1f1f; font-weight:800; }
+
+/* Footer */
 footer {
-  margin-top: 20px;
+  margin: 16px 0 32px;
   text-align: center;
-  padding: 12px;
-  font-size: 14px;
-  background-color: #fafafa;
-  border-top: 1px solid #ddd;
 }
 
-/* Language Switcher */
-#languageSwitcher {
-  padding: 5px 10px;
-  font-size: 14px;
-  border-radius: 3px;
-  border: 1px solid #ccc;
+/* Remove white hairlines below inputs (iOS/retina fix) */
+/* [CHANGED] */
+input, select, textarea { transform: translateZ(0); backface-visibility:hidden; }
+
+/* Login page header minimal */
+.header-min{
+  text-align:center;
+  padding:24px 12px;
 }
