@@ -8,103 +8,82 @@ var firebaseConfig = {
   appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
 };
 
-// Initialize Firebase
+// Initialize Firebase (avoid double init)
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 var auth = firebase.auth();
 var db = firebase.firestore();
 
-// === Approved Admin Emails ===
+// === Admin email list ===
 var ADMIN_EMAILS = ["m.ngoma1988@gmail.com", "ngomamicaelc@gmail.com"];
 
-// === Translations ===
+// === Multilingual Resources ===
 const resources = {
   en: {
     translation: {
-      "title": "GDLVS",
+      "title": "Gabon License Verifier",
+      "home": "Home",
       "login": "Login",
       "logout": "Logout",
       "email": "Email",
       "password": "Password",
+      "licenseNumber": "License Number",
+      "requestingOrganization": "Requesting Organization",
+      "country": "Country",
+      "purpose": "Purpose of Verification",
+      "verifyLicence": "Verify Licence",
       "dashboard": "Dashboard",
       "addLicense": "Add License",
       "verificationPortal": "Verification Portal",
       "analytics": "Analytics",
       "userManagement": "User Management",
-      "licenseNumber": "License Number",
-      "fullName": "Full Name",
-      "class": "Class",
-      "issueDate": "Issue Date",
-      "expiryDate": "Expiry Date",
-      "verify": "Verify",
       "totalLicenses": "Total Licenses",
-      "activeLicenses": "Active Licenses",
-      "todayVerifications": "Today’s Verifications",
-      "successRate": "Success Rate",
-      "recentRequests": "Recent Verification Requests",
-      "organization": "Organization",
-      "country": "Country",
-      "status": "Status",
-      "date": "Date"
+      "activeLicenses": "Active Licenses"
     }
   },
   fr: {
     translation: {
-      "title": "Système GDLVS",
+      "title": "Vérificateur de Permis du Gabon",
+      "home": "Accueil",
       "login": "Connexion",
       "logout": "Déconnexion",
       "email": "E-mail",
       "password": "Mot de passe",
+      "licenseNumber": "Numéro de Permis",
+      "requestingOrganization": "Organisation Requérante",
+      "country": "Pays",
+      "purpose": "But de la Vérification",
+      "verifyLicence": "Vérifier le Permis",
       "dashboard": "Tableau de Bord",
       "addLicense": "Ajouter un Permis",
       "verificationPortal": "Portail de Vérification",
       "analytics": "Analytique",
       "userManagement": "Gestion des Utilisateurs",
-      "licenseNumber": "Numéro de Permis",
-      "fullName": "Nom Complet",
-      "class": "Catégorie",
-      "issueDate": "Date d’Émission",
-      "expiryDate": "Date d’Expiration",
-      "verify": "Vérifier",
-      "totalLicenses": "Nombre Total",
-      "activeLicenses": "Permis Actifs",
-      "todayVerifications": "Vérifications Aujourd’hui",
-      "successRate": "Taux de Succès",
-      "recentRequests": "Requêtes Récentes",
-      "organization": "Organisation",
-      "country": "Pays",
-      "status": "Statut",
-      "date": "Date"
+      "totalLicenses": "Nombre Total de Permis",
+      "activeLicenses": "Permis Actifs"
     }
   },
   ja: {
     translation: {
-      "title": "ガボン免許検証システム",
+      "title": "ガボン運転免許確認システム",
+      "home": "ホーム",
       "login": "ログイン",
       "logout": "ログアウト",
-      "email": "メール",
+      "email": "メールアドレス",
       "password": "パスワード",
+      "licenseNumber": "免許番号",
+      "requestingOrganization": "申請組織",
+      "country": "国",
+      "purpose": "確認の目的",
+      "verifyLicence": "免許を確認する",
       "dashboard": "ダッシュボード",
       "addLicense": "免許を追加",
-      "verificationPortal": "検証ポータル",
+      "verificationPortal": "確認ポータル",
       "analytics": "分析",
       "userManagement": "ユーザー管理",
-      "licenseNumber": "免許番号",
-      "fullName": "氏名",
-      "class": "クラス",
-      "issueDate": "発行日",
-      "expiryDate": "有効期限",
-      "verify": "確認する",
       "totalLicenses": "総免許数",
-      "activeLicenses": "有効免許数",
-      "todayVerifications": "本日の検証数",
-      "successRate": "成功率",
-      "recentRequests": "最近の検証",
-      "organization": "組織",
-      "country": "国",
-      "status": "ステータス",
-      "date": "日付"
+      "activeLicenses": "有効な免許"
     }
   }
 };
@@ -119,6 +98,7 @@ i18next.use(i18nextBrowserLanguageDetector).init({
   $("body").localize();
 });
 
+// === Language Switcher ===
 document.addEventListener("DOMContentLoaded", () => {
   const switcher = document.getElementById("languageSwitcher");
   if (switcher) {
@@ -128,44 +108,41 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// === Utility Alert ===
+// === Utility: Alerts ===
 function showAlert(message, type = "error") {
-  const el = document.getElementById("msg") || document.createElement("div");
-  el.className = "alert " + (type === "success" ? "success" : "error");
-  el.textContent = message;
-  document.body.prepend(el);
-  setTimeout(() => el.remove(), 4000);
+  const alertDiv = document.createElement("div");
+  alertDiv.className = "alert " + (type === "success" ? "success" : "error");
+  alertDiv.innerText = message;
+  document.body.prepend(alertDiv);
+  setTimeout(() => alertDiv.remove(), 4000);
 }
 
 // === Authentication ===
 function loginUser() {
-  const email = document.getElementById("email").value.trim();
+  const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
-  if (!email || !password) {
-    showAlert("Enter email & password");
-    return;
-  }
   auth.signInWithEmailAndPassword(email, password)
-    .then(() => {
-      window.location.href = "dashboard.html";
-    })
-    .catch(err => showAlert(err.message));
+    .then(() => window.location.href = "dashboard.html")
+    .catch(error => showAlert(error.message, "error"));
 }
 
 function signOutUser() {
   auth.signOut()
     .then(() => window.location.href = "index.html")
-    .catch(err => showAlert(err.message));
+    .catch(error => showAlert(error.message, "error"));
 }
 
-// Restrict protected pages
+// === Restrict Pages ===
 auth.onAuthStateChanged(user => {
-  const page = window.location.pathname.split("/").pop();
-  const protectedPages = ["dashboard.html", "add_license.html", "analytics.html", "user_management.html"];
-  if (!user && protectedPages.includes(page)) {
+  const currentPage = window.location.pathname.split("/").pop();
+  const protectedPages = ["dashboard.html", "add_license.html"];
+
+  if (!user && protectedPages.includes(currentPage)) {
     window.location.href = "index.html";
+    return;
   }
-  if (user && page === "add_license.html" && !ADMIN_EMAILS.includes(user.email)) {
+
+  if (user && currentPage === "add_license.html" && !ADMIN_EMAILS.includes(user.email)) {
     alert("You don’t have permission to add licenses.");
     window.location.href = "dashboard.html";
   }
@@ -180,16 +157,17 @@ function addLicense() {
   const expiryDate = document.getElementById("expiryDate").value;
 
   if (!licenseNumber || !fullName || !licenseClass || !issueDate || !expiryDate) {
-    showAlert("Please fill all fields");
+    showAlert("Please fill in all fields.", "error");
     return;
   }
 
   const ref = db.collection("licenses").doc(licenseNumber);
   ref.get().then(docSnap => {
     if (docSnap.exists) {
-      showAlert("License already exists!");
+      showAlert("License already exists!", "error");
       return;
     }
+
     return ref.set({
       licenseNumber,
       fullName,
@@ -198,36 +176,52 @@ function addLicense() {
       issueDate,
       expiryDate,
       addedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      createdBy: auth.currentUser ? auth.currentUser.email : null
+      createdBy: auth.currentUser ? auth.currentUser.uid : null
     });
-  }).then(() => {
+  })
+  .then(() => {
     showAlert("License added successfully!", "success");
     document.getElementById("addLicenseForm").reset();
-  }).catch(err => showAlert(err.message));
+  })
+  .catch(error => showAlert("Error adding license: " + error.message, "error"));
+}
+
+// === Dashboard ===
+function loadDashboardData() {
+  db.collection("licenses").get().then(snapshot => {
+    const total = snapshot.size;
+    let activeCount = 0;
+    snapshot.forEach(doc => {
+      if (doc.data().status === "Active") activeCount++;
+    });
+    document.getElementById("totalLicenses").innerText = total;
+    document.getElementById("activeLicenses").innerText = activeCount;
+  });
 }
 
 // === Verification ===
 function verifyLicense() {
   const licenseNumber = document.getElementById("verifyLicenseNumber").value.trim();
-  const requestingOrg = document.getElementById("requestingOrg").value.trim();
-  const country = document.getElementById("country").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const purpose = document.getElementById("purpose").value.trim();
+  const requestingOrg = document.getElementById("requestingOrg")?.value.trim();
+  const country = document.getElementById("country")?.value.trim();
+  const email = document.getElementById("email")?.value.trim();
+  const purpose = document.getElementById("purpose")?.value.trim();
 
   if (!licenseNumber) {
-    showAlert("Enter a license number");
+    showAlert("Please enter a license number.", "error");
     return;
   }
 
   db.collection("licenses").doc(licenseNumber).get()
     .then(doc => {
       const resultDiv = document.getElementById("verificationResult");
-      let html = "";
+      let resultText = "";
+
       if (!doc.exists) {
-        html = "<p>License not found.</p>";
+        resultText = "<p>License not found.</p>";
       } else {
         const data = doc.data();
-        html = `
+        resultText = `
           <p><strong>Name:</strong> ${data.fullName}</p>
           <p><strong>Class:</strong> ${data.class}</p>
           <p><strong>Status:</strong> ${data.status}</p>
@@ -235,127 +229,16 @@ function verifyLicense() {
           <p><strong>Expiry Date:</strong> ${data.expiryDate}</p>
         `;
       }
-      resultDiv.innerHTML = html;
+      resultDiv.innerHTML = resultText;
 
-      // Log verification
       db.collection("verifications").add({
         licenseNumber,
         requestingOrg,
         country,
         email,
         purpose,
-        result: doc.exists ? "Found" : "Not found",
+        result: doc.exists ? "License found" : "License not found",
         verifiedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
     })
-    .catch(err => showAlert(err.message));
-}
-
-// === Dashboard Data ===
-function loadDashboardData() {
-  let todayCount = 0, successCount = 0;
-  db.collection("licenses").get().then(snapshot => {
-    const total = snapshot.size;
-    let active = 0;
-    snapshot.forEach(doc => {
-      if (doc.data().status === "Active") active++;
-    });
-    document.getElementById("totalLicenses").innerText = total;
-    document.getElementById("activeLicenses").innerText = active;
-  });
-
-  db.collection("verifications").orderBy("verifiedAt", "desc").limit(5).get().then(snapshot => {
-    const tbody = document.querySelector("#recentRequestsTable tbody");
-    tbody.innerHTML = "";
-    snapshot.forEach(doc => {
-      const d = doc.data();
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${d.licenseNumber}</td>
-        <td>${d.requestingOrg || "-"}</td>
-        <td>${d.country || "-"}</td>
-        <td>${d.result}</td>
-        <td>${d.verifiedAt?.toDate().toLocaleString() || ""}</td>
-      `;
-      tbody.appendChild(tr);
-      if (d.result === "Found") successCount++;
-      if (d.verifiedAt?.toDate().toDateString() === new Date().toDateString()) todayCount++;
-    });
-    document.getElementById("todayVerifications").innerText = todayCount;
-    const rate = snapshot.size ? Math.round((successCount / snapshot.size) * 100) : 0;
-    document.getElementById("successRate").innerText = rate + "%";
-
-    drawStatusChart(successCount, snapshot.size - successCount);
-  });
-}
-
-// === Chart.js ===
-function drawStatusChart(success, failed) {
-  const ctx = document.getElementById("statusChart");
-  if (!ctx) return;
-  new Chart(ctx, {
-    type: "doughnut",
-    data: {
-      labels: ["Success", "Failed"],
-      datasets: [{
-        data: [success, failed],
-        backgroundColor: ["#2ecc71", "#e74c3c"]
-      }]
-    }
-  });
-}
-
-// === Analytics Page ===
-function loadAnalytics() {
-  db.collection("licenses").get().then(snapshot => {
-    let classes = {};
-    snapshot.forEach(doc => {
-      const c = doc.data().class || "Unknown";
-      classes[c] = (classes[c] || 0) + 1;
-    });
-
-    new Chart(document.getElementById("licenseClassChart"), {
-      type: "bar",
-      data: {
-        labels: Object.keys(classes),
-        datasets: [{
-          label: "Licenses per Class",
-          data: Object.values(classes),
-          backgroundColor: "#3498db"
-        }]
-      }
-    });
-  });
-
-  db.collection("verifications").get().then(snapshot => {
-    let found = 0, notFound = 0;
-    snapshot.forEach(doc => {
-      if (doc.data().result === "Found") found++;
-      else notFound++;
-    });
-
-    new Chart(document.getElementById("verificationResultsChart"), {
-      type: "pie",
-      data: {
-        labels: ["Found", "Not Found"],
-        datasets: [{
-          data: [found, notFound],
-          backgroundColor: ["#2ecc71", "#e74c3c"]
-        }]
-      }
-    });
-  });
-}
-
-// === Page Loader ===
-window.onload = function() {
-  const page = window.location.pathname.split("/").pop();
-  if (page === "dashboard.html") loadDashboardData();
-  if (page === "analytics.html") loadAnalytics();
-};
-
-// Expose globally
-window.loginUser = loginUser;
-window.signOutUser = signOutUser;
-window.addLicense = addLicense;
-window.verifyLicense = verifyLicense;
+    .catch(error => showAlert("Error verifying license:
