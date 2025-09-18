@@ -4,6 +4,16 @@
   <meta charset="UTF-8">
   <title data-i18n="analytics">Analytics - GDLVS</title>
   <link rel="stylesheet" href="style.css">
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <!-- i18next -->
+  <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
+  <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
+  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
+  <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -20,13 +30,17 @@
   </div>
 
   <div class="main">
-    <header><h1 data-i18n="analytics">Analytics Dashboard</h1></header>
-    <section class="charts">
-      <canvas id="licenseStatusChart"></canvas>
-      <canvas id="licenseClassChart"></canvas>
-      <canvas id="verificationResultsChart"></canvas>
-    </section>
+    <header><h1 data-i18n="analytics">Analytics</h1></header>
+
+    <div class="form-wrapper">
+      <div class="form-card">
+        <h2 data-i18n="dashboard">System Metrics</h2>
+        <canvas id="licensesChart" width="400" height="200"></canvas>
+        <canvas id="verificationsChart" width="400" height="200" style="margin-top:20px;"></canvas>
+      </div>
+    </div>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
