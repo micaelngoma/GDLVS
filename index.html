@@ -2,50 +2,142 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title data-i18n="title">Login - GDLVS</title>
+  <title data-i18n="title">Login - Gabon License Verifier</title>
   <link rel="stylesheet" href="style.css">
-  <!-- Firebase -->
+
+  <!-- Firebase v8 SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-  <!-- i18next -->
+
+  <!-- i18next + jQuery -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 </head>
 <body>
-  <div class="main">
-    <header>
-      <h1 data-i18n="title">GDLVS Verification System</h1>
-    </header>
+  <header>
+    <h1 data-i18n="title">Gabon License Verifier</h1>
+  </header>
 
-    <div class="form-wrapper">
-      <form class="form-card" onsubmit="loginUser(); return false;">
-        <h2 data-i18n="login">Login</h2>
-
-        <label for="email" data-i18n="email">Email</label>
-        <input type="email" id="email" placeholder="you@example.com">
-
-        <label for="password" data-i18n="password">Password</label>
-        <input type="password" id="password" placeholder="********">
-
-        <button type="submit" data-i18n="login">Login</button>
-
-        <div id="msg" class="alert" style="margin-top:12px;"></div>
-
-        <div style="margin-top:15px; text-align:center;">
-          <label for="languageSwitcher">🌍</label>
-          <select id="languageSwitcher">
-            <option value="en">English</option>
-            <option value="fr">Français</option>
-            <option value="ja">日本語</option>
-          </select>
-        </div>
-      </form>
+  <div class="container">
+    <h2 data-i18n="login">Login</h2>
+    <div class="input-group">
+      <label for="email" data-i18n="email">Email:</label>
+      <input type="email" id="email" placeholder="you@example.com">
     </div>
+    <div class="input-group">
+      <label for="password" data-i18n="password">Password:</label>
+      <input type="password" id="password" placeholder="Password">
+    </div>
+    <button onclick="loginUser()" data-i18n="login">Login</button>
+
+    <div id="msg" class="alert" style="margin-top:12px;"></div>
   </div>
 
-  <script src="script.js"></script>
+  <!-- Language Switcher -->
+  <footer style="margin-top:20px; text-align:center;">
+    <label for="languageSwitcher">🌍 Language:</label>
+    <select id="languageSwitcher">
+      <option value="en">English</option>
+      <option value="fr">Français</option>
+      <option value="ja">日本語</option>
+    </select>
+  </footer>
+
+  <!-- Firebase + Auth Logic + i18next init -->
+  <script>
+    // --- Firebase config for gdlvs-system ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
+      authDomain: "gdlvs-2348e.firebaseapp.com",
+      projectId: "gdlvs-2348e",
+      storageBucket: "gdlvs-2348e.firebasestorage.app",
+      messagingSenderId: "358715790318",
+      appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
+    };
+
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // --- Translations ---
+    const resources = {
+      en: {
+        translation: {
+          "title": "Gabon License Verifier",
+          "login": "Login",
+          "email": "Email",
+          "password": "Password"
+        }
+      },
+      fr: {
+        translation: {
+          "title": "Vérificateur de Permis du Gabon",
+          "login": "Connexion",
+          "email": "E-mail",
+          "password": "Mot de passe"
+        }
+      },
+      ja: {
+        translation: {
+          "title": "ガボン運転免許確認システム",
+          "login": "ログイン",
+          "email": "メールアドレス",
+          "password": "パスワード"
+        }
+      }
+    };
+
+    i18next.use(i18nextBrowserLanguageDetector).init({
+      resources,
+      fallbackLng: "en",
+      debug: false
+    }, function() {
+      jqueryI18next.init(i18next, $, { useOptionsAttr: true });
+      $("body").localize();
+    });
+
+    // Language switcher
+    document.getElementById("languageSwitcher").addEventListener("change", function() {
+      i18next.changeLanguage(this.value, () => $("body").localize());
+    });
+
+    // --- Helper for messages ---
+    function showMsg(text, ok=false) {
+      const el = document.getElementById('msg');
+      el.textContent = text || '';
+      el.style.color = ok ? '#155724' : '#721c24';
+    }
+
+    // Redirect logged-in users to dashboard
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        window.location.href = "dashboard.html";
+      }
+    });
+
+    // Login
+    function loginUser() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!email || !password) {
+        showMsg('Please enter email and password.');
+        return;
+      }
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => showMsg('Logging in...', true))
+        .catch(err => showMsg(err.message));
+    }
+
+    // Expose function
+    window.loginUser = loginUser;
+  </script>
 </body>
 </html>

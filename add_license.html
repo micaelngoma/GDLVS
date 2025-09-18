@@ -3,87 +3,80 @@
 <head>
   <meta charset="UTF-8">
   <title data-i18n="addLicense">Add License - Gabon License Verifier</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="style.css">
 
-  <!-- Firebase v8 -->
+  <!-- Firebase v8 SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-  <!-- i18n -->
+  <!-- i18next + jQuery -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
+  <!-- App logic -->
   <script defer src="script.js"></script>
 </head>
 <body>
-  <div class="app">
-    <aside class="sidebar">
-      <h1 data-i18n="title">Gabon License Verifier</h1>
-      <small data-i18n="addLicense">Add License</small>
-      <nav class="nav">
-        <a href="dashboard.html" data-i18n="dashboard">Dashboard</a>
-        <a href="add_licence.html" class="active" data-i18n="addLicense">Add License</a>
-        <a href="verify.html" data-i18n="verificationPortal">Verification Portal</a>
-      </nav>
-    </aside>
+  <header>
+    <h1 data-i18n="addLicense">Add New License</h1>
+    <button onclick="signOutUser()" data-i18n="logout">Logout</button>
+  </header>
 
-    <main class="main">
-      <div class="topbar">
-        <div></div>
-        <div class="lang-switch">
-          <select id="languageSwitcher">
-            <option value="en">English</option>
-            <option value="fr">Français</option>
-            <option value="ja">日本語</option>
-          </select>
-          <button class="danger" onclick="signOutUser()" data-i18n="logout">Logout</button>
-        </div>
+  <nav>
+    <a href="dashboard.html" data-i18n="dashboard">Dashboard</a>
+    <a href="add_license.html" data-i18n="addLicense">Add License</a>
+    <a href="verify.html" data-i18n="verificationPortal">Verification Portal</a>
+  </nav>
+
+  <div class="container">
+    <form id="addLicenseForm" onsubmit="addLicense(); return false;">
+      <div class="input-group">
+        <label for="licenseNumber" data-i18n="licenseNumber">License Number</label>
+        <input type="text" id="licenseNumber" placeholder="GAB123456">
       </div>
 
-      <section class="container">
-        <h2 data-i18n="addLicense">Add New License</h2>
-        <div id="alertAdd" class="alert" style="display:none;"></div>
+      <div class="input-group">
+        <label for="fullName" data-i18n="fullName">Full Name</label>
+        <input type="text" id="fullName" placeholder="Your Name">
+      </div>
 
-        <form id="addLicenseForm" class="form" onsubmit="addLicense(); return false;">
-          <div class="input-group">
-            <label for="licenseNumber" data-i18n="licenseNumber">License Number</label>
-            <input type="text" id="licenseNumber" placeholder="GAB123456" required>
-          </div>
+      <div class="input-group">
+        <label for="licenseClass" data-i18n="class">Class</label>
+        <select id="licenseClass">
+          <option value="">-- Select --</option>
+          <option value="Class A">Class A</option>
+          <option value="Class B">Class B</option>
+          <option value="Class C">Class C</option>
+          <option value="Class D">Class D</option>
+        </select>
+      </div>
 
-          <div class="input-group">
-            <label for="fullName" data-i18n="fullName">Full Name</label>
-            <input type="text" id="fullName" placeholder="Your Name" required>
-          </div>
+      <div class="input-group">
+        <label for="issueDate" data-i18n="issueDate">Issue Date</label>
+        <input type="date" id="issueDate">
+      </div>
 
-          <div class="input-group">
-            <label for="licenseClass" data-i18n="class">Class</label>
-            <select id="licenseClass" required>
-              <option value="">-- Select --</option>
-              <option value="Class A">Class A</option>
-              <option value="Class B">Class B</option>
-              <option value="Class C">Class C</option>
-              <option value="Class D">Class D</option>
-            </select>
-          </div>
+      <div class="input-group">
+        <label for="expiryDate" data-i18n="expiryDate">Expiry Date</label>
+        <input type="date" id="expiryDate">
+      </div>
 
-          <div class="input-group">
-            <label for="issueDate" data-i18n="issueDate">Issue Date</label>
-            <input type="date" id="issueDate" required>
-          </div>
-
-          <div class="input-group">
-            <label for="expiryDate" data-i18n="expiryDate">Expiry Date</label>
-            <input type="date" id="expiryDate" required>
-          </div>
-
-          <button type="submit" data-i18n="addLicense">Add License</button>
-        </form>
-      </section>
-    </main>
+      <button type="submit" data-i18n="addLicense">Add License</button>
+    </form>
   </div>
+
+  <!-- Language Switcher -->
+  <footer style="margin-top:20px; text-align:center;">
+    <label for="languageSwitcher">🌍 Language:</label>
+    <select id="languageSwitcher">
+      <option value="en">English</option>
+      <option value="fr">Français</option>
+      <option value="ja">日本語</option>
+    </select>
+  </footer>
 </body>
 </html>
+
