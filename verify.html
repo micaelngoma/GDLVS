@@ -5,12 +5,12 @@
   <title data-i18n="verificationPortal">Verify License - Gabon License Verifier</title>
   <link rel="stylesheet" href="style.css">
 
-  <!-- Firebase v8 SDKs -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
-  <!-- i18next + jQuery -->
+  <!-- i18next -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
@@ -35,41 +35,28 @@
 
   <div class="container">
     <form onsubmit="verifyLicense(); return false;">
-      <!-- License Number -->
       <div class="input-group">
         <label for="verifyLicenseNumber" data-i18n="licenseNumber">License Number</label>
         <input type="text" id="verifyLicenseNumber" placeholder="GAB123456">
       </div>
-
-      <!-- Requesting Organization -->
       <div class="input-group">
         <label for="requestingOrg" data-i18n="organization">Requesting Organization</label>
         <input type="text" id="requestingOrg" placeholder="Organization name">
       </div>
-
-      <!-- Country -->
       <div class="input-group">
         <label for="country" data-i18n="country">Country</label>
         <input type="text" id="country" placeholder="Country">
       </div>
-
-      <!-- Contact Email -->
       <div class="input-group">
         <label for="email" data-i18n="email">Contact Email</label>
         <input type="email" id="email" placeholder="you@example.com">
       </div>
-
-      <!-- Purpose of Verification -->
       <div class="input-group">
         <label for="purpose" data-i18n="purpose">Purpose of Verification</label>
         <textarea id="purpose" placeholder="Why are you verifying?"></textarea>
       </div>
-
-      <!-- Submit Button -->
       <button type="submit" data-i18n="verify">Verify License</button>
     </form>
-
-    <!-- Results -->
     <div id="verificationResult"></div>
   </div>
 </body>

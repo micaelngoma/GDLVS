@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title data-i18n="dashboard">Dashboard - Gabon License Verifier</title>
+  <title data-i18n="logs">Verification Logs - Gabon License Verifier</title>
   <link rel="stylesheet" href="style.css">
 
   <!-- Firebase -->
@@ -20,7 +20,7 @@
 </head>
 <body>
   <header>
-    <h1 data-i18n="dashboard">Dashboard</h1>
+    <h1 data-i18n="logs">Verification Logs</h1>
     <button onclick="signOutUser()" data-i18n="logout">Logout</button>
   </header>
 
@@ -41,18 +41,23 @@
   </nav>
 
   <div class="container">
-    <h2 data-i18n="dashboard">System Overview</h2>
-    <p><strong data-i18n="totalLicenses">Total Licenses:</strong> <span id="totalLicenses">0</span></p>
-    <p><strong data-i18n="activeLicenses">Active Licenses:</strong> <span id="activeLicenses">0</span></p>
+    <h2 data-i18n="logs">Verification Attempts</h2>
+    <table class="table" id="logsTable">
+      <thead>
+        <tr>
+          <th data-i18n="licenseNumber">License Number</th>
+          <th data-i18n="organization">Organization</th>
+          <th data-i18n="country">Country</th>
+          <th data-i18n="email">Email</th>
+          <th data-i18n="purpose">Purpose</th>
+          <th data-i18n="result">Result</th>
+          <th data-i18n="date">Date</th>
+        </tr>
+      </thead>
+      <tbody id="logsList">
+        <tr><td colspan="7">Loading...</td></tr>
+      </tbody>
+    </table>
   </div>
-
-  <footer>
-    <label for="languageSwitcher">🌍</label>
-    <select id="languageSwitcher">
-      <option value="en">English</option>
-      <option value="fr">Français</option>
-      <option value="ja">日本語</option>
-    </select>
-  </footer>
 </body>
 </html>

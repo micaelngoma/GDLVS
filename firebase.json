@@ -7,18 +7,14 @@
       "**/node_modules/**"
     ],
     "rewrites": [
-      { "source": "**", "destination": "/index.html" }
-    ],
-    "headers": [
       {
-        "source": "**/*.@(html|js|css)",
-        "headers": [
-          { "key": "Strict-Transport-Security", "value": "max-age=31536000; includeSubDomains" },
-          { "key": "Content-Security-Policy", "value": "default-src 'self' https://www.gstatic.com https://unpkg.com" },
-          { "key": "X-Content-Type-Options", "value": "nosniff" },
-          { "key": "X-Frame-Options", "value": "DENY" }
-        ]
+        "source": "**",
+        "destination": "/index.html"
       }
     ]
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
   }
 }

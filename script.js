@@ -1,27 +1,24 @@
-// === Firebase setup (gdlvs-system) ===
+// === Firebase Setup ===
 var firebaseConfig = {
   apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
   authDomain: "gdlvs-2348e.firebaseapp.com",
   projectId: "gdlvs-2348e",
-  storageBucket: "gdlvs-2348e.firebasestorage.app",
+  storageBucket: "gdlvs-2348e.appspot.com",
   messagingSenderId: "358715790318",
   appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
 };
 
-// Initialize Firebase
+// Initialize Firebase if not already
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 var auth = firebase.auth();
 var db = firebase.firestore();
 
-// === Helper: Sanitize Input ===
-function sanitize(input) {
-  if (!input) return "";
-  return input.replace(/[<>{}()$;]/g, "").trim();
-}
+// === Admin Emails (hardcoded for Capstone demo) ===
+var ADMIN_EMAILS = ["m.ngoma1988@gmail.com", "ngomamicaelc@gmail.com"];
 
-// === Helper: Alerts ===
+// === Utility: Show Alert Messages ===
 function showAlert(message, type = "error") {
   const alertDiv = document.createElement("div");
   alertDiv.className = "alert " + (type === "success" ? "success" : "error");
@@ -30,62 +27,54 @@ function showAlert(message, type = "error") {
   setTimeout(() => alertDiv.remove(), 4000);
 }
 
-// === Authentication Functions ===
-function loginUser() {
-  const email = sanitize(document.getElementById("email").value);
-  const password = document.getElementById("password").value;
+// === AUTHENTICATION ===
 
+// Login user with email/password
+function loginUser() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
   if (!email || !password) {
-    showAlert("Please enter email and password.", "error");
+    showAlert("Please enter email and password.");
     return;
   }
-
   auth.signInWithEmailAndPassword(email, password)
     .then(() => window.location.href = "dashboard.html")
     .catch(error => showAlert(error.message, "error"));
 }
 
+// Sign out
 function signOutUser() {
   auth.signOut()
     .then(() => window.location.href = "index.html")
     .catch(error => showAlert(error.message, "error"));
 }
 
-// === Restrict Pages by Role ===
-auth.onAuthStateChanged(async user => {
+// Restrict access to pages
+auth.onAuthStateChanged(user => {
   const currentPage = window.location.pathname.split("/").pop();
-  const protectedPages = ["dashboard.html", "add_license.html"];
+  const protectedPages = ["dashboard.html", "add_license.html", "logs.html", "backups.html", "backupLogs.html"];
 
   if (!user && protectedPages.includes(currentPage)) {
     window.location.href = "index.html";
     return;
   }
 
-  if (user) {
-    const token = await user.getIdTokenResult();
-    const role = token.claims.role || "none";
-
-    // Restrict add_license.html to admins only
-    if (currentPage === "add_license.html" && role !== "admin") {
-      alert("You don’t have permission to add licenses.");
-      window.location.href = "dashboard.html";
-    }
-
-    // Restrict dashboard.html to authenticated users
-    if (currentPage === "dashboard.html" && role === "none") {
-      alert("Unauthorized access.");
-      window.location.href = "index.html";
-    }
+  // Extra restriction: Add License is admin-only
+  if (user && currentPage === "add_license.html" && !ADMIN_EMAILS.includes(user.email)) {
+    alert("You don’t have permission to add licenses.");
+    window.location.href = "dashboard.html";
   }
 });
 
-// === License Management ===
+// === LICENSE MANAGEMENT ===
+
+// Add new license (admin only)
 function addLicense() {
-  const licenseNumber = sanitize(document.getElementById("licenseNumber").value);
-  const fullName = sanitize(document.getElementById("fullName").value);
-  const licenseClass = sanitize(document.getElementById("licenseClass").value);
-  const issueDate = sanitize(document.getElementById("issueDate").value);
-  const expiryDate = sanitize(document.getElementById("expiryDate").value);
+  const licenseNumber = document.getElementById("licenseNumber").value.trim();
+  const fullName = document.getElementById("fullName").value.trim();
+  const licenseClass = document.getElementById("licenseClass").value;
+  const issueDate = document.getElementById("issueDate").value;
+  const expiryDate = document.getElementById("expiryDate").value;
 
   if (!licenseNumber || !fullName || !licenseClass || !issueDate || !expiryDate) {
     showAlert("Please fill in all fields.", "error");
@@ -98,7 +87,6 @@ function addLicense() {
       showAlert("License already exists!", "error");
       return;
     }
-
     return ref.set({
       licenseNumber,
       fullName,
@@ -107,7 +95,7 @@ function addLicense() {
       issueDate,
       expiryDate,
       addedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      createdBy: auth.currentUser ? auth.currentUser.uid : null
+      createdBy: auth.currentUser ? auth.currentUser.email : null
     });
   })
   .then(() => {
@@ -117,7 +105,7 @@ function addLicense() {
   .catch(error => showAlert("Error adding license: " + error.message, "error"));
 }
 
-// === Dashboard ===
+// === DASHBOARD ===
 function loadDashboardData() {
   db.collection("licenses").get().then(snapshot => {
     const total = snapshot.size;
@@ -130,13 +118,13 @@ function loadDashboardData() {
   });
 }
 
-// === Verification ===
+// === VERIFICATION ===
 function verifyLicense() {
-  const licenseNumber = sanitize(document.getElementById("verifyLicenseNumber").value);
-  const requestingOrg = sanitize(document.getElementById("requestingOrg")?.value);
-  const country = sanitize(document.getElementById("country")?.value);
-  const email = sanitize(document.getElementById("email")?.value);
-  const purpose = sanitize(document.getElementById("purpose")?.value);
+  const licenseNumber = document.getElementById("verifyLicenseNumber").value.trim();
+  const requestingOrg = document.getElementById("requestingOrg")?.value.trim();
+  const country = document.getElementById("country")?.value.trim();
+  const email = document.getElementById("email")?.value.trim();
+  const purpose = document.getElementById("purpose")?.value.trim();
 
   if (!licenseNumber) {
     showAlert("Please enter a license number.", "error");
@@ -162,6 +150,7 @@ function verifyLicense() {
       }
       resultDiv.innerHTML = resultText;
 
+      // Log verification attempt
       db.collection("verifications").add({
         licenseNumber,
         requestingOrg,
@@ -169,8 +158,7 @@ function verifyLicense() {
         email,
         purpose,
         result: doc.exists ? "License found" : "License not found",
-        verifiedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        requestedBy: auth.currentUser ? auth.currentUser.uid : "external"
+        verifiedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
     })
     .catch(error => showAlert("Error verifying license: " + error.message, "error"));
