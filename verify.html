@@ -4,12 +4,10 @@
   <meta charset="UTF-8">
   <title data-i18n="verificationPortal">Verification Portal - GDLVS</title>
   <link rel="stylesheet" href="style.css">
-
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
   <!-- i18next -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
@@ -17,7 +15,6 @@
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 </head>
 <body>
-  <!-- Sidebar -->
   <div class="sidebar">
     <h2>GDLVS</h2>
     <ul>
@@ -30,49 +27,33 @@
     </ul>
   </div>
 
-  <!-- Main Content -->
   <div class="main">
-    <header>
-      <h1 data-i18n="verificationPortal">International Verification Portal</h1>
-    </header>
+    <header><h1 data-i18n="verificationPortal">International Verification Portal</h1></header>
 
-    <!-- Centered Form -->
     <div class="form-wrapper">
       <form onsubmit="verifyLicense(); return false;" class="form-card">
         <label for="verifyLicenseNumber" data-i18n="licenseNumber">License Number</label>
-        <input type="text" id="verifyLicenseNumber" placeholder="GA123456789">
+        <input type="text" id="verifyLicenseNumber" placeholder="GAB123456">
 
         <label for="requestingOrg" data-i18n="requestingOrganization">Requesting Organization</label>
-        <input type="text" id="requestingOrg" placeholder="e.g., Japan Motor Vehicle Office">
+        <input type="text" id="requestingOrg" placeholder="Organization name">
 
         <label for="country" data-i18n="country">Country</label>
-        <input type="text" id="country" placeholder="e.g., Japan">
+        <input type="text" id="country" placeholder="Country">
 
         <label for="email" data-i18n="email">Contact Email</label>
-        <input type="email" id="email" placeholder="official@organization.gov">
+        <input type="email" id="email" placeholder="you@example.com">
 
         <label for="purpose" data-i18n="purpose">Purpose of Verification</label>
-        <textarea id="purpose" placeholder="e.g., Licence conversion for international resident"></textarea>
+        <textarea id="purpose" placeholder="Why are you verifying?"></textarea>
 
         <button type="submit" data-i18n="verifyLicence">Verify Licence</button>
       </form>
-
-      <!-- Results -->
-      <div id="verificationResult" class="form-card" style="margin-top:20px;"></div>
     </div>
 
-    <!-- Language Switcher -->
-    <footer style="margin-top:20px; text-align:center;">
-      <label for="languageSwitcher">🌍</label>
-      <select id="languageSwitcher">
-        <option value="en">English</option>
-        <option value="fr">Français</option>
-        <option value="ja">日本語</option>
-      </select>
-    </footer>
+    <div id="verificationResult"></div>
   </div>
 
-  <!-- App Logic -->
   <script src="script.js"></script>
 </body>
 </html>
