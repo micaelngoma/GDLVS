@@ -1,20 +1,169 @@
-# Gabon License Verifier
+# Gabon Driver’s License Verification System (GDLVS)
 
-This is a simple web-based system for managing and verifying Gabonese driver’s licenses using Firebase (Authentication, Firestore, Hosting).
+A secure, web-based platform for verifying Gabonese driver’s licenses.  
+Built with **HTML, CSS, JavaScript, Firebase (Auth, Firestore, Hosting)**, and supports **multi-language translation (English, French, Japanese)**.
 
-## Features
+---
 
-- User login & registration
-- Add license records
-- Dashboard with totals
-- Public verification portal to check a license by number
+## 🚀 Features
 
-## Setup Instructions
+- 🔑 **Authentication** (Email/Password via Firebase Auth)  
+- 📜 **Role-based access control** (Admin, Staff, Verifier, Auditor)  
+- 📋 **License Management** (Add, edit, delete licenses in Firestore)  
+- ✅ **Verification Portal** for international government authorities  
+- 📊 **Analytics Dashboard** (placeholder for statistics & reports)  
+- 👥 **User Management** (Admin assigns roles via Firestore)  
+- 🌍 **Translation Support** (English, French, Japanese)  
+- 🔐 **Security**: Firebase rules restrict access based on roles  
+- ⚡ **CI/CD**: Auto-deploy with GitHub Actions on push to `main`
 
-1. Create a Firebase project in the [Firebase Console](https://console.firebase.google.com/).
-2. Enable **Authentication** (Email/Password).
-3. Enable **Cloud Firestore** database.
-4. Enable **Hosting**.
-5. Register a Web App in your Firebase project → get the config object.
-6. In `public/script.js`, replace the `firebaseConfig` placeholder with your actual config.
-7. Install Firebase CLI:  
+---
+
+## 📂 Project Structure
+
+gdlvs/
+│── public/
+│ │── index.html # Login page
+│ │── dashboard.html # Dashboard
+│ │── licenses.html # License management
+│ │── verify.html # Verification portal
+│ │── analytics.html # Analytics
+│ │── users.html # User management
+│ │── style.css # Styling
+│ │── firebase.js # Firebase config
+│ │── lang.js # Translation system
+│ │── seed.js # Seed initial data
+│
+│── .firebaserc # Firebase project alias
+│── firebase.json # Firebase hosting config
+│── firestore.rules # Firestore security rules
+│── README.md # Documentation
+│── .github/workflows/
+│ └── firebase-hosting.yml # GitHub Actions workflow
+
+yaml
+Copy code
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/<your-username>/GDLVS.git
+cd GDLVS
+2. Install Firebase CLI
+bash
+Copy code
+npm install -g firebase-tools
+firebase login
+3. Initialize Firebase Project
+Make sure you’ve created a Firebase project (gdlvs-2348e).
+Then set it as the default:
+
+bash
+Copy code
+firebase use gdlvs-2348e
+4. Deploy to Firebase Hosting
+bash
+Copy code
+firebase deploy
+Your app will be available at:
+
+https://gdlvs-2348e.web.app
+
+https://gdlvs-2348e.firebaseapp.com
+
+🔐 User Roles
+Roles are stored in Firestore under the roles collection:
+
+Admin → Full access (users, roles, licenses, logs)
+
+Staff → Manage licenses
+
+Verifier → Verify licenses
+
+Auditor → Read-only access to verification logs
+
+🌱 Seeding Data
+To set up initial data:
+
+Register a new account via the login page.
+
+Open /public/seed.js in your browser OR temporarily link it in dashboard.html.
+
+html
+Copy code
+<button onclick="import('./seed.js')">Run Seed</button>
+This will:
+
+Assign your logged-in account as Admin.
+
+Create a sample license (TEST-12345).
+
+Add sample roles for staff and verifier.
+
+🔄 CI/CD with GitHub Actions
+This project includes .github/workflows/firebase-hosting.yml which:
+
+🚀 Deploys automatically to Firebase Hosting on push to main.
+
+🔍 Creates preview channels for pull requests.
+
+Setup:
+In GitHub → Repo → Settings → Secrets → Actions.
+
+Add secret:
+
+mathematica
+Copy code
+FIREBASE_SERVICE_ACCOUNT_GDLVS_2348E
+Paste your Firebase service account JSON (Hosting Admin role).
+
+Now, every commit to main → auto-deploy.
+
+🔐 Firestore Security Rules
+Located in firestore.rules.
+
+Admin can manage everything.
+
+Staff can manage licenses.
+
+Verifier can create verifications.
+
+Auditor can read logs.
+
+🌍 Multi-language Support
+Powered by i18next.
+Languages supported:
+
+English (default)
+
+French
+
+Japanese
+
+Switch via buttons in sidebar: EN | FR | 日本語.
+
+📌 Roadmap
+Add real-time analytics charts
+
+Email notifications for verifications
+
+API for external government systems
+
+Stronger encryption for sensitive data
+
+📖 References
+Firebase Documentation
+
+i18next Translation
+
+World Bank Digital ID
+
+ISO/IEC 18013 mDL Standard
+
+👨‍💻 Author
+Micael Cardin Ngoma Mavoungou
+MSIT 5910 – Capstone Project
+University of the People
