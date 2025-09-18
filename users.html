@@ -2,115 +2,110 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title data-i18n="users">User Management</title>
+  <title>User Management - GDLVS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="style.css">
-
-  <!-- i18n -->
-  <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
-  <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
-  <script src="lang.js"></script>
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="brand" data-i18n="appName">Gabon Driver’s License Verification System</div>
+    <div class="brand">GDLVS</div>
     <nav>
-      <a href="dashboard.html" data-i18n="dashboard">Dashboard</a>
-      <a href="licenses.html" data-i18n="licenses">License Management</a>
-      <a href="verify.html" data-i18n="verify">Verification Portal</a>
-      <a href="analytics.html" data-i18n="analytics">Analytics</a>
-      <a href="users.html" class="active" data-i18n="users">User Management</a>
-      <a href="#" id="logout" data-i18n="logout">Logout</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="licenses.html">License Management</a>
+      <a href="verify.html">Verification Portal</a>
+      <a href="analytics.html">Analytics</a>
+      <a href="users.html" class="active">User Management</a>
+      <a href="#" id="logout">Logout</a>
     </nav>
-    <div class="lang-switch"><button onclick="changeLng('en')">🇬🇧</button><button onclick="changeLng('fr')">🇫🇷</button><button onclick="changeLng('ja')">🇯🇵</button></div>
   </aside>
 
   <main class="main">
-    <h2 data-i18n="users">User Management</h2>
+    <h2>User Management</h2>
 
-    <div class="card" style="margin-bottom:16px">
-      <h3>Add / Update User Role</h3>
-      <p>Paste the user's UID from Firebase Authentication, set their role, and save.</p>
-      <div style="display:grid;grid-template-columns:2fr 2fr 1fr;gap:10px">
-        <input id="newEmail" class="input" placeholder="Email (optional)">
-        <input id="newUID" class="input" placeholder="UID (from Authentication)">
-        <select id="newRole" class="input">
-          <option value="verifier" data-i18n="verifier">Verifier</option>
-          <option value="staff" data-i18n="staff">Staff</option>
-          <option value="auditor" data-i18n="auditor">Auditor</option>
-          <option value="admin" data-i18n="admin">Admin</option>
-        </select>
-      </div>
-      <div style="margin-top:8px"><button id="addUserBtn" class="btn">➕ Save Role</button></div>
+    <div class="card">
+      <h3>Manage Roles</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Change Role</th>
+          </tr>
+        </thead>
+        <tbody id="usersTable"></tbody>
+      </table>
     </div>
-
-    <table class="table" id="userTable">
-      <thead>
-        <tr>
-          <th data-i18n="email">Email</th>
-          <th>UID</th>
-          <th data-i18n="role">Role</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
   </main>
 </div>
 
 <script type="module">
   import { auth, db } from "./firebase.js";
   import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-  import { collection, getDocs, updateDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+  import { collection, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-  logout.onclick = async (e)=>{ e.preventDefault(); await signOut(auth); location.href="index.html"; };
+  const logoutBtn = document.getElementById("logout");
 
-  async function getUserRole(uid){ const r=await getDoc(doc(db,"roles",uid)); return r.exists()? r.data().role : null; }
+  logoutBtn.addEventListener("click", async (e) => {
+    e.preventDefault();
+    await signOut(auth);
+    window.location.href = "index.html";
+  });
 
-  onAuthStateChanged(auth, async (user)=>{
-    if(!user){ location.href="index.html"; return; }
-    const role = await getUserRole(user.uid);
-    if(role!=="admin"){ alert(i18next.t("notAuthorized")); location.href="dashboard.html"; return; }
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "index.html";
+      return;
+    }
+
+    // Check if current user is admin
+    const roleDoc = await getDoc(doc(db, "roles", user.uid));
+    if (!roleDoc.exists() || roleDoc.data().role !== "admin") {
+      alert("❌ You are not authorized to view this page.");
+      window.location.href = "dashboard.html";
+      return;
+    }
+
     loadUsers();
   });
 
-  async function loadUsers(){
-    const snap=await getDocs(collection(db,"roles"));
-    const tbody=document.querySelector("#userTable tbody"); tbody.innerHTML="";
-    snap.forEach(d=>{
-      const u=d.data();
-      const tr=document.createElement("tr");
-      tr.innerHTML=`<td>${u.email||"(no email)"}</td><td>${d.id}</td>
-      <td>
-        <select data-uid="${d.id}">
-          <option value="admin" ${u.role==="admin"?"selected":""}>Admin</option>
-          <option value="staff" ${u.role==="staff"?"selected":""}>Staff</option>
-          <option value="verifier" ${u.role==="verifier"?"selected":""}>Verifier</option>
-          <option value="auditor" ${u.role==="auditor"?"selected":""}>Auditor</option>
-        </select>
-      </td>`;
-      tbody.appendChild(tr);
-    });
+  async function loadUsers() {
+    const usersSnap = await getDocs(collection(db, "users"));
+    const table = document.getElementById("usersTable");
+    table.innerHTML = "";
 
-    document.querySelectorAll("select[data-uid]").forEach(sel=>{
-      sel.addEventListener("change", async (e)=>{
-        const uid=e.target.getAttribute("data-uid");
-        const newRole=e.target.value;
-        await updateDoc(doc(db,"roles",uid),{ role:newRole });
-        alert(`Role updated to ${newRole}`);
+    for (let u of usersSnap.docs) {
+      const data = u.data();
+      const roleSnap = await getDoc(doc(db, "roles", u.id));
+      const role = roleSnap.exists() ? roleSnap.data().role : "none";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${data.email || "(unknown)"}</td>
+        <td>${role}</td>
+        <td>
+          <select class="input" data-uid="${u.id}">
+            <option value="none" ${role==="none"?"selected":""}>None</option>
+            <option value="verifier" ${role==="verifier"?"selected":""}>Verifier</option>
+            <option value="staff" ${role==="staff"?"selected":""}>Staff</option>
+            <option value="auditor" ${role==="auditor"?"selected":""}>Auditor</option>
+            <option value="admin" ${role==="admin"?"selected":""}>Admin</option>
+          </select>
+        </td>
+      `;
+      table.appendChild(tr);
+    }
+
+    // Add change event
+    document.querySelectorAll("select[data-uid]").forEach(sel => {
+      sel.addEventListener("change", async (e) => {
+        const uid = e.target.getAttribute("data-uid");
+        const newRole = e.target.value;
+        await setDoc(doc(db, "roles", uid), { role: newRole });
+        alert(`✅ Role updated to "${newRole}" for UID: ${uid}`);
       });
     });
   }
-
-  addUserBtn.onclick = async ()=>{
-    const email = newEmail.value.trim() || null;
-    const uid = newUID.value.trim();
-    const role = newRole.value;
-    if(!uid){ alert("UID is required"); return; }
-    await setDoc(doc(db,"roles",uid), { email, role });
-    alert(`Saved role for ${uid}: ${role}`);
-    loadUsers();
-  };
 </script>
 </body>
 </html>
