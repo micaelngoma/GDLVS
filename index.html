@@ -2,48 +2,50 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title data-i18n="appName">Gabon Driver’s License Verification System</title>
+  <title>Login - GDLVS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="style.css">
-
-  <!-- i18n libs -->
-  <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
-  <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
-  <script src="lang.js"></script>
 </head>
-<body class="login-wrap">
-  <div class="login">
-    <h2 data-i18n="loginTitle">Welcome to GDLVS</h2>
-    <div class="muted" data-i18n="loginSubtitle">Sign in to continue</div>
+<body>
+<div class="login-container">
+  <h2>Login to GDLVS</h2>
+  <form id="loginForm">
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button type="submit">Login</button>
+  </form>
+  <div id="loginError" class="error"></div>
+</div>
 
-    <input id="email" type="email" class="input" placeholder="Email" data-i18n="[placeholder]email">
-    <input id="password" type="password" class="input" placeholder="Password" data-i18n="[placeholder]password">
-    <div class="actions">
-      <button id="signin" class="btn" data-i18n="signin">Sign In</button>
-      <button id="signup" class="btn outline" data-i18n="signup">Register</button>
-    </div>
-    <div class="lang-switch" style="margin-top:14px">
-      <button onclick="changeLng('en')">🇬🇧</button>
-      <button onclick="changeLng('fr')">🇫🇷</button>
-      <button onclick="changeLng('ja')">🇯🇵</button>
-    </div>
-  </div>
+<script type="module">
+  import { auth } from "./firebase.js";
+  import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
-  <script type="module">
-    import { auth } from "./firebase.js";
-    import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged }
-      from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+  const loginForm = document.getElementById("loginForm");
+  const loginError = document.getElementById("loginError");
 
-    onAuthStateChanged(auth, user => { if (user) location.href = "dashboard.html"; });
+  // Handle login
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
 
-    signin.onclick = async () => {
-      try { await signInWithEmailAndPassword(auth, email.value, password.value); }
-      catch (e) { alert(e.message); }
-    };
-    signup.onclick = async () => {
-      try { await createUserWithEmailAndPassword(auth, email.value, password.value); }
-      catch (e) { alert(e.message); }
-    };
-  </script>
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      window.location.href = "dashboard.html"; // Redirect to dashboard
+    } catch (err) {
+      loginError.textContent = "❌ " + err.message;
+    }
+  });
+
+  // Allow Enter key for login (form already submits, but extra safety)
+  ["email", "password"].forEach(id => {
+    document.getElementById(id).addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        loginForm.dispatchEvent(new Event("submit"));
+      }
+    });
+  });
+</script>
 </body>
 </html>
