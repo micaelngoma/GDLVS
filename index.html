@@ -24,7 +24,6 @@
   const loginForm = document.getElementById("loginForm");
   const loginError = document.getElementById("loginError");
 
-  // Handle login
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = document.getElementById("email").value.trim();
@@ -38,7 +37,6 @@
     }
   });
 
-  // Allow Enter key to login
   ["email", "password"].forEach(id => {
     document.getElementById(id).addEventListener("keypress", (e) => {
       if (e.key === "Enter") {
