@@ -1,123 +1,43 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title data-i18n="verify">Verification Portal</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <title>GDLVS - Verification</title>
   <link rel="stylesheet" href="style.css">
-
-  <!-- i18n -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
-  <script src="lang.js"></script>
+  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
+  <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
+  <script defer src="script.js"></script>
 </head>
 <body>
-<div class="app">
-  <aside class="sidebar">
-    <div class="brand" data-i18n="appName">Gabon Driver’s License Verification System</div>
-    <nav>
-      <a href="dashboard.html" data-i18n="dashboard">Dashboard</a>
-      <a href="licenses.html" data-i18n="licenses">License Management</a>
-      <a href="verify.html" class="active" data-i18n="verify">Verification Portal</a>
-      <a href="analytics.html" data-i18n="analytics">Analytics</a>
-      <a href="users.html" data-i18n="users">User Management</a>
-      <a href="#" id="logout" data-i18n="logout">Logout</a>
-    </nav>
-    <div class="lang-switch"><button onclick="changeLng('en')">🇬🇧</button><button onclick="changeLng('fr')">🇫🇷</button><button onclick="changeLng('ja')">🇯🇵</button></div>
-  </aside>
+  <header>
+    <h1><i class="fas fa-search"></i> <span data-i18n="verificationPortal">Verification Portal</span></h1>
+  </header>
 
-  <main class="main">
-    <h2 data-i18n="verify">Verification Portal</h2>
+  <div class="container">
+    <form onsubmit="verifyLicense(); return false;">
+      <label data-i18n="licenseNumber">License Number</label>
+      <input type="text" id="verifyLicenseNumber" required>
 
-    <div id="verifyForm" class="card" style="display:none; margin-bottom:20px;">
-      <h3 data-i18n="verifyLicense">Verify License</h3>
-      <label data-i18n="licNumber">License Number</label>
-      <input id="num" class="input" placeholder="GA123456789">
       <label data-i18n="organization">Requesting Organization</label>
-      <input id="org" class="input" placeholder="Organization">
+      <input type="text" id="requestingOrg">
+
       <label data-i18n="country">Country</label>
-      <input id="country" class="input" placeholder="Country">
-      <label data-i18n="officialEmail">Official Email</label>
-      <input id="email" class="input" placeholder="official@org.gov">
-      <label data-i18n="purpose">Purpose</label>
-      <textarea id="purpose" class="input" placeholder="License conversion"></textarea>
-      <button id="verifyBtn" class="btn" style="margin-top:8px" data-i18n="verifyLicense">Verify License</button>
-      <div id="result" style="margin-top:10px;font-weight:700"></div>
-    </div>
+      <input type="text" id="country">
 
-    <div id="logsSection" class="card" style="display:none;">
-      <h3 data-i18n="logs">Verification Logs</h3>
-      <table class="table">
-        <thead>
-          <tr>
-            <th data-i18n="licNumber">License Number</th>
-            <th data-i18n="organization">Requesting Organization</th>
-            <th data-i18n="country">Country</th>
-            <th data-i18n="officialEmail">Official Email</th>
-            <th data-i18n="result">Result</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody id="logsTable"></tbody>
-      </table>
-    </div>
-  </main>
-</div>
+      <label data-i18n="email">Contact Email</label>
+      <input type="email" id="email">
 
-<script type="module">
-  import { auth, db } from "./firebase.js";
-  import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-  import { doc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+      <label data-i18n="purpose">Purpose of Verification</label>
+      <textarea id="purpose"></textarea>
 
-  let currentRole=null;
-  logout.onclick = async (e)=>{ e.preventDefault(); await signOut(auth); location.href="index.html"; };
-
-  async function getUserRole(uid){
-    const r=await getDoc(doc(db,"roles",uid)); return r.exists()? r.data().role : null;
-  }
-
-  onAuthStateChanged(auth, async (user)=>{
-    if(!user){ location.href="index.html"; return; }
-    currentRole = await getUserRole(user.uid);
-
-    if(["verifier","staff","admin"].includes(currentRole)) document.getElementById("verifyForm").style.display="block";
-    if(["auditor","admin"].includes(currentRole)) { document.getElementById("logsSection").style.display="block"; loadLogs(); }
-  });
-
-  function todayISO(){ return new Date().toISOString().slice(0,10); }
-
-  verifyBtn.onclick = async ()=>{
-    if(!["verifier","staff","admin"].includes(currentRole)) { alert(i18next.t("notAuthorized")); return; }
-    const id=num.value.trim(); const org=window.org.value.trim(); const country=window.country.value.trim();
-    const email=window.email.value.trim(); const purpose=window.purpose.value.trim();
-    if(!id||!org||!country||!email||!purpose){ alert("Please fill all fields."); return; }
-
-    const s=await getDoc(doc(db,"licenses",id));
-    let result="Not Found"; let l=null;
-    if(s.exists()){ l=s.data();
-      if(l.status==="Active" && (l.expiryDate||"") >= todayISO()) result="Verified";
-      else if((l.expiryDate||"") < todayISO()) result="Expired";
-      else if(l.status!=="Active") result=l.status;
-    }
-    await addDoc(collection(db,"verifications"),{
-      licenseNumber:id, org, country, email, purpose, result,
-      requestedBy: auth.currentUser.uid, at: serverTimestamp()
-    });
-    resultDiv.textContent = ""; // backward safety if element id changed
-    document.getElementById("result").textContent = i18next.t("result")+": "+result;
-  };
-
-  async function loadLogs(){
-    const qy = query(collection(db,"verifications"), orderBy("at","desc"));
-    const snap=await getDocs(qy);
-    const tbody=document.getElementById("logsTable"); tbody.innerHTML="";
-    snap.forEach(d=>{
-      const v=d.data(); const when = v.at?.toDate?.().toLocaleString?.() || "—";
-      const tr=document.createElement("tr");
-      tr.innerHTML=`<td>${v.licenseNumber||""}</td><td>${v.org||""}</td><td>${v.country||""}</td><td>${v.email||""}</td><td>${v.result||""}</td><td>${when}</td>`;
-      tbody.appendChild(tr);
-    });
-  }
-</script>
+      <button type="submit"><i class="fas fa-search"></i> <span data-i18n="verify">Verify License</span></button>
+    </form>
+    <div id="verificationResult"></div>
+  </div>
 </body>
 </html>
