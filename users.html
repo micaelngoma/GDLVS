@@ -1,111 +1,23 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>User Management - GDLVS</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <title>GDLVS - User Management</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script defer src="script.js"></script>
 </head>
 <body>
-<div class="app">
-  <aside class="sidebar">
-    <div class="brand">GDLVS</div>
-    <nav>
-      <a href="dashboard.html">Dashboard</a>
-      <a href="licenses.html">License Management</a>
-      <a href="verify.html">Verification Portal</a>
-      <a href="analytics.html">Analytics</a>
-      <a href="users.html" class="active">User Management</a>
-      <a href="#" id="logout">Logout</a>
-    </nav>
-  </aside>
+  <header>
+    <h1><i class="fas fa-users-cog"></i> <span data-i18n="userManagement">User Management</span></h1>
+    <button onclick="signOutUser()"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></button>
+  </header>
 
-  <main class="main">
-    <h2>User Management</h2>
-
-    <div class="card">
-      <h3>Manage Roles</h3>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Change Role</th>
-          </tr>
-        </thead>
-        <tbody id="usersTable"></tbody>
-      </table>
-    </div>
-  </main>
-</div>
-
-<script type="module">
-  import { auth, db } from "./firebase.js";
-  import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-  import { collection, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
-
-  const logoutBtn = document.getElementById("logout");
-
-  logoutBtn.addEventListener("click", async (e) => {
-    e.preventDefault();
-    await signOut(auth);
-    window.location.href = "index.html";
-  });
-
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      window.location.href = "index.html";
-      return;
-    }
-
-    // Check if current user is admin
-    const roleDoc = await getDoc(doc(db, "roles", user.uid));
-    if (!roleDoc.exists() || roleDoc.data().role !== "admin") {
-      alert("❌ You are not authorized to view this page.");
-      window.location.href = "dashboard.html";
-      return;
-    }
-
-    loadUsers();
-  });
-
-  async function loadUsers() {
-    const usersSnap = await getDocs(collection(db, "users"));
-    const table = document.getElementById("usersTable");
-    table.innerHTML = "";
-
-    for (let u of usersSnap.docs) {
-      const data = u.data();
-      const roleSnap = await getDoc(doc(db, "roles", u.id));
-      const role = roleSnap.exists() ? roleSnap.data().role : "none";
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${data.email || "(unknown)"}</td>
-        <td>${role}</td>
-        <td>
-          <select class="input" data-uid="${u.id}">
-            <option value="none" ${role==="none"?"selected":""}>None</option>
-            <option value="verifier" ${role==="verifier"?"selected":""}>Verifier</option>
-            <option value="staff" ${role==="staff"?"selected":""}>Staff</option>
-            <option value="auditor" ${role==="auditor"?"selected":""}>Auditor</option>
-            <option value="admin" ${role==="admin"?"selected":""}>Admin</option>
-          </select>
-        </td>
-      `;
-      table.appendChild(tr);
-    }
-
-    // Add change event
-    document.querySelectorAll("select[data-uid]").forEach(sel => {
-      sel.addEventListener("change", async (e) => {
-        const uid = e.target.getAttribute("data-uid");
-        const newRole = e.target.value;
-        await setDoc(doc(db, "roles", uid), { role: newRole });
-        alert(`✅ Role updated to "${newRole}" for UID: ${uid}`);
-      });
-    });
-  }
-</script>
+  <div class="container">
+    <p data-i18n="userManagement">Admins can promote/demote roles here.</p>
+  </div>
 </body>
 </html>
