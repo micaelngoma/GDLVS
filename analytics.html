@@ -1,73 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Analytics - GDLVS</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title data-i18n="analytics">Analytics - GDLVS</title>
+  <link rel="stylesheet" href="style.css">
 
-  <!-- Firebase v8 -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
-  <!-- Chart.js (lightweight CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- i18next -->
+  <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
+  <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
+  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
+  <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
   <script defer src="script.js"></script>
 </head>
-<body class="shell">
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-logo">🛡️</div>
-      <div class="brand-text">
-        <div class="brand-title">GDLVS</div>
-        <div class="brand-sub">Verification System</div>
-      </div>
-    </div>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-logo">🚗</div><div class="brand-title" data-i18n="title">GDLVS</div></div>
+      <nav class="side-nav">
+        <a href="dashboard.html" class="side-link" data-i18n="dashboard">Dashboard</a>
+        <a href="analytics.html" class="side-link active" data-i18n="analytics">Analytics</a>
+      </nav>
+      <footer>
+        <label for="languageSwitcher">🌍</label>
+        <select id="languageSwitcher">
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="ja">日本語</option>
+        </select>
+      </footer>
+    </aside>
 
-    <nav class="side-nav">
-      <a class="side-link" href="dashboard.html">🏠 Dashboard</a>
-      <a class="side-link" href="add_license.html">🪪 License Management</a>
-      <a class="side-link" href="verify.html">🌐 Verification Portal</a>
-      <a class="side-link active" href="analytics.html">📊 Analytics</a>
-    </nav>
-
-    <div class="side-status">
-      <div class="status-row"><span class="dot dot-green"></span> System Online</div>
-      <div class="status-row"><span class="dot dot-green"></span> International Access: <b>Active</b></div>
-    </div>
-
-    <div class="side-user">
-      <div class="user-avatar">M</div>
-      <div class="user-meta">
-        <div id="anCurrentUserEmail">—</div>
-        <small>signed in</small>
-      </div>
-      <button class="btn btn-secondary" onclick="signOutUser()">Logout</button>
-    </div>
-  </aside>
-
-  <!-- Main -->
-  <main class="content">
-    <header class="page-header"><h1 class="page-title">Analytics Dashboard</h1></header>
-
-    <section class="grid grid-2">
-      <div class="card">
-        <div class="card-header"><h3>License Status Distribution</h3></div>
-        <canvas id="chartStatus" height="200"></canvas>
-      </div>
-
-      <div class="card">
-        <div class="card-header"><h3>License Classes</h3></div>
-        <canvas id="chartClasses" height="200"></canvas>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="card-header"><h3>Verification Results</h3></div>
-      <canvas id="chartResults" height="240"></canvas>
-    </section>
-  </main>
+    <main class="content">
+      <h1 data-i18n="analytics">Analytics</h1>
+      <section class="grid grid-2">
+        <div class="card"><canvas id="licenseStatusChart"></canvas></div>
+        <div class="card"><canvas id="licenseClassChart"></canvas></div>
+        <div class="card"><canvas id="verificationResultChart"></canvas></div>
+        <div class="card"><canvas id="backupActivityChart"></canvas></div>
+      </section>
+    </main>
+  </div>
 </body>
 </html>
