@@ -4,41 +4,48 @@
   <meta charset="UTF-8">
   <title data-i18n="title">Login - GDLVS</title>
   <link rel="stylesheet" href="style.css">
-
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
-  <!-- i18next + jQuery -->
+  <!-- i18next -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 </head>
-<body class="login-page">
-  <div class="login-box">
-    <h1 data-i18n="title">GDLVS</h1>
-    <div class="input-group">
-      <label for="email" data-i18n="email">Email</label>
-      <input type="email" id="email" placeholder="you@example.com">
-    </div>
-    <div class="input-group">
-      <label for="password" data-i18n="password">Password</label>
-      <input type="password" id="password" placeholder="••••••••">
-    </div>
-    <button onclick="loginUser()" data-i18n="login">Login</button>
-    <div id="msg" class="alert"></div>
+<body>
+  <div class="main">
+    <header>
+      <h1 data-i18n="title">GDLVS Verification System</h1>
+    </header>
 
-    <footer>
-      <label for="languageSwitcher">🌍</label>
-      <select id="languageSwitcher">
-        <option value="en">English</option>
-        <option value="fr">Français</option>
-        <option value="ja">日本語</option>
-      </select>
-    </footer>
+    <div class="form-wrapper">
+      <form class="form-card" onsubmit="loginUser(); return false;">
+        <h2 data-i18n="login">Login</h2>
+
+        <label for="email" data-i18n="email">Email</label>
+        <input type="email" id="email" placeholder="you@example.com">
+
+        <label for="password" data-i18n="password">Password</label>
+        <input type="password" id="password" placeholder="********">
+
+        <button type="submit" data-i18n="login">Login</button>
+
+        <div id="msg" class="alert" style="margin-top:12px;"></div>
+
+        <div style="margin-top:15px; text-align:center;">
+          <label for="languageSwitcher">🌍</label>
+          <select id="languageSwitcher">
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+            <option value="ja">日本語</option>
+          </select>
+        </div>
+      </form>
+    </div>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
