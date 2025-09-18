@@ -10,34 +10,27 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-  <!-- i18next -->
+  <!-- i18next + jQuery -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
-
-  <script defer src="script.js"></script>
 </head>
-<body>
-  <div class="login-container">
+<body class="login-page">
+  <div class="login-box">
     <h1 data-i18n="title">GDLVS</h1>
-    <h2 data-i18n="login">Secure Login</h2>
-
     <div class="input-group">
       <label for="email" data-i18n="email">Email</label>
-      <input type="email" id="email" class="input" placeholder="you@example.com">
+      <input type="email" id="email" placeholder="you@example.com">
     </div>
     <div class="input-group">
       <label for="password" data-i18n="password">Password</label>
-      <input type="password" id="password" class="input" placeholder="••••••••">
+      <input type="password" id="password" placeholder="••••••••">
     </div>
+    <button onclick="loginUser()" data-i18n="login">Login</button>
+    <div id="msg" class="alert"></div>
 
-    <button class="btn" onclick="loginUser()" data-i18n="login">Login</button>
-
-    <div id="msg" class="alert" style="margin-top:12px;"></div>
-
-    <!-- Language Switcher -->
-    <footer style="margin-top:20px; text-align:center;">
+    <footer>
       <label for="languageSwitcher">🌍</label>
       <select id="languageSwitcher">
         <option value="en">English</option>
@@ -46,5 +39,6 @@
       </select>
     </footer>
   </div>
+  <script src="script.js"></script>
 </body>
 </html>
