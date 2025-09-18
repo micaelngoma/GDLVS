@@ -1,59 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title data-i18n="addLicense">Add License - Gabon License Verifier</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>License Management - GDLVS</title>
+  <link rel="stylesheet" href="style.css" />
 
-  <!-- Firebase -->
+  <!-- Firebase v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
   <script defer src="script.js"></script>
 </head>
-<body>
-  <header>
-    <h1 data-i18n="addLicense">Add New License</h1>
-    <button onclick="signOutUser()" data-i18n="logout">Logout</button>
-  </header>
+<body class="shell">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">🛡️</div>
+      <div class="brand-text">
+        <div class="brand-title">GDLVS</div>
+        <div class="brand-sub">Verification System</div>
+      </div>
+    </div>
 
-  <nav>
-    <a href="dashboard.html" data-i18n="dashboard">Dashboard</a>
-    <a href="add_license.html" data-i18n="addLicense">Add License</a>
-    <a href="verify.html" data-i18n="verificationPortal">Verification Portal</a>
-  </nav>
+    <nav class="side-nav">
+      <a class="side-link" href="dashboard.html">🏠 Dashboard</a>
+      <a class="side-link active" href="add_license.html">🪪 License Management</a>
+      <a class="side-link" href="verify.html">🌐 Verification Portal</a>
+      <a class="side-link" href="analytics.html">📊 Analytics</a>
+    </nav>
 
-  <div class="container">
-    <form id="addLicenseForm" onsubmit="addLicense(); return false;">
-      <div class="input-group">
-        <label for="licenseNumber" data-i18n="licenseNumber">License Number</label>
-        <input type="text" id="licenseNumber" placeholder="GAB123456">
+    <div class="side-status">
+      <div class="status-row"><span class="dot dot-green"></span> System Online</div>
+      <div class="status-row"><span class="dot dot-green"></span> International Access: <b>Active</b></div>
+    </div>
+
+    <div class="side-user">
+      <div class="user-avatar">M</div>
+      <div class="user-meta">
+        <div id="lmCurrentUserEmail">—</div>
+        <small>admin only</small>
       </div>
-      <div class="input-group">
-        <label for="fullName" data-i18n="fullName">Full Name</label>
-        <input type="text" id="fullName" placeholder="Your Name">
+      <button class="btn btn-secondary" onclick="signOutUser()">Logout</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="content">
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">License Management</h1>
+        <p class="page-subtitle">Manage driver's license records</p>
       </div>
-      <div class="input-group">
-        <label for="licenseClass" data-i18n="class">Class</label>
-        <select id="licenseClass">
-          <option value="">-- Select --</option>
-          <option value="Class A">Class A</option>
-          <option value="Class B">Class B</option>
-          <option value="Class C">Class C</option>
-          <option value="Class D">Class D</option>
-        </select>
+      <button class="btn" onclick="openAddForm()">+ Add New License</button>
+    </header>
+
+    <!-- Add License Form -->
+    <section id="addFormSection" class="card" style="display:none;">
+      <h3>Add New Driver License</h3>
+      <form id="addLicenseForm" onsubmit="addLicense(); return false;" class="grid grid-2">
+        <div class="input-group"><label>License Number</label><input id="licenseNumber" placeholder="GA123456789" /></div>
+        <div class="input-group"><label>Full Name</label><input id="fullName" placeholder="Full name as on license" /></div>
+        <div class="input-group"><label>Class</label>
+          <select id="licenseClass">
+            <option value="">-- Select --</option>
+            <option>Class A</option><option>Class B</option><option>Class C</option><option>Class D</option>
+          </select>
+        </div>
+        <div class="input-group"><label>Issue Date</label><input type="date" id="issueDate" /></div>
+        <div class="input-group"><label>Expiry Date</label><input type="date" id="expiryDate" /></div>
+        <div class="input-group"><label>Status</label>
+          <select id="statusSelect">
+            <option value="Active" selected>Active</option>
+            <option value="Expired">Expired</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <button type="submit" class="btn">Create License</button>
+          <button type="button" class="btn btn-secondary" onclick="closeAddForm()">Cancel</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- List + Filters -->
+    <section class="card">
+      <div class="card-header">
+        <h3>All Licenses</h3>
+        <div class="toolbar">
+          <input id="licenseSearch" class="input" placeholder="Search by number or name…" oninput="filterLicenseList()" />
+          <select id="filterStatus" class="input" onchange="filterLicenseList()">
+            <option value="">All Status</option>
+            <option>Active</option>
+            <option>Expired</option>
+          </select>
+          <select id="filterClass" class="input" onchange="filterLicenseList()">
+            <option value="">All Classes</option>
+            <option>Class A</option><option>Class B</option><option>Class C</option><option>Class D</option>
+          </select>
+        </div>
       </div>
-      <div class="input-group">
-        <label for="issueDate" data-i18n="issueDate">Issue Date</label>
-        <input type="date" id="issueDate">
-      </div>
-      <div class="input-group">
-        <label for="expiryDate" data-i18n="expiryDate">Expiry Date</label>
-        <input type="date" id="expiryDate">
-      </div>
-      <button type="submit" data-i18n="addLicense">Add License</button>
-    </form>
-  </div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>License Number</th><th>Full Name</th><th>Class</th><th>Status</th><th>Issue Date</th><th>Expiry Date</th>
+          </tr>
+        </thead>
+        <tbody id="licenseTable"><tr><td colspan="6" class="muted">Loading…</td></tr></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    function openAddForm(){ document.getElementById('addFormSection').style.display='block'; }
+    function closeAddForm(){ document.getElementById('addFormSection').style.display='none'; }
+  </script>
 </body>
 </html>
