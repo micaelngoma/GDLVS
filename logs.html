@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title data-i18n="logs">Verification Logs - Gabon License Verifier</title>
+  <title data-i18n="logs">Logs - GDLVS</title>
   <link rel="stylesheet" href="style.css">
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
   <!-- i18next -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
@@ -19,45 +19,41 @@
   <script defer src="script.js"></script>
 </head>
 <body>
-  <header>
-    <h1 data-i18n="logs">Verification Logs</h1>
-    <button onclick="signOutUser()" data-i18n="logout">Logout</button>
-  </header>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-logo">🚗</div><div class="brand-title" data-i18n="title">GDLVS</div></div>
+      <nav class="side-nav">
+        <a href="dashboard.html" class="side-link" data-i18n="dashboard">Dashboard</a>
+        <a href="logs.html" class="side-link active" data-i18n="logs">Logs</a>
+      </nav>
+      <footer>
+        <label for="languageSwitcher">🌍</label>
+        <select id="languageSwitcher">
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="ja">日本語</option>
+        </select>
+      </footer>
+    </aside>
 
-  <nav>
-    <a href="dashboard.html" data-i18n="dashboard">Dashboard</a>
-    <a href="add_license.html" data-i18n="addLicense">Add License</a>
-    <a href="verify.html" data-i18n="verificationPortal">Verification Portal</a>
-
-    <!-- Admin Menu -->
-    <div id="adminMenu" class="dropdown" style="display:none;">
-      <button class="dropbtn">⚙️ Admin Tools ▾</button>
-      <div class="dropdown-content">
-        <a href="logs.html" data-i18n="logs">Verification Logs</a>
-        <a href="backups.html" data-i18n="backups">Backups</a>
-        <a href="backupLogs.html" data-i18n="backupLogs">Backup Logs</a>
-      </div>
-    </div>
-  </nav>
-
-  <div class="container">
-    <h2 data-i18n="logs">Verification Attempts</h2>
-    <table class="table" id="logsTable">
-      <thead>
-        <tr>
-          <th data-i18n="licenseNumber">License Number</th>
-          <th data-i18n="organization">Organization</th>
-          <th data-i18n="country">Country</th>
-          <th data-i18n="email">Email</th>
-          <th data-i18n="purpose">Purpose</th>
-          <th data-i18n="result">Result</th>
-          <th data-i18n="date">Date</th>
-        </tr>
-      </thead>
-      <tbody id="logsList">
-        <tr><td colspan="7">Loading...</td></tr>
-      </tbody>
-    </table>
+    <main class="content">
+      <h1 data-i18n="logs">Verification Logs</h1>
+      <input type="text" id="searchBox" placeholder="Search logs..." onkeyup="searchLicenses()">
+      <section class="card">
+        <table class="table">
+          <thead>
+            <tr>
+              <th data-i18n="licenseNumber">License #</th>
+              <th data-i18n="organization">Organization</th>
+              <th data-i18n="country">Country</th>
+              <th data-i18n="status">Result</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="logsTable"></tbody>
+        </table>
+      </section>
+    </main>
   </div>
 </body>
 </html>
