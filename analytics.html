@@ -2,12 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title data-i18n="analytics">Analytics</title>
+  <title data-i18n="analytics">Analytics - GDLVS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
-  <!-- i18n -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="lang.js"></script>
@@ -15,7 +13,7 @@
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="brand" data-i18n="appName">Gabon Driver’s License Verification System</div>
+    <div class="brand" data-i18n="appName">GDLVS</div>
     <nav>
       <a href="dashboard.html" data-i18n="dashboard">Dashboard</a>
       <a href="licenses.html" data-i18n="licenses">License Management</a>
@@ -24,24 +22,29 @@
       <a href="users.html" data-i18n="users">User Management</a>
       <a href="#" id="logout" data-i18n="logout">Logout</a>
     </nav>
-    <div class="lang-switch"><button onclick="changeLng('en')">🇬🇧</button><button onclick="changeLng('fr')">🇫🇷</button><button onclick="changeLng('ja')">🇯🇵</button></div>
+    <div class="lang-switch">
+      <button onclick="changeLng('en')">🇬🇧</button>
+      <button onclick="changeLng('fr')">🇫🇷</button>
+      <button onclick="changeLng('ja')">🇯🇵</button>
+    </div>
   </aside>
 
   <main class="main">
-    <h2 data-i18n="analytics">Analytics</h2>
-    <div class="grid cards">
-      <div class="card"><h3>Total Licenses</h3><div id="k1">—</div></div>
-      <div class="card"><h3>Active Licenses</h3><div id="k2">—</div></div>
-      <div class="card"><h3>Verifications</h3><div id="k3">—</div></div>
+    <h2 data-i18n="analyticsOverview">Analytics Overview</h2>
+
+    <div class="card">
+      <h3 data-i18n="licenseStatus">License Status Distribution</h3>
+      <canvas id="licensePie"></canvas>
     </div>
 
-    <div class="card" style="margin-top:12px">
-      <h3>License Status Distribution</h3>
-      <canvas id="pie1" height="160"></canvas>
+    <div class="card">
+      <h3 data-i18n="verifyTrends">Verification Requests Over Time</h3>
+      <canvas id="verifyLine"></canvas>
     </div>
-    <div class="card" style="margin-top:12px">
-      <h3>Verification Results</h3>
-      <canvas id="bar1" height="160"></canvas>
+
+    <div class="card">
+      <h3 data-i18n="licensesByCountry">Licenses by Country</h3>
+      <canvas id="licenseBar"></canvas>
     </div>
   </main>
 </div>
@@ -49,29 +52,90 @@
 <script type="module">
   import { auth, db } from "./firebase.js";
   import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-  import { collection, getDocs } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+  import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-  logout.onclick = async (e)=>{ e.preventDefault(); await signOut(auth); location.href="index.html"; };
-  onAuthStateChanged(auth, u=>{ if(!u) location.href="index.html"; });
+  let pieChart, lineChart, barChart;
 
-  async function load(){
-    const lic=await getDocs(collection(db,"licenses"));
-    const v=await getDocs(collection(db,"verifications"));
-    let total=lic.size, active=0; const statusDist={};
-    lic.forEach(d=>{ const s=d.data().status||"Unknown"; statusDist[s]=(statusDist[s]||0)+1; if(s==="Active") active++; });
-    k1.textContent=total; k2.textContent=active; k3.textContent=v.size;
+  document.getElementById("logout").addEventListener("click", async (e) => {
+    e.preventDefault();
+    await signOut(auth);
+    window.location.href = "index.html";
+  });
 
-    new Chart(document.getElementById("pie1"),{ type:"doughnut",
-      data:{ labels:Object.keys(statusDist), datasets:[{ data:Object.values(statusDist) }]}
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "index.html";
+      return;
+    }
+
+    const licensesSnap = await getDocs(collection(db, "licenses"));
+    let activeCount = 0, inactiveCount = 0;
+    const countryCounts = {};
+
+    licensesSnap.forEach(doc => {
+      const data = doc.data();
+      if (data.status === "Active") activeCount++;
+      else inactiveCount++;
+
+      const country = data.country || i18next.t("unknown");
+      countryCounts[country] = (countryCounts[country] || 0) + 1;
     });
-    const results={Verified:0,"Not Found":0,Expired:0,Invalid:0,Suspended:0,Revoked:0};
-    v.forEach(d=>{ const r=d.data().result||"Unknown"; results[r]=(results[r]||0)+1; });
-    new Chart(document.getElementById("bar1"),{ type:"bar",
-      data:{ labels:Object.keys(results), datasets:[{ data:Object.values(results), label:"Results" }]},
-      options:{ plugins:{legend:{display:false}} }
+
+    // Pie
+    pieChart = new Chart(document.getElementById("licensePie"), {
+      type: "pie",
+      data: {
+        labels: [i18next.t("active"), i18next.t("inactive")],
+        datasets: [{ data: [activeCount, inactiveCount], backgroundColor: ["#10b981", "#ef4444"] }]
+      }
     });
-  }
-  load();
+
+    // Line
+    const verifySnap = await getDocs(query(collection(db, "verifications"), orderBy("at", "asc")));
+    const countsByDate = {};
+    verifySnap.forEach(doc => {
+      const v = doc.data();
+      const date = v.at?.toDate?.().toISOString().slice(0, 10) || i18next.t("unknown");
+      countsByDate[date] = (countsByDate[date] || 0) + 1;
+    });
+
+    lineChart = new Chart(document.getElementById("verifyLine"), {
+      type: "line",
+      data: {
+        labels: Object.keys(countsByDate),
+        datasets: [{
+          label: i18next.t("verifications"),
+          data: Object.values(countsByDate),
+          borderColor: "#3b82f6",
+          backgroundColor: "rgba(59,130,246,0.2)",
+          tension: 0.3,
+          fill: true
+        }]
+      }
+    });
+
+    // Bar
+    barChart = new Chart(document.getElementById("licenseBar"), {
+      type: "bar",
+      data: {
+        labels: Object.keys(countryCounts),
+        datasets: [{
+          label: i18next.t("licenses"),
+          data: Object.values(countryCounts),
+          backgroundColor: "#3b82f6"
+        }]
+      }
+    });
+
+    i18next.on("languageChanged", () => {
+      pieChart.data.labels = [i18next.t("active"), i18next.t("inactive")];
+      lineChart.data.datasets[0].label = i18next.t("verifications");
+      barChart.data.datasets[0].label = i18next.t("licenses");
+      pieChart.update();
+      lineChart.update();
+      barChart.update();
+    });
+  });
 </script>
 </body>
 </html>
