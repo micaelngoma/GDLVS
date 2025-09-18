@@ -10,88 +10,58 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-  <!-- i18next -->
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- i18next + jQuery -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
-
-  <script defer src="script.js"></script>
 </head>
 <body>
-  <div class="shell">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-logo">🚗</div>
-        <div>
-          <div class="brand-title" data-i18n="title">GDLVS</div>
-        </div>
-      </div>
-      <nav class="side-nav">
-        <a href="dashboard.html" class="side-link active" data-i18n="dashboard">Dashboard</a>
-        <a href="add_license.html" class="side-link" data-i18n="addLicense">Add License</a>
-        <a href="verify.html" class="side-link" data-i18n="verificationPortal">Verification Portal</a>
-        <a href="analytics.html" class="side-link" data-i18n="analytics">Analytics</a>
-        <a href="logs.html" class="side-link" data-i18n="logs">Logs</a>
-        <a href="backups.html" class="side-link" data-i18n="backups">Backups</a>
-        <a href="backupLogs.html" class="side-link" data-i18n="backupLogs">Backup Logs</a>
-      </nav>
-      <footer>
-        <label for="languageSwitcher">🌍</label>
-        <select id="languageSwitcher">
-          <option value="en">English</option>
-          <option value="fr">Français</option>
-          <option value="ja">日本語</option>
-        </select>
-      </footer>
-    </aside>
-
-    <!-- Content -->
-    <main class="content">
-      <header class="page-header">
-        <h1 class="page-title" data-i18n="dashboard">Dashboard</h1>
-      </header>
-
-      <!-- Stats Cards -->
-      <section class="grid grid-4">
-        <div class="card">
-          <h3 data-i18n="licenseNumber">Total Licenses</h3>
-          <p id="totalLicenses">0</p>
-        </div>
-        <div class="card">
-          <h3 data-i18n="status">Active Licenses</h3>
-          <p id="activeLicenses">0</p>
-        </div>
-        <div class="card">
-          <h3 data-i18n="logs">Today’s Verifications</h3>
-          <p id="todaysVerifications">0</p>
-        </div>
-        <div class="card">
-          <h3 data-i18n="analytics">Success Rate</h3>
-          <p id="successRate">0%</p>
-        </div>
-      </section>
-
-      <!-- Recent Verifications -->
-      <section class="card">
-        <h3 data-i18n="recentVerifications">Recent Verification Requests</h3>
-        <table class="table">
-          <thead>
-            <tr>
-              <th data-i18n="licenseNumber">License #</th>
-              <th data-i18n="organization">Organization</th>
-              <th data-i18n="country">Country</th>
-              <th data-i18n="status">Result</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody id="recentTable">
-            <tr><td colspan="5">Loading…</td></tr>
-          </tbody>
-        </table>
-      </section>
-    </main>
+  <div class="sidebar">
+    <h2>GDLVS</h2>
+    <ul>
+      <li><a href="dashboard.html" class="active" data-i18n="dashboard">Dashboard</a></li>
+      <li><a href="add_license.html" data-i18n="addLicense">License Management</a></li>
+      <li><a href="verify.html" data-i18n="verificationPortal">Verification Portal</a></li>
+      <li><a href="analytics.html" data-i18n="analytics">Analytics</a></li>
+      <li><a href="user_management.html" data-i18n="userManagement">User Management</a></li>
+      <li><button onclick="signOutUser()" data-i18n="logout">Logout</button></li>
+    </ul>
   </div>
+
+  <div class="main">
+    <header><h1 data-i18n="dashboard">Dashboard</h1></header>
+
+    <section class="cards">
+      <div class="card"><h3 data-i18n="totalLicenses">Total Licenses</h3><p id="totalLicenses">0</p></div>
+      <div class="card"><h3 data-i18n="activeLicenses">Active Licenses</h3><p id="activeLicenses">0</p></div>
+      <div class="card"><h3 data-i18n="todayVerifications">Today’s Verifications</h3><p id="todayVerifications">0</p></div>
+      <div class="card"><h3 data-i18n="successRate">Success Rate</h3><p id="successRate">0%</p></div>
+    </section>
+
+    <section>
+      <h2 data-i18n="recentRequests">Recent Verification Requests</h2>
+      <table class="table" id="recentRequestsTable">
+        <thead>
+          <tr>
+            <th data-i18n="licenseNumber">License</th>
+            <th data-i18n="organization">Entity</th>
+            <th data-i18n="country">Country</th>
+            <th data-i18n="status">Status</th>
+            <th data-i18n="date">Date</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section class="charts">
+      <canvas id="statusChart"></canvas>
+    </section>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
