@@ -4,70 +4,54 @@
   <meta charset="UTF-8">
   <title data-i18n="addLicense">Add License - GDLVS</title>
   <link rel="stylesheet" href="style.css">
-
-  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
-  <!-- i18next -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
-
-  <script defer src="script.js"></script>
 </head>
 <body>
-  <div class="shell">
-    <aside class="sidebar">
-      <div class="brand"><div class="brand-logo">🚗</div><div class="brand-title" data-i18n="title">GDLVS</div></div>
-      <nav class="side-nav">
-        <a href="dashboard.html" class="side-link" data-i18n="dashboard">Dashboard</a>
-        <a href="add_license.html" class="side-link active" data-i18n="addLicense">Add License</a>
-        <a href="verify.html" class="side-link" data-i18n="verificationPortal">Verification Portal</a>
-        <a href="analytics.html" class="side-link" data-i18n="analytics">Analytics</a>
-      </nav>
-      <footer>
-        <label for="languageSwitcher">🌍</label>
-        <select id="languageSwitcher">
-          <option value="en">English</option>
-          <option value="fr">Français</option>
-          <option value="ja">日本語</option>
-        </select>
-      </footer>
-    </aside>
-
-    <main class="content">
-      <h1 data-i18n="addLicense">Add License</h1>
-      <form id="addLicenseForm" onsubmit="addLicense(); return false;" class="card">
-        <div class="input-group"><label data-i18n="licenseNumber">License Number</label><input type="text" id="licenseNumber"></div>
-        <div class="input-group"><label data-i18n="fullName">Full Name</label><input type="text" id="fullName"></div>
-        <div class="input-group"><label data-i18n="class">Class</label>
-          <select id="licenseClass"><option>A</option><option>B</option><option>C</option><option>D</option></select>
-        </div>
-        <div class="input-group"><label data-i18n="issueDate">Issue Date</label><input type="date" id="issueDate"></div>
-        <div class="input-group"><label data-i18n="expiryDate">Expiry Date</label><input type="date" id="expiryDate"></div>
-        <button type="submit" class="btn" data-i18n="addLicense">Add</button>
-      </form>
-
-      <section class="card">
-        <h3 data-i18n="licenseManagement">License Management</h3>
-        <input type="text" id="searchBox" placeholder="Search..." onkeyup="searchLicenses()">
-        <table class="table">
-          <thead>
-            <tr>
-              <th data-i18n="licenseNumber">License #</th>
-              <th data-i18n="fullName">Name</th>
-              <th data-i18n="class">Class</th>
-              <th data-i18n="status">Status</th>
-              <th data-i18n="expiryDate">Expiry</th>
-            </tr>
-          </thead>
-          <tbody id="licenseTable"></tbody>
-        </table>
-      </section>
-    </main>
+  <div class="sidebar">
+    <h2>GDLVS</h2>
+    <ul>
+      <li><a href="dashboard.html" data-i18n="dashboard">Dashboard</a></li>
+      <li><a href="add_license.html" class="active" data-i18n="addLicense">License Management</a></li>
+      <li><a href="verify.html" data-i18n="verificationPortal">Verification Portal</a></li>
+      <li><a href="analytics.html" data-i18n="analytics">Analytics</a></li>
+      <li><a href="user_management.html" data-i18n="userManagement">User Management</a></li>
+      <li><button onclick="signOutUser()" data-i18n="logout">Logout</button></li>
+    </ul>
   </div>
+
+  <div class="main">
+    <header><h1 data-i18n="addLicense">Add New License</h1></header>
+    <form id="addLicenseForm" onsubmit="addLicense(); return false;" class="form-card">
+      <label for="licenseNumber" data-i18n="licenseNumber">License Number</label>
+      <input type="text" id="licenseNumber">
+
+      <label for="fullName" data-i18n="fullName">Full Name</label>
+      <input type="text" id="fullName">
+
+      <label for="licenseClass" data-i18n="class">Class</label>
+      <select id="licenseClass">
+        <option value="">-- Select --</option>
+        <option value="Class A">Class A</option>
+        <option value="Class B">Class B</option>
+        <option value="Class C">Class C</option>
+        <option value="Class D">Class D</option>
+      </select>
+
+      <label for="issueDate" data-i18n="issueDate">Issue Date</label>
+      <input type="date" id="issueDate">
+
+      <label for="expiryDate" data-i18n="expiryDate">Expiry Date</label>
+      <input type="date" id="expiryDate">
+
+      <button type="submit" data-i18n="addLicense">Add License</button>
+    </form>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
