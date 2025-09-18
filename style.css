@@ -1,101 +1,221 @@
-/* Full style.css here */
-/* =============================
-   GLOBAL
-   ============================= */
-:root {
-  --primary: #1a73e8;
-  --primary-dark: #0c47a1;
-  --secondary: #f1f3f4;
-  --danger: #e53935;
-  --success: #34a853;
-  --text: #202124;
-  --muted: #5f6368;
-  --bg: #ffffff;
+/* === Reset & Base === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", Roboto, sans-serif; }
-body { background: var(--secondary); color: var(--text); line-height: 1.6; min-height: 100vh; }
-
-/* =============================
-   LOGIN PAGE
-   ============================= */
-.login-wrap { display: grid; place-items: center; background: linear-gradient(135deg, #1a73e8, #0c47a1); min-height: 100vh; }
-.login {
-  background: var(--bg); padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-  width: min(380px, 92vw); text-align: center;
+body {
+  background: #f5f7fa;
+  color: #333;
+  line-height: 1.6;
 }
-.login h2 { margin-bottom: 10px; color: var(--primary-dark); }
-.login .muted { color: var(--muted); margin-bottom: 20px; }
-.login .input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 6px; }
-.login .actions { margin-top: 20px; display: flex; gap: 12px; }
 
-/* =============================
-   APP LAYOUT
-   ============================= */
-.app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+/* === Layout === */
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* === Sidebar === */
 .sidebar {
-  background: var(--primary); color: #fff; padding: 20px; position: sticky; top: 0; height: 100vh;
-  display: flex; flex-direction: column; gap: 12px;
+  width: 240px;
+  background: #2563eb;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
 }
-.sidebar .brand { font-weight: 700; margin-bottom: 4px; }
+
+.sidebar .brand {
+  font-weight: bold;
+  font-size: 1.3em;
+  margin-bottom: 30px;
+}
+
 .sidebar nav a {
-  color: #fff; text-decoration: none; display: block; padding: 10px 12px; border-radius: 6px; margin: 2px 0; transition: .2s;
+  display: block;
+  color: #fff;
+  padding: 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  margin-bottom: 8px;
+  transition: background 0.3s;
 }
-.sidebar nav a:hover, .sidebar nav a.active { background: rgba(255,255,255,0.2); }
-.lang-switch { margin-top: auto; display: flex; gap: 6px; flex-wrap: wrap; }
-.lang-switch button {
-  border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; background: rgba(255,255,255,0.15); color: #fff;
+
+.sidebar nav a:hover,
+.sidebar nav a.active {
+  background: rgba(255, 255, 255, 0.2);
 }
 
-.main { padding: 20px; background: var(--secondary); }
+/* === Main Content === */
+.main {
+  flex: 1;
+  padding: 30px;
+  background: #f9fafb;
+}
 
-/* =============================
-   CARDS
-   ============================= */
-.grid.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 20px; }
-.card { background: var(--bg); padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-.card h3 { margin-bottom: 8px; }
+.main h2 {
+  margin-bottom: 20px;
+  font-size: 1.5em;
+}
 
-/* =============================
-   TABLES
-   ============================= */
-.table { width: 100%; border-collapse: collapse; background: var(--bg); border-radius: 8px; overflow: hidden; }
-.table th, .table td { padding: 12px; border-bottom: 1px solid #e8eaed; text-align: left; }
-.table th { background: var(--primary); color: #fff; }
-.table tr:hover { background: #f9f9f9; }
+/* === Cards === */
+.card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
 
-/* =============================
-   BUTTONS
-   ============================= */
+/* === Forms & Buttons === */
+.input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 1em;
+}
+
+select.input {
+  cursor: pointer;
+}
+
 .btn {
-  background: var(--primary); border: none; color: #fff; padding: 10px 16px; border-radius: 6px;
-  cursor: pointer; font-size: 14px; transition: .2s;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1em;
 }
-.btn:hover { background: var(--primary-dark); }
-.btn.outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
-.btn.danger { background: var(--danger); }
-.btn.success { background: var(--success); }
 
-/* =============================
-   FORMS
-   ============================= */
-input, select, textarea {
-  padding: 10px; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 10px; width: 100%;
+.btn:hover {
+  background: #1d4ed8;
 }
-label { display: block; margin-bottom: 6px; font-weight: 500; }
 
-/* =============================
-   MODALS
-   ============================= */
-.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
-.modal-content {
-  background: var(--bg); padding: 20px; border-radius: 10px; width: min(560px, 92vw); position: relative;
-  box-shadow: 0 8px 22px rgba(0,0,0,.25);
+/* === Tables === */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
 }
-.modal-content h3 { margin-bottom: 12px; }
-.modal-content .close { position: absolute; right: 14px; top: 10px; font-size: 20px; cursor: pointer; }
 
-/* =============================
-   RESPONSIVE
-   ============================= */
-@media (max-width: 900px) { .app { grid-template-columns: 1fr; } .sidebar { position: relative; height: auto; } }
+.table th,
+.table td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.table th {
+  background: #f1f5f9;
+  font-weight: bold;
+}
+
+/* === Dashboard Stats === */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.stat-box {
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  color: #fff;
+  font-weight: bold;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+
+.stat-box i {
+  font-size: 2.5em;
+  margin-bottom: 10px;
+  display: block;
+  opacity: 0.9;
+}
+
+.stat-box h3 {
+  margin-bottom: 10px;
+  font-size: 1.2em;
+}
+
+.stat-box p {
+  font-size: 2em;
+  margin: 0;
+}
+
+/* Stat colors */
+.stat-box.total { background: #3b82f6; }
+.stat-box.active { background: #10b981; }
+.stat-box.verify { background: #f59e0b; }
+
+/* === Login Page === */
+.login-container {
+  max-width: 350px;
+  margin: 80px auto;
+  padding: 30px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.login-container h2 {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.login-container input,
+.login-container button {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1em;
+}
+
+.login-container button {
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.login-container button:hover {
+  background: #2563eb;
+}
+
+.error {
+  color: red;
+  font-size: 0.9em;
+  text-align: center;
+  margin-top: 5px;
+}
+
+/* === Charts === */
+canvas {
+  max-width: 100%;
+  height: auto !important;
+}
+
+/* === Language Switch === */
+.lang-switch {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-around;
+}
+
+.lang-switch button {
+  background: transparent;
+  border: none;
+  font-size: 1.3em;
+  cursor: pointer;
+}
