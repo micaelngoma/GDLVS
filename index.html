@@ -33,19 +33,6 @@
     </div>
     <button onclick="loginUser()" data-i18n="login">Login</button>
 
-    <hr>
-
-    <h2 data-i18n="signup">Sign Up</h2>
-    <div class="input-group">
-      <label for="signupEmail" data-i18n="email">Email:</label>
-      <input type="email" id="signupEmail" placeholder="you@example.com">
-    </div>
-    <div class="input-group">
-      <label for="signupPassword" data-i18n="password">Password:</label>
-      <input type="password" id="signupPassword" placeholder="Min 6 characters">
-    </div>
-    <button onclick="signUpUser()" data-i18n="signup">Create Account</button>
-
     <div id="msg" class="alert" style="margin-top:12px;"></div>
   </div>
 
@@ -84,7 +71,6 @@
         translation: {
           "title": "Gabon License Verifier",
           "login": "Login",
-          "signup": "Sign Up",
           "email": "Email",
           "password": "Password"
         }
@@ -93,7 +79,6 @@
         translation: {
           "title": "Vérificateur de Permis du Gabon",
           "login": "Connexion",
-          "signup": "Créer un Compte",
           "email": "E-mail",
           "password": "Mot de passe"
         }
@@ -102,7 +87,6 @@
         translation: {
           "title": "ガボン運転免許確認システム",
           "login": "ログイン",
-          "signup": "新規登録",
           "email": "メールアドレス",
           "password": "パスワード"
         }
@@ -152,24 +136,8 @@
         .catch(err => showMsg(err.message));
     }
 
-    // Sign Up
-    function signUpUser() {
-      const email = document.getElementById('signupEmail').value.trim();
-      const password = document.getElementById('signupPassword').value;
-
-      if (!email || !password) {
-        showMsg('Please enter email and password to create an account.');
-        return;
-      }
-
-      auth.createUserWithEmailAndPassword(email, password)
-        .then(() => showMsg('Account created. You can now log in.', true))
-        .catch(err => showMsg(err.message));
-    }
-
-    // Expose functions
+    // Expose function
     window.loginUser = loginUser;
-    window.signUpUser = signUpUser;
   </script>
 </body>
 </html>
