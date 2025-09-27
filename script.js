@@ -42,9 +42,9 @@ function showMsg(text, ok = false) {
   }
 }
 
-// === Authentication ===
+// === Authentication: Login ===
 function loginUser() {
-  const email = document.getElementById("email").value.trim().toLowerCase();
+  const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
 
   auth.signInWithEmailAndPassword(email, password)
@@ -87,6 +87,30 @@ function loginUser() {
 
 function signOutUser() {
   auth.signOut().then(() => window.location.href = "index.html");
+}
+
+// === Signup: New User ===
+async function signupUser(e) {
+  e.preventDefault();
+
+  const email = document.getElementById("signupEmail").value.trim();
+  const password = document.getElementById("signupPassword").value;
+
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, password);
+
+    // Save default role (verifier) in Firestore
+    await db.collection("roles").doc(email).set({
+      email,
+      role: "verifier"
+    });
+
+    alert("✅ Account created! You can now log in.");
+    window.location.href = "index.html";
+  } catch (err) {
+    console.error("Signup error:", err);
+    alert("❌ Signup failed: " + err.message);
+  }
 }
 
 // === Role-based Access Control ===
@@ -227,8 +251,8 @@ async function loadUsersData() {
       const d = doc.data();
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>${doc.id}</td>
-        <td>${d.role}</td>
+        <td>${d.email || doc.id}</td>
+        <td>${d.role || "verifier"}</td>
         <td>
           <button onclick="promoteUser('${doc.id}')">Promote</button>
           <button onclick="demoteUser('${doc.id}')">Demote</button>
@@ -242,34 +266,10 @@ async function loadUsersData() {
   }
 }
 
-// === Create User ===
-async function createUser() {
-  const email = document.getElementById("newUserEmail").value.trim().toLowerCase();
-  const role = document.getElementById("newUserRole").value;
-
-  if (!email) {
-    showMsg("⚠️ Please enter an email address");
-    return;
-  }
-
+async function promoteUser(uid) {
   try {
-    await db.collection("roles").doc(email).set({ email, role });
-    showMsg("✅ User added successfully", true);
-
-    document.getElementById("newUserEmail").value = "";
-    document.getElementById("newUserRole").value = "verifier";
-    loadUsersData();
-  } catch (err) {
-    console.error("Create user error:", err);
-    showMsg("❌ Failed to create user");
-  }
-}
-
-// === Promote / Demote User ===
-async function promoteUser(email) {
-  try {
-    await db.collection("roles").doc(email).update({ role: "admin" });
-    showMsg(`✅ ${email} promoted to admin`, true);
+    await db.collection("roles").doc(uid).update({ role: "admin" });
+    showMsg("✅ User promoted to admin", true);
     loadUsersData();
   } catch (err) {
     console.error("Promote error:", err);
@@ -277,10 +277,10 @@ async function promoteUser(email) {
   }
 }
 
-async function demoteUser(email) {
+async function demoteUser(uid) {
   try {
-    await db.collection("roles").doc(email).update({ role: "verifier" });
-    showMsg(`✅ ${email} demoted to verifier`, true);
+    await db.collection("roles").doc(uid).update({ role: "verifier" });
+    showMsg("✅ User demoted to verifier", true);
     loadUsersData();
   } catch (err) {
     console.error("Demote error:", err);
@@ -290,11 +290,11 @@ async function demoteUser(email) {
 
 // === Expose globally ===
 window.loginUser = loginUser;
+window.signupUser = signupUser;
 window.signOutUser = signOutUser;
 window.addLicense = addLicense;
 window.loadDashboardData = loadDashboardData;
 window.loadAnalyticsData = loadAnalyticsData;
 window.loadUsersData = loadUsersData;
-window.createUser = createUser;
 window.promoteUser = promoteUser;
 window.demoteUser = demoteUser;
