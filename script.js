@@ -12,7 +12,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// === i18n init (keep translations as before) ===
+// === i18n init ===
 const resources = { /* translations here */ };
 i18next.use(i18nextBrowserLanguageDetector).init(
   { resources, fallbackLng: "en" },
@@ -285,12 +285,27 @@ async function loadUsersData() {
   }
 }
 
-// === Placeholder Promote/Demote ===
-function promoteUser(uid) {
-  showMsg(`⚠️ Promote function not yet implemented for ${uid}`);
+// === Promote / Demote User ===
+async function promoteUser(uid) {
+  try {
+    await db.collection("roles").doc(uid).update({ role: "admin" });
+    showMsg("✅ User promoted to admin", true);
+    loadUsersData();
+  } catch (err) {
+    console.error("Promote error:", err);
+    showMsg("❌ Failed to promote user");
+  }
 }
-function demoteUser(uid) {
-  showMsg(`⚠️ Demote function not yet implemented for ${uid}`);
+
+async function demoteUser(uid) {
+  try {
+    await db.collection("roles").doc(uid).update({ role: "verifier" });
+    showMsg("✅ User demoted to verifier", true);
+    loadUsersData();
+  } catch (err) {
+    console.error("Demote error:", err);
+    showMsg("❌ Failed to demote user");
+  }
 }
 
 // === Expose globally ===
@@ -301,3 +316,5 @@ window.verifyLicense = verifyLicense;
 window.loadDashboardData = loadDashboardData;
 window.loadAnalyticsData = loadAnalyticsData;
 window.loadUsersData = loadUsersData;
+window.promoteUser = promoteUser;
+window.demoteUser = demoteUser;
