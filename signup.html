@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Sign Up - GDLVS</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -19,17 +20,14 @@
   <script defer src="script.js"></script>
 </head>
 <body>
-  <header>
-    <h1>Create an Account</h1>
-  </header>
-
   <div class="container">
+    <h2><i class="fas fa-user-plus"></i> Create an Account</h2>
     <form id="signupForm" onsubmit="signupUser(event)">
       <input type="email" id="signupEmail" placeholder="Enter email" required>
       <input type="password" id="signupPassword" placeholder="Enter password" required>
-      <button type="submit">Sign Up</button>
+      <button type="submit"><i class="fas fa-user-plus"></i> Sign Up</button>
     </form>
-
+    <div id="msg"></div>
     <p>Already have an account? <a href="index.html">Login here</a></p>
   </div>
 
