@@ -1,3 +1,4 @@
+// === Firebase Setup ===
 const firebaseConfig = {
   apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
   authDomain: "gdlvs-2348e.firebaseapp.com",
@@ -11,7 +12,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// i18n init (keep translations as before)
+// === i18n init (keep translations as before) ===
 const resources = { /* translations here */ };
 i18next.use(i18nextBrowserLanguageDetector).init(
   { resources, fallbackLng: "en" },
@@ -30,6 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// === Utility: Message Alerts ===
 function showMsg(text, ok = false) {
   const el = document.getElementById("msg");
   if (el) {
@@ -40,15 +42,23 @@ function showMsg(text, ok = false) {
   }
 }
 
-// Auth
+// === Authentication ===
 function loginUser() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
 
   auth.signInWithEmailAndPassword(email, password)
-    .then(() => {
-      showMsg("Login successful, redirecting...", true);
-      window.location.href = "dashboard.html";
+    .then(async (cred) => {
+      const token = await cred.user.getIdTokenResult();
+      const role = token.claims.role || "verifier";
+
+      if (role === "admin") {
+        showMsg("Login successful, redirecting to Dashboard...", true);
+        window.location.href = "dashboard.html";
+      } else {
+        showMsg("Login successful, redirecting to Verification Portal...", true);
+        window.location.href = "verify.html";
+      }
     })
     .catch(err => showMsg(err.message));
 }
@@ -57,26 +67,44 @@ function signOutUser() {
   auth.signOut().then(() => window.location.href = "index.html");
 }
 
-// Role access
+// === Role-based Access Control ===
 auth.onAuthStateChanged(async (user) => {
   const currentPage = window.location.pathname.split("/").pop();
   const adminPages = ["dashboard.html", "add_licenses.html", "analytics.html", "users.html"];
 
   if (!user) {
+    // If not logged in, block admin pages
     if (adminPages.includes(currentPage)) {
       window.location.href = "index.html";
     }
     return;
   }
 
+  // Get user claims
   const token = await user.getIdTokenResult();
   const role = token.claims.role || "verifier";
 
-  if (role !== "admin" && adminPages.includes(currentPage)) {
-    window.location.href = "verify.html";
+  if (role === "admin") {
+    // Admin allowed everywhere
+    if (currentPage === "dashboard.html") {
+      loadDashboardData?.();
+    }
+    if (currentPage === "analytics.html") {
+      loadAnalyticsData?.();
+    }
+    if (currentPage === "users.html") {
+      loadUsersData?.();
+    }
+  } else {
+    // Non-admins cannot access admin pages
+    if (adminPages.includes(currentPage)) {
+      window.location.href = "verify.html";
+    }
   }
-});
+}
 
-// Add license, verify, analytics functions remain same...
+// === Keep existing feature functions ===
+// (addLicense, verifyLicense, loadDashboardData, loadAnalyticsData, loadUsersData...)
+
 window.loginUser = loginUser;
 window.signOutUser = signOutUser;
