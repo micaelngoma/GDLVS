@@ -52,7 +52,7 @@ async function loginUser(e) {
   try {
     const cred = await auth.signInWithEmailAndPassword(email, password);
 
-    // 🔹 Check if email is verified
+    // 🔹 Require verified email
     if (!cred.user.emailVerified) {
       showMsg("⚠️ Please verify your email before logging in. Verification link resent.");
       await cred.user.sendEmailVerification();
@@ -60,7 +60,7 @@ async function loginUser(e) {
       return;
     }
 
-    // 🔹 Get role from Firestore
+    // 🔹 Get role
     const roleDoc = await db.collection("roles").doc(email).get();
     const role = roleDoc.exists ? roleDoc.data().role : "verifier";
 
@@ -77,17 +77,13 @@ async function loginUser(e) {
     let msg;
     switch (err.code) {
       case "auth/invalid-email":
-        msg = "⚠️ Please enter a valid email address.";
-        break;
+        msg = "⚠️ Please enter a valid email address."; break;
       case "auth/user-disabled":
-        msg = "⚠️ This account has been disabled. Contact support.";
-        break;
+        msg = "⚠️ This account has been disabled. Contact support."; break;
       case "auth/user-not-found":
-        msg = "❌ No account found with this email.";
-        break;
+        msg = "❌ No account found with this email."; break;
       case "auth/wrong-password":
-        msg = "❌ Incorrect password. Please try again.";
-        break;
+        msg = "❌ Incorrect password. Please try again."; break;
       default:
         msg = "❌ Login failed. " + err.message;
     }
@@ -111,17 +107,10 @@ async function signupUser(e) {
   try {
     const cred = await auth.createUserWithEmailAndPassword(email, password);
 
-    // 🔹 Save default role (verifier) in Firestore
-    await db.collection("roles").doc(email).set({
-      email,
-      role: "verifier"
-    });
-
-    // 🔹 Send email verification
+    await db.collection("roles").doc(email).set({ email, role: "verifier" });
     await cred.user.sendEmailVerification();
-    showMsg("✅ Account created! Please check your email to verify before login.", true);
 
-    // Auto logout until verified
+    showMsg("✅ Account created! Please check your email to verify before login.", true);
     await auth.signOut();
 
     setTimeout(() => (window.location.href = "index.html"), 3000);
@@ -143,24 +132,19 @@ auth.onAuthStateChanged(async (user) => {
     return;
   }
 
-  // Block unverified users
   if (!user.emailVerified) {
     showMsg("⚠️ Please verify your email before using the platform.");
     await auth.signOut();
     return;
   }
 
-  // Get role
   const roleDoc = await db.collection("roles").doc(user.email).get();
   const role = roleDoc.exists ? roleDoc.data().role : "verifier";
 
   console.log("AuthStateChanged →", user.email, "role:", role);
 
-  // 🔹 Show nav item for admins
   const navRequests = document.getElementById("navVerificationRequests");
-  if (navRequests) {
-    navRequests.style.display = (role === "admin") ? "block" : "none";
-  }
+  if (navRequests) navRequests.style.display = (role === "admin") ? "block" : "none";
 
   if (role === "admin") {
     if (currentPage === "dashboard.html") loadDashboardData?.();
@@ -187,44 +171,31 @@ function addLicense() {
     return;
   }
 
-  db.collection("licenses")
-    .doc(licenseNumber)
-    .set({
-      licenseNumber,
-      fullName,
-      class: licenseClass,
-      issueDate,
-      expiryDate,
-      status: "Active",
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      createdBy: auth.currentUser ? auth.currentUser.uid : null
-    })
-    .then(() => {
-      showMsg("✅ License added successfully!", true);
-      document.getElementById("addLicenseForm").reset();
-    })
-    .catch((err) => {
-      if (err.code === "permission-denied") {
-        showMsg("❌ Permission denied. Only ADMIN can add licenses.");
-      } else {
-        showMsg(`❌ Error adding license: ${err.message}`);
-      }
-      console.error("Add license error:", err);
-    });
+  db.collection("licenses").doc(licenseNumber).set({
+    licenseNumber, fullName, class: licenseClass,
+    issueDate, expiryDate, status: "Active",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    createdBy: auth.currentUser ? auth.currentUser.uid : null
+  })
+  .then(() => {
+    showMsg("✅ License added successfully!", true);
+    document.getElementById("addLicenseForm").reset();
+  })
+  .catch((err) => {
+    showMsg(`❌ Error adding license: ${err.message}`);
+    console.error("Add license error:", err);
+  });
 }
 
 // === Dashboard Data ===
 async function loadDashboardData() {
   try {
     const snapshot = await db.collection("licenses").get();
-    let total = 0,
-      active = 0;
-
+    let total = 0, active = 0;
     snapshot.forEach((doc) => {
       total++;
       if (doc.data().status === "Active") active++;
     });
-
     document.getElementById("totalLicenses").innerText = total;
     document.getElementById("activeLicenses").innerText = active;
   } catch (err) {
@@ -236,31 +207,22 @@ async function loadDashboardData() {
 // === Analytics Data ===
 async function loadAnalyticsData() {
   try {
-    const snapshot = await db
-      .collection("verifications")
-      .orderBy("verifiedAt", "desc")
-      .limit(10)
-      .get();
-
-    let total = 0,
-      success = 0,
-      fail = 0;
+    const snapshot = await db.collection("verifications").orderBy("verifiedAt", "desc").limit(10).get();
+    let total = 0, success = 0, fail = 0;
     const tbody = document.getElementById("verificationLogs");
     if (!tbody) return;
     tbody.innerHTML = "";
 
     snapshot.forEach((doc) => {
-      const d = doc.data();
-      total++;
-      if (d.result === "License found") success++;
-      else fail++;
+      const d = doc.data(); total++;
+      if (d.result === "License found") success++; else fail++;
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${d.licenseNumber}</td>
         <td>${d.requestingOrg || ""}</td>
         <td>${d.country || ""}</td>
-        <td>${d.result}</td>
+        <td>${d.result || ""}</td>
         <td>${d.verifiedAt ? d.verifiedAt.toDate().toLocaleString() : ""}</td>`;
       tbody.appendChild(tr);
     });
@@ -328,8 +290,7 @@ async function loadUsersData() {
         <td>
           <button onclick="promoteUser('${doc.id}')">Promote</button>
           <button onclick="demoteUser('${doc.id}')">Demote</button>
-        </td>
-      `;
+        </td>`;
       tbody.appendChild(tr);
     });
   } catch (err) {
