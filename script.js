@@ -43,50 +43,62 @@ function showMsg(text, ok = false) {
 }
 
 // === Authentication: Login ===
-function loginUser() {
+async function loginUser(e) {
+  if (e) e.preventDefault();
+
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
 
-  auth.signInWithEmailAndPassword(email, password)
-    .then(async (cred) => {
-      const token = await cred.user.getIdTokenResult();
-      const role = token.claims.role || "verifier";
+  try {
+    const cred = await auth.signInWithEmailAndPassword(email, password);
 
-      console.log("Logged in as:", cred.user.email, "with role:", role);
+    // 🔹 Check if email is verified
+    if (!cred.user.emailVerified) {
+      showMsg("⚠️ Please verify your email before logging in. Verification link resent.");
+      await cred.user.sendEmailVerification();
+      await auth.signOut();
+      return;
+    }
 
-      if (role === "admin") {
-        showMsg("✅ Login successful, redirecting to Dashboard...", true);
-        window.location.href = "dashboard.html";
-      } else {
-        showMsg("✅ Login successful, redirecting to Verification Portal...", true);
-        window.location.href = "verify.html";
-      }
-    })
-    .catch(err => {
-      let msg;
-      switch (err.code) {
-        case "auth/invalid-email":
-          msg = "⚠️ Please enter a valid email address.";
-          break;
-        case "auth/user-disabled":
-          msg = "⚠️ This account has been disabled. Contact support.";
-          break;
-        case "auth/user-not-found":
-          msg = "❌ No account found with this email.";
-          break;
-        case "auth/wrong-password":
-          msg = "❌ Incorrect password. Please try again.";
-          break;
-        default:
-          msg = "❌ Login failed. Please check your credentials.";
-      }
-      showMsg(msg);
-      console.error("Login error:", err.code, err.message);
-    });
+    // 🔹 Get role from Firestore
+    const roleDoc = await db.collection("roles").doc(email).get();
+    const role = roleDoc.exists ? roleDoc.data().role : "verifier";
+
+    console.log("Logged in as:", email, "role:", role);
+
+    if (role === "admin") {
+      showMsg("✅ Welcome Admin! Redirecting...", true);
+      setTimeout(() => (window.location.href = "dashboard.html"), 1000);
+    } else {
+      showMsg("✅ Login successful. Redirecting...", true);
+      setTimeout(() => (window.location.href = "verify.html"), 1000);
+    }
+  } catch (err) {
+    let msg;
+    switch (err.code) {
+      case "auth/invalid-email":
+        msg = "⚠️ Please enter a valid email address.";
+        break;
+      case "auth/user-disabled":
+        msg = "⚠️ This account has been disabled. Contact support.";
+        break;
+      case "auth/user-not-found":
+        msg = "❌ No account found with this email.";
+        break;
+      case "auth/wrong-password":
+        msg = "❌ Incorrect password. Please try again.";
+        break;
+      default:
+        msg = "❌ Login failed. " + err.message;
+    }
+    showMsg(msg);
+    console.error("Login error:", err.code, err.message);
+  }
 }
 
+// === Logout ===
 function signOutUser() {
-  auth.signOut().then(() => window.location.href = "index.html");
+  auth.signOut().then(() => (window.location.href = "index.html"));
 }
 
 // === Signup: New User ===
@@ -99,17 +111,23 @@ async function signupUser(e) {
   try {
     const cred = await auth.createUserWithEmailAndPassword(email, password);
 
-    // Save default role (verifier) in Firestore
+    // 🔹 Save default role (verifier) in Firestore
     await db.collection("roles").doc(email).set({
       email,
       role: "verifier"
     });
 
-    alert("✅ Account created! You can now log in.");
-    window.location.href = "index.html";
+    // 🔹 Send email verification
+    await cred.user.sendEmailVerification();
+    showMsg("✅ Account created! Please check your email to verify before login.", true);
+
+    // Auto logout until verified
+    await auth.signOut();
+
+    setTimeout(() => (window.location.href = "index.html"), 3000);
   } catch (err) {
     console.error("Signup error:", err);
-    alert("❌ Signup failed: " + err.message);
+    showMsg("❌ Signup failed: " + err.message);
   }
 }
 
@@ -125,8 +143,16 @@ auth.onAuthStateChanged(async (user) => {
     return;
   }
 
-  const token = await user.getIdTokenResult();
-  const role = token.claims.role || "verifier";
+  // Block unverified users
+  if (!user.emailVerified) {
+    showMsg("⚠️ Please verify your email before using the platform.");
+    await auth.signOut();
+    return;
+  }
+
+  // Get role
+  const roleDoc = await db.collection("roles").doc(user.email).get();
+  const role = roleDoc.exists ? roleDoc.data().role : "verifier";
 
   console.log("AuthStateChanged →", user.email, "role:", role);
 
@@ -154,37 +180,40 @@ function addLicense() {
     return;
   }
 
-  db.collection("licenses").doc(licenseNumber).set({
-    licenseNumber,
-    fullName,
-    class: licenseClass,
-    issueDate,
-    expiryDate,
-    status: "Active",
-    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    createdBy: auth.currentUser ? auth.currentUser.uid : null
-  })
-  .then(() => {
-    showMsg("✅ License added successfully!", true);
-    document.getElementById("addLicenseForm").reset();
-  })
-  .catch(err => {
-    if (err.code === "permission-denied") {
-      showMsg("❌ Permission denied. Only ADMIN can add licenses.");
-    } else {
-      showMsg(`❌ Error adding license: ${err.message}`);
-    }
-    console.error("Add license error:", err);
-  });
+  db.collection("licenses")
+    .doc(licenseNumber)
+    .set({
+      licenseNumber,
+      fullName,
+      class: licenseClass,
+      issueDate,
+      expiryDate,
+      status: "Active",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy: auth.currentUser ? auth.currentUser.uid : null
+    })
+    .then(() => {
+      showMsg("✅ License added successfully!", true);
+      document.getElementById("addLicenseForm").reset();
+    })
+    .catch((err) => {
+      if (err.code === "permission-denied") {
+        showMsg("❌ Permission denied. Only ADMIN can add licenses.");
+      } else {
+        showMsg(`❌ Error adding license: ${err.message}`);
+      }
+      console.error("Add license error:", err);
+    });
 }
 
 // === Dashboard Data ===
 async function loadDashboardData() {
   try {
     const snapshot = await db.collection("licenses").get();
-    let total = 0, active = 0;
+    let total = 0,
+      active = 0;
 
-    snapshot.forEach(doc => {
+    snapshot.forEach((doc) => {
       total++;
       if (doc.data().status === "Active") active++;
     });
@@ -200,20 +229,24 @@ async function loadDashboardData() {
 // === Analytics Data ===
 async function loadAnalyticsData() {
   try {
-    const snapshot = await db.collection("verifications")
+    const snapshot = await db
+      .collection("verifications")
       .orderBy("verifiedAt", "desc")
       .limit(10)
       .get();
 
-    let total = 0, success = 0, fail = 0;
+    let total = 0,
+      success = 0,
+      fail = 0;
     const tbody = document.getElementById("verificationLogs");
     if (!tbody) return;
     tbody.innerHTML = "";
 
-    snapshot.forEach(doc => {
+    snapshot.forEach((doc) => {
       const d = doc.data();
       total++;
-      if (d.result === "License found") success++; else fail++;
+      if (d.result === "License found") success++;
+      else fail++;
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
@@ -247,7 +280,7 @@ async function loadUsersData() {
       return;
     }
 
-    snapshot.forEach(doc => {
+    snapshot.forEach((doc) => {
       const d = doc.data();
       const tr = document.createElement("tr");
       tr.innerHTML = `
