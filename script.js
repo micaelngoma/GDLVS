@@ -202,57 +202,95 @@ function verifyLicense() {
     });
 }
 
-// === Analytics Data ===
-function loadAnalyticsData() {
-  db.collection("verifications").orderBy("verifiedAt", "desc").limit(10).get()
-    .then(snapshot => {
-      let total = 0, success = 0, fail = 0;
-      const tbody = document.getElementById("verificationLogs");
-      if (!tbody) return;
-      tbody.innerHTML = "";
+// === Dashboard Data ===
+async function loadDashboardData() {
+  try {
+    const snapshot = await db.collection("licenses").get();
+    let total = 0, active = 0;
 
-      snapshot.forEach(doc => {
-        const d = doc.data();
-        total++;
-        if (d.result === "License found") success++; else fail++;
-
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${d.licenseNumber}</td>
-          <td>${d.requestingOrg}</td>
-          <td>${d.country}</td>
-          <td>${d.result}</td>
-          <td>${d.verifiedAt ? d.verifiedAt.toDate().toLocaleString() : ""}</td>`;
-        tbody.appendChild(tr);
-      });
-
-      document.getElementById("totalVerifications").innerText = total;
-      document.getElementById("successfulVerifications").innerText = success;
-      document.getElementById("failedVerifications").innerText = fail;
-    })
-    .catch(err => {
-      showMsg(`❌ Error loading analytics: ${err.message}`);
-      console.error("Analytics error:", err);
+    snapshot.forEach(doc => {
+      total++;
+      if (doc.data().status === "Active") active++;
     });
+
+    document.getElementById("totalLicenses").innerText = total;
+    document.getElementById("activeLicenses").innerText = active;
+  } catch (err) {
+    console.error("Dashboard load error:", err);
+    showMsg("❌ Failed to load dashboard data");
+  }
 }
 
-// === User Management (placeholder) ===
-function loadUsersData() {
-  const tbody = document.getElementById("usersTable");
-  if (!tbody) return;
+// === Analytics Data ===
+async function loadAnalyticsData() {
+  try {
+    const snapshot = await db.collection("verifications")
+      .orderBy("verifiedAt", "desc")
+      .limit(10)
+      .get();
 
-  tbody.innerHTML = `
-    <tr>
-      <td>admin@example.com</td>
-      <td>Admin</td>
-      <td><button disabled>Promote</button> <button disabled>Demote</button></td>
-    </tr>
-    <tr>
-      <td>verifier@example.com</td>
-      <td>Verifier</td>
-      <td><button disabled>Promote</button> <button disabled>Demote</button></td>
-    </tr>
-  `;
+    let total = 0, success = 0, fail = 0;
+    const tbody = document.getElementById("verificationLogs");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      total++;
+      if (d.result === "License found") success++; else fail++;
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${d.licenseNumber}</td>
+        <td>${d.requestingOrg || ""}</td>
+        <td>${d.country || ""}</td>
+        <td>${d.result}</td>
+        <td>${d.verifiedAt ? d.verifiedAt.toDate().toLocaleString() : ""}</td>`;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById("totalVerifications").innerText = total;
+    document.getElementById("successfulVerifications").innerText = success;
+    document.getElementById("failedVerifications").innerText = fail;
+  } catch (err) {
+    console.error("Analytics load error:", err);
+    showMsg("❌ Failed to load analytics");
+  }
+}
+
+// === User Management ===
+async function loadUsersData() {
+  try {
+    const snapshot = await db.collection("roles").get();
+    const tbody = document.getElementById("usersTable");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${d.email}</td>
+        <td>${d.role}</td>
+        <td>
+          <button onclick="promoteUser('${doc.id}')">Promote</button>
+          <button onclick="demoteUser('${doc.id}')">Demote</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    console.error("User load error:", err);
+    showMsg("❌ Failed to load users");
+  }
+}
+
+// === Placeholder Promote/Demote ===
+function promoteUser(uid) {
+  showMsg(`⚠️ Promote function not yet implemented for ${uid}`);
+}
+function demoteUser(uid) {
+  showMsg(`⚠️ Demote function not yet implemented for ${uid}`);
 }
 
 // === Expose globally ===
@@ -260,5 +298,6 @@ window.loginUser = loginUser;
 window.signOutUser = signOutUser;
 window.addLicense = addLicense;
 window.verifyLicense = verifyLicense;
+window.loadDashboardData = loadDashboardData;
 window.loadAnalyticsData = loadAnalyticsData;
 window.loadUsersData = loadUsersData;
