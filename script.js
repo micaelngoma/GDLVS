@@ -3,7 +3,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
   authDomain: "gdlvs-2348e.firebaseapp.com",
   projectId: "gdlvs-2348e",
-  storageBucket: "gdlvs-2348e.firebasestorage.app",
+  storageBucket: "gdlvs-2348e.appspot.com",   // ✅ FIXED
   messagingSenderId: "358715790318",
   appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
 };
@@ -84,6 +84,8 @@ auth.onAuthStateChanged(async (user) => {
   const token = await user.getIdTokenResult();
   const role = token.claims.role || "verifier";
 
+  console.log("Logged in as:", user.email, "with role:", role); // ✅ debug log
+
   if (role === "admin") {
     // Admin allowed everywhere
     if (currentPage === "dashboard.html") {
@@ -101,7 +103,7 @@ auth.onAuthStateChanged(async (user) => {
       window.location.href = "verify.html";
     }
   }
-}
+}); // ✅ FIXED
 
 // === Keep existing feature functions ===
 // (addLicense, verifyLicense, loadDashboardData, loadAnalyticsData, loadUsersData...)
