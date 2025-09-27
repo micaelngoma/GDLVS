@@ -3,7 +3,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
   authDomain: "gdlvs-2348e.firebaseapp.com",
   projectId: "gdlvs-2348e",
-  storageBucket: "gdlvs-2348e.appspot.com",   // ✅ FIXED
+  storageBucket: "gdlvs-2348e.appspot.com",
   messagingSenderId: "358715790318",
   appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
 };
@@ -154,54 +154,6 @@ function addLicense() {
   });
 }
 
-// === License Verification ===
-function verifyLicense() {
-  const number = document.getElementById("verifyLicenseNumber").value.trim();
-  const org = document.getElementById("requestingOrg")?.value.trim();
-  const country = document.getElementById("country")?.value.trim();
-  const email = document.getElementById("email")?.value.trim();
-  const purpose = document.getElementById("purpose")?.value.trim();
-
-  if (!number) {
-    showMsg("⚠️ Please enter a license number");
-    return;
-  }
-
-  db.collection("licenses").doc(number).get()
-    .then(doc => {
-      const div = document.getElementById("verificationResult");
-      if (!div) return;
-
-      if (!doc.exists) {
-        div.innerHTML = "<p style='color:red;'>❌ License not found</p>";
-      } else {
-        const d = doc.data();
-        div.innerHTML = `
-          <p><b>Name:</b> ${d.fullName}</p>
-          <p><b>Class:</b> ${d.class}</p>
-          <p><b>Status:</b> ${d.status}</p>
-          <p><b>Issue Date:</b> ${d.issueDate}</p>
-          <p><b>Expiry Date:</b> ${d.expiryDate}</p>`;
-      }
-
-      // log verification
-      db.collection("verifications").add({
-        licenseNumber: number,
-        requestingOrg: org || "",
-        country: country || "",
-        email: email || "",
-        purpose: purpose || "",
-        result: doc.exists ? "License found" : "Not found",
-        verifiedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        verifiedBy: auth.currentUser ? auth.currentUser.uid : "anonymous"
-      }).catch(err => console.error("Log verification error:", err));
-    })
-    .catch(err => {
-      showMsg(`❌ Error verifying license: ${err.message}`);
-      console.error("Verify license error:", err);
-    });
-}
-
 // === Dashboard Data ===
 async function loadDashboardData() {
   try {
@@ -266,6 +218,11 @@ async function loadUsersData() {
     if (!tbody) return;
     tbody.innerHTML = "";
 
+    if (snapshot.empty) {
+      tbody.innerHTML = `<tr><td colspan="3">No users found</td></tr>`;
+      return;
+    }
+
     snapshot.forEach(doc => {
       const d = doc.data();
       const tr = document.createElement("tr");
@@ -285,7 +242,6 @@ async function loadUsersData() {
   }
 }
 
-// === Promote / Demote User ===
 async function promoteUser(uid) {
   try {
     await db.collection("roles").doc(uid).update({ role: "admin" });
@@ -308,13 +264,36 @@ async function demoteUser(uid) {
   }
 }
 
+// === Create User ===
+async function createUser() {
+  const email = document.getElementById("newUserEmail").value.trim();
+  const role = document.getElementById("newUserRole").value;
+
+  if (!email) {
+    showMsg("⚠️ Please enter an email address");
+    return;
+  }
+
+  try {
+    await db.collection("roles").add({ email, role });
+    showMsg("✅ User added successfully", true);
+
+    document.getElementById("newUserEmail").value = "";
+    document.getElementById("newUserRole").value = "verifier";
+    loadUsersData();
+  } catch (err) {
+    console.error("Create user error:", err);
+    showMsg("❌ Failed to create user");
+  }
+}
+
 // === Expose globally ===
 window.loginUser = loginUser;
 window.signOutUser = signOutUser;
 window.addLicense = addLicense;
-window.verifyLicense = verifyLicense;
 window.loadDashboardData = loadDashboardData;
 window.loadAnalyticsData = loadAnalyticsData;
 window.loadUsersData = loadUsersData;
 window.promoteUser = promoteUser;
 window.demoteUser = demoteUser;
+window.createUser = createUser;
