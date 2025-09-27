@@ -44,7 +44,7 @@ function showMsg(text, ok = false) {
 
 // === Authentication ===
 function loginUser() {
-  const email = document.getElementById("email").value.trim();
+  const email = document.getElementById("email").value.trim().toLowerCase();
   const password = document.getElementById("password").value;
 
   auth.signInWithEmailAndPassword(email, password)
@@ -227,7 +227,7 @@ async function loadUsersData() {
       const d = doc.data();
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>${d.email}</td>
+        <td>${doc.id}</td>
         <td>${d.role}</td>
         <td>
           <button onclick="promoteUser('${doc.id}')">Promote</button>
@@ -242,31 +242,9 @@ async function loadUsersData() {
   }
 }
 
-async function promoteUser(uid) {
-  try {
-    await db.collection("roles").doc(uid).update({ role: "admin" });
-    showMsg("✅ User promoted to admin", true);
-    loadUsersData();
-  } catch (err) {
-    console.error("Promote error:", err);
-    showMsg("❌ Failed to promote user");
-  }
-}
-
-async function demoteUser(uid) {
-  try {
-    await db.collection("roles").doc(uid).update({ role: "verifier" });
-    showMsg("✅ User demoted to verifier", true);
-    loadUsersData();
-  } catch (err) {
-    console.error("Demote error:", err);
-    showMsg("❌ Failed to demote user");
-  }
-}
-
 // === Create User ===
 async function createUser() {
-  const email = document.getElementById("newUserEmail").value.trim();
+  const email = document.getElementById("newUserEmail").value.trim().toLowerCase();
   const role = document.getElementById("newUserRole").value;
 
   if (!email) {
@@ -275,7 +253,7 @@ async function createUser() {
   }
 
   try {
-    await db.collection("roles").add({ email, role });
+    await db.collection("roles").doc(email).set({ email, role });
     showMsg("✅ User added successfully", true);
 
     document.getElementById("newUserEmail").value = "";
@@ -287,6 +265,29 @@ async function createUser() {
   }
 }
 
+// === Promote / Demote User ===
+async function promoteUser(email) {
+  try {
+    await db.collection("roles").doc(email).update({ role: "admin" });
+    showMsg(`✅ ${email} promoted to admin`, true);
+    loadUsersData();
+  } catch (err) {
+    console.error("Promote error:", err);
+    showMsg("❌ Failed to promote user");
+  }
+}
+
+async function demoteUser(email) {
+  try {
+    await db.collection("roles").doc(email).update({ role: "verifier" });
+    showMsg(`✅ ${email} demoted to verifier`, true);
+    loadUsersData();
+  } catch (err) {
+    console.error("Demote error:", err);
+    showMsg("❌ Failed to demote user");
+  }
+}
+
 // === Expose globally ===
 window.loginUser = loginUser;
 window.signOutUser = signOutUser;
@@ -294,6 +295,6 @@ window.addLicense = addLicense;
 window.loadDashboardData = loadDashboardData;
 window.loadAnalyticsData = loadAnalyticsData;
 window.loadUsersData = loadUsersData;
+window.createUser = createUser;
 window.promoteUser = promoteUser;
 window.demoteUser = demoteUser;
-window.createUser = createUser;
