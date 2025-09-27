@@ -52,15 +52,37 @@ function loginUser() {
       const token = await cred.user.getIdTokenResult();
       const role = token.claims.role || "verifier";
 
+      console.log("Logged in as:", cred.user.email, "with role:", role);
+
       if (role === "admin") {
-        showMsg("Login successful, redirecting to Dashboard...", true);
+        showMsg("✅ Login successful, redirecting to Dashboard...", true);
         window.location.href = "dashboard.html";
       } else {
-        showMsg("Login successful, redirecting to Verification Portal...", true);
+        showMsg("✅ Login successful, redirecting to Verification Portal...", true);
         window.location.href = "verify.html";
       }
     })
-    .catch(err => showMsg(err.message));
+    .catch(err => {
+      let msg;
+      switch (err.code) {
+        case "auth/invalid-email":
+          msg = "⚠️ Please enter a valid email address.";
+          break;
+        case "auth/user-disabled":
+          msg = "⚠️ This account has been disabled. Contact support.";
+          break;
+        case "auth/user-not-found":
+          msg = "❌ No account found with this email.";
+          break;
+        case "auth/wrong-password":
+          msg = "❌ Incorrect password. Please try again.";
+          break;
+        default:
+          msg = `❌ Login failed: ${err.message}`;
+      }
+      showMsg(msg);
+      console.error("Login error:", err);
+    });
 }
 
 function signOutUser() {
@@ -73,40 +95,170 @@ auth.onAuthStateChanged(async (user) => {
   const adminPages = ["dashboard.html", "add_licenses.html", "analytics.html", "users.html"];
 
   if (!user) {
-    // If not logged in, block admin pages
     if (adminPages.includes(currentPage)) {
       window.location.href = "index.html";
     }
     return;
   }
 
-  // Get user claims
   const token = await user.getIdTokenResult();
   const role = token.claims.role || "verifier";
 
-  console.log("Logged in as:", user.email, "with role:", role); // ✅ debug log
+  console.log("AuthStateChanged →", user.email, "role:", role);
 
   if (role === "admin") {
-    // Admin allowed everywhere
-    if (currentPage === "dashboard.html") {
-      loadDashboardData?.();
-    }
-    if (currentPage === "analytics.html") {
-      loadAnalyticsData?.();
-    }
-    if (currentPage === "users.html") {
-      loadUsersData?.();
-    }
+    if (currentPage === "dashboard.html") loadDashboardData?.();
+    if (currentPage === "analytics.html") loadAnalyticsData?.();
+    if (currentPage === "users.html") loadUsersData?.();
   } else {
-    // Non-admins cannot access admin pages
     if (adminPages.includes(currentPage)) {
       window.location.href = "verify.html";
     }
   }
-}); // ✅ FIXED
+});
 
-// === Keep existing feature functions ===
-// (addLicense, verifyLicense, loadDashboardData, loadAnalyticsData, loadUsersData...)
+// === License Management ===
+function addLicense() {
+  const licenseNumber = document.getElementById("licenseNumber").value.trim();
+  const fullName = document.getElementById("fullName").value.trim();
+  const licenseClass = document.getElementById("licenseClass").value;
+  const issueDate = document.getElementById("issueDate").value;
+  const expiryDate = document.getElementById("expiryDate").value;
 
+  if (!licenseNumber || !fullName || !licenseClass || !issueDate || !expiryDate) {
+    showMsg("⚠️ All fields are required");
+    return;
+  }
+
+  db.collection("licenses").doc(licenseNumber).set({
+    licenseNumber,
+    fullName,
+    class: licenseClass,
+    issueDate,
+    expiryDate,
+    status: "Active",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    createdBy: auth.currentUser ? auth.currentUser.uid : null
+  })
+  .then(() => {
+    showMsg("✅ License added successfully!", true);
+    document.getElementById("addLicenseForm").reset();
+  })
+  .catch(err => {
+    if (err.code === "permission-denied") {
+      showMsg("❌ Permission denied. Only ADMIN can add licenses.");
+    } else {
+      showMsg(`❌ Error adding license: ${err.message}`);
+    }
+    console.error("Add license error:", err);
+  });
+}
+
+// === License Verification ===
+function verifyLicense() {
+  const number = document.getElementById("verifyLicenseNumber").value.trim();
+  const org = document.getElementById("requestingOrg")?.value.trim();
+  const country = document.getElementById("country")?.value.trim();
+  const email = document.getElementById("email")?.value.trim();
+  const purpose = document.getElementById("purpose")?.value.trim();
+
+  if (!number) {
+    showMsg("⚠️ Please enter a license number");
+    return;
+  }
+
+  db.collection("licenses").doc(number).get()
+    .then(doc => {
+      const div = document.getElementById("verificationResult");
+      if (!div) return;
+
+      if (!doc.exists) {
+        div.innerHTML = "<p style='color:red;'>❌ License not found</p>";
+      } else {
+        const d = doc.data();
+        div.innerHTML = `
+          <p><b>Name:</b> ${d.fullName}</p>
+          <p><b>Class:</b> ${d.class}</p>
+          <p><b>Status:</b> ${d.status}</p>
+          <p><b>Issue Date:</b> ${d.issueDate}</p>
+          <p><b>Expiry Date:</b> ${d.expiryDate}</p>`;
+      }
+
+      // log verification
+      db.collection("verifications").add({
+        licenseNumber: number,
+        requestingOrg: org || "",
+        country: country || "",
+        email: email || "",
+        purpose: purpose || "",
+        result: doc.exists ? "License found" : "Not found",
+        verifiedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        verifiedBy: auth.currentUser ? auth.currentUser.uid : "anonymous"
+      }).catch(err => console.error("Log verification error:", err));
+    })
+    .catch(err => {
+      showMsg(`❌ Error verifying license: ${err.message}`);
+      console.error("Verify license error:", err);
+    });
+}
+
+// === Analytics Data ===
+function loadAnalyticsData() {
+  db.collection("verifications").orderBy("verifiedAt", "desc").limit(10).get()
+    .then(snapshot => {
+      let total = 0, success = 0, fail = 0;
+      const tbody = document.getElementById("verificationLogs");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        total++;
+        if (d.result === "License found") success++; else fail++;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${d.licenseNumber}</td>
+          <td>${d.requestingOrg}</td>
+          <td>${d.country}</td>
+          <td>${d.result}</td>
+          <td>${d.verifiedAt ? d.verifiedAt.toDate().toLocaleString() : ""}</td>`;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById("totalVerifications").innerText = total;
+      document.getElementById("successfulVerifications").innerText = success;
+      document.getElementById("failedVerifications").innerText = fail;
+    })
+    .catch(err => {
+      showMsg(`❌ Error loading analytics: ${err.message}`);
+      console.error("Analytics error:", err);
+    });
+}
+
+// === User Management (placeholder) ===
+function loadUsersData() {
+  const tbody = document.getElementById("usersTable");
+  if (!tbody) return;
+
+  tbody.innerHTML = `
+    <tr>
+      <td>admin@example.com</td>
+      <td>Admin</td>
+      <td><button disabled>Promote</button> <button disabled>Demote</button></td>
+    </tr>
+    <tr>
+      <td>verifier@example.com</td>
+      <td>Verifier</td>
+      <td><button disabled>Promote</button> <button disabled>Demote</button></td>
+    </tr>
+  `;
+}
+
+// === Expose globally ===
 window.loginUser = loginUser;
 window.signOutUser = signOutUser;
+window.addLicense = addLicense;
+window.verifyLicense = verifyLicense;
+window.loadAnalyticsData = loadAnalyticsData;
+window.loadUsersData = loadUsersData;
