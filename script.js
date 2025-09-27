@@ -78,10 +78,10 @@ function loginUser() {
           msg = "❌ Incorrect password. Please try again.";
           break;
         default:
-          msg = `❌ Login failed: ${err.message}`;
+          msg = "❌ Login failed. Please check your credentials.";
       }
       showMsg(msg);
-      console.error("Login error:", err);
+      console.error("Login error:", err.code, err.message);
     });
 }
 
