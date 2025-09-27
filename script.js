@@ -134,7 +134,7 @@ async function signupUser(e) {
 // === Role-based Access Control ===
 auth.onAuthStateChanged(async (user) => {
   const currentPage = window.location.pathname.split("/").pop();
-  const adminPages = ["dashboard.html", "add_licenses.html", "analytics.html", "users.html"];
+  const adminPages = ["dashboard.html", "add_licenses.html", "analytics.html", "users.html", "verification_requests.html"];
 
   if (!user) {
     if (adminPages.includes(currentPage)) {
@@ -156,10 +156,17 @@ auth.onAuthStateChanged(async (user) => {
 
   console.log("AuthStateChanged →", user.email, "role:", role);
 
+  // 🔹 Show nav item for admins
+  const navRequests = document.getElementById("navVerificationRequests");
+  if (navRequests) {
+    navRequests.style.display = (role === "admin") ? "block" : "none";
+  }
+
   if (role === "admin") {
     if (currentPage === "dashboard.html") loadDashboardData?.();
     if (currentPage === "analytics.html") loadAnalyticsData?.();
     if (currentPage === "users.html") loadUsersData?.();
+    if (currentPage === "verification_requests.html") loadVerificationRequests?.();
   } else {
     if (adminPages.includes(currentPage)) {
       window.location.href = "verify.html";
@@ -267,6 +274,38 @@ async function loadAnalyticsData() {
   }
 }
 
+// === Verification Requests (Admin) ===
+async function loadVerificationRequests() {
+  try {
+    const snapshot = await db.collection("verifications").orderBy("verifiedAt", "desc").get();
+    const tbody = document.getElementById("requestsTable");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    if (snapshot.empty) {
+      tbody.innerHTML = `<tr><td colspan="7">No verification requests found</td></tr>`;
+      return;
+    }
+
+    snapshot.forEach((doc) => {
+      const d = doc.data();
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${d.licenseNumber || ""}</td>
+        <td>${d.requestingOrg || ""}</td>
+        <td>${d.country || ""}</td>
+        <td>${d.email || ""}</td>
+        <td>${d.purpose || ""}</td>
+        <td>${d.result || ""}</td>
+        <td>${d.verifiedAt ? d.verifiedAt.toDate().toLocaleString() : ""}</td>`;
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    console.error("Load requests error:", err);
+    showMsg("❌ Failed to load verification requests");
+  }
+}
+
 // === User Management ===
 async function loadUsersData() {
   try {
@@ -328,6 +367,7 @@ window.signOutUser = signOutUser;
 window.addLicense = addLicense;
 window.loadDashboardData = loadDashboardData;
 window.loadAnalyticsData = loadAnalyticsData;
+window.loadVerificationRequests = loadVerificationRequests;
 window.loadUsersData = loadUsersData;
 window.promoteUser = promoteUser;
 window.demoteUser = demoteUser;
