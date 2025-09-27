@@ -5,24 +5,30 @@
   <title>GDLVS - Login</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+  <!-- i18n + jQuery -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
+
   <script defer src="script.js"></script>
 </head>
 <body>
   <div class="login-container">
     <h2><i class="fas fa-id-card"></i> <span data-i18n="login">Login</span></h2>
-    <form id="loginForm" onsubmit="loginUser(); return false;">
+    <form id="loginForm" onsubmit="loginUser(event)">
       <input type="email" id="email" placeholder="Email" data-i18n="[placeholder]email" required>
       <input type="password" id="password" placeholder="Password" data-i18n="[placeholder]password" required>
       <button type="submit"><i class="fas fa-sign-in-alt"></i> <span data-i18n="login">Login</span></button>
     </form>
     <div id="msg"></div>
+    <p>Don’t have an account? <a href="signup.html">Sign up here</a></p>
   </div>
 
   <footer>
