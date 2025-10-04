@@ -32,6 +32,9 @@ nav {
   background: #fff;
   border-bottom: 1px solid #ddd;
   padding: 10px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
 }
 nav a {
   margin-right: 15px;
@@ -44,6 +47,11 @@ nav a:hover { text-decoration: underline; }
 nav a.active {
   border-bottom: 2px solid #2a3f54;
   padding-bottom: 4px;
+}
+nav div {
+  margin-left: auto; /* For right-aligned section (Verification + Analytics) */
+  display: flex;
+  gap: 15px;
 }
 
 /* Containers */
@@ -67,7 +75,16 @@ input, select, textarea, button {
 }
 textarea { resize: vertical; }
 
-/* Buttons */
+/* Search Inputs (Users, Licenses, Requests, Analytics) */
+#userSearch, #licenseSearch, #requestSearch, #analyticsSearch {
+  width: 100%;
+  padding: 10px;
+  margin: 12px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Default Buttons */
 button {
   background: #2a3f54;
   color: white;
@@ -84,6 +101,45 @@ button.inline {
   color: #fff;
 }
 button.inline:hover { background: #1e2d3c; }
+
+/* Custom Buttons */
+.btn-add {
+  background: #27ae60; /* green */
+  color: #fff;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+}
+.btn-add:hover { background: #219150; }
+
+.btn-edit {
+  background: #2980b9; /* blue */
+  color: #fff;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+}
+.btn-edit:hover { background: #216699; }
+
+.btn-delete {
+  background: #c0392b; /* red */
+  color: #fff;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+}
+.btn-delete:hover { background: #a93226; }
+
+.btn-export {
+  background: #8e44ad; /* purple */
+  color: #fff;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 4px;
+  margin: 10px 0;
+  cursor: pointer;
+}
+.btn-export:hover { background: #732d91; }
 
 /* Dashboard cards */
 .dashboard-cards {
