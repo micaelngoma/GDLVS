@@ -16,6 +16,16 @@ header {
   align-items: center;
 }
 header h1 { margin: 0; }
+header button {
+  width: auto;              /* Compact logout */
+  padding: 8px 12px;
+  border-radius: 4px;
+  background: #1e2d3c;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
+header button:hover { background: #16222e; }
 
 /* Nav */
 nav {
@@ -31,10 +41,14 @@ nav a {
 }
 nav a i { margin-right: 6px; }
 nav a:hover { text-decoration: underline; }
+nav a.active {
+  border-bottom: 2px solid #2a3f54;
+  padding-bottom: 4px;
+}
 
 /* Containers */
 .container, .login-container {
-  max-width: 500px;
+  max-width: 800px;
   margin: 40px auto;
   padding: 20px;
   background: #fff;
@@ -60,6 +74,16 @@ button {
   cursor: pointer;
 }
 button:hover { background: #1e2d3c; }
+button.inline {
+  width: auto;              /* For table action buttons */
+  padding: 6px 10px;
+  margin-right: 6px;
+  border: none;
+  border-radius: 4px;
+  background: #2a3f54;
+  color: #fff;
+}
+button.inline:hover { background: #1e2d3c; }
 
 /* Dashboard cards */
 .dashboard-cards {
@@ -79,10 +103,41 @@ button:hover { background: #1e2d3c; }
 .card.active { background: #27ae60; }
 .card i { display: block; margin-bottom: 8px; }
 
+/* Panels (used in verify + dashboard tables) */
+.panel {
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  padding: 16px;
+  margin: 16px 20px;
+}
+
+/* Tables */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+.table th, .table td {
+  border: 1px solid #eee;
+  padding: 8px;
+  text-align: left;
+}
+.table th {
+  background: #f2f2f2;
+  font-weight: bold;
+}
+
 /* Language Switcher */
 footer { text-align: center; margin-top: 20px; }
 #languageSwitcher {
-  padding: 6px;
+  width: auto;              /* Compact width */
+  padding: 6px 10px;
   border-radius: 4px;
-  min-width: 160px;
+}
+
+/* Muted text (approval notices etc.) */
+.muted { 
+  color: #666; 
+  font-size: 0.95rem; 
 }
