@@ -218,6 +218,7 @@ button.inline:hover { background: #1e2d3c; }
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   padding: 30px;
+  overflow-x: auto; /* ✅ Added scrollbar for overflow tables */
 }
 
 .verification-container h2 {
@@ -244,6 +245,7 @@ button.inline:hover { background: #1e2d3c; }
   width: 100%;
   border-collapse: collapse;
   margin-top: 16px;
+  min-width: 900px; /* ✅ ensures table stays within scrollable area */
 }
 
 .verification-container .table th,
