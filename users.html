@@ -43,9 +43,29 @@
 
   <!-- Main Content -->
   <div class="container">
-    <h2 data-i18n="userManagement">Manage Users</h2>
-    <p data-i18n="userManagementDesc">Admins can approve, disable, or change user roles.</p>
+    <h2><i class="fas fa-users"></i> Manage Users</h2>
+    <p>Admins can add, edit, or remove users directly from here.</p>
 
+    <!-- Search Users -->
+    <input type="text" id="userSearch" placeholder="Search users by name or email..." onkeyup="filterUsers()">
+
+    <!-- Add New User -->
+    <form id="addUserForm" onsubmit="addNewUser(event)">
+      <input type="text" id="newUserName" placeholder="Full Name" required>
+      <input type="email" id="newUserEmail" placeholder="Email" required>
+      <select id="newUserRole">
+        <option value="verifier">Verifier</option>
+        <option value="admin">Admin</option>
+      </select>
+      <button type="submit" class="btn-add"><i class="fas fa-user-plus"></i> Add User</button>
+    </form>
+
+    <!-- Export Users -->
+    <button class="btn-export" onclick="exportTableToCSV('usersTable','users')">
+      📥 Export Users
+    </button>
+
+    <!-- Users Table -->
     <table class="table">
       <thead>
         <tr>
