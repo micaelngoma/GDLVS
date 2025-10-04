@@ -11,6 +11,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+const functions = firebase.functions();
 
 // === i18n init ===
 const resources = {
@@ -57,7 +58,7 @@ const resources = {
 
 i18next.use(i18nextBrowserLanguageDetector).init(
   { resources, fallbackLng: "en" },
-  function () {
+  () => {
     jqueryI18next.init(i18next, $, { useOptionsAttr: true });
     $("body").localize();
   }
@@ -379,6 +380,7 @@ async function loadUsersData() {
           <button class="inline" onclick="disableUser('${u.email}')">Disable</button>
           <button class="inline" onclick="promoteUser('${u.email}')">Promote</button>
           <button class="inline" onclick="demoteUser('${u.email}')">Demote</button>
+          <button class="delete-btn inline" onclick="deleteUser('${u.email}')">Delete</button>
         </td>`;
       tbody.appendChild(tr);
     });
@@ -400,6 +402,20 @@ async function demoteUser(email) {
   await db.collection("roles").doc(email).update({ role: "verifier" });
   showMsg("✅ User demoted to verifier", true); loadUsersData();
 }
+async function deleteUser(email) {
+  if (!confirm(`Are you sure you want to delete ${email}?`)) return;
+  try {
+    await db.collection("users").doc(email).delete();
+    await db.collection("roles").doc(email).delete();
+    // Call Cloud Function (requires Firebase Functions deployment)
+    await functions.httpsCallable("deleteUserAccount")({ email });
+    showMsg("✅ User deleted", true);
+    loadUsersData();
+  } catch (err) {
+    console.error("Delete user error:", err);
+    showMsg("❌ Error deleting user: " + err.message);
+  }
+}
 
 // === Expose globally ===
 window.loginUser = loginUser;
@@ -417,3 +433,4 @@ window.approveUser = approveUser;
 window.disableUser = disableUser;
 window.promoteUser = promoteUser;
 window.demoteUser = demoteUser;
+window.deleteUser = deleteUser;
