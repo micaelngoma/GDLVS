@@ -354,51 +354,153 @@ async function loadVerificationRequests() {
   } catch (err) { console.error("Load requests error:", err); }
 }
 
-// === User Management ===
+// === User Management (Enhanced) ===
 async function loadUsersData() {
   try {
     const usersSnap = await db.collection("users").get();
     const rolesSnap = await db.collection("roles").get();
     const roleMap = {};
     rolesSnap.forEach(doc => roleMap[doc.id] = (doc.data().role || "verifier"));
+
     const tbody = document.getElementById("usersTable");
     if (!tbody) return;
     tbody.innerHTML = "";
-    if (usersSnap.empty) { tbody.innerHTML = "<tr><td colspan='5'>No users found</td></tr>"; return; }
+    if (usersSnap.empty) { tbody.innerHTML = "<tr><td colspan='6'>No users found</td></tr>"; return; }
+
     usersSnap.forEach(doc => {
       const u = doc.data();
       const role = roleMap[u.email] || u.role || "verifier";
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>${u.fullName || ""}</td>
+        <td contenteditable="true" data-field="fullName">${u.fullName || ""}</td>
         <td>${u.email}</td>
-        <td>${role}</td>
-        <td>${u.status || "pending"}</td>
         <td>
-          <button class="inline" onclick="approveUser('${u.email}')">Approve</button>
-          <button class="inline" onclick="disableUser('${u.email}')">Disable</button>
-          <button class="inline" onclick="promoteUser('${u.email}')">Promote</button>
-          <button class="inline" onclick="demoteUser('${u.email}')">Demote</button>
+          <select data-field="role">
+            <option ${role==="verifier"?"selected":""}>verifier</option>
+            <option ${role==="admin"?"selected":""}>admin</option>
+          </select>
+        </td>
+        <td>
+          <select data-field="status">
+            <option ${u.status==="approved"?"selected":""}>approved</option>
+            <option ${u.status==="pending"?"selected":""}>pending</option>
+            <option ${u.status==="disabled"?"selected":""}>disabled</option>
+          </select>
+        </td>
+        <td>
+          <button class="btn-edit" onclick="updateUserRow('${u.email}', this)">Update</button>
+          <button class="btn-delete" onclick="deleteUser('${u.email}')">Delete</button>
         </td>`;
       tbody.appendChild(tr);
     });
   } catch (err) { console.error("User load error:", err); }
 }
-async function approveUser(email) {
-  await db.collection("users").doc(email).update({ status: "approved" });
-  showMsg("✅ User approved", true); loadUsersData();
+
+async function updateUserRow(email, btn) {
+  try {
+    const tr = btn.closest("tr");
+    const updates = {};
+    tr.querySelectorAll("[data-field]").forEach(el => {
+      const key = el.getAttribute("data-field");
+      updates[key] = (el.tagName === "TD") ? el.textContent.trim() : el.value;
+    });
+
+    await db.collection("users").doc(email).update({
+      fullName: updates.fullName,
+      status: updates.status
+    });
+    await db.collection("roles").doc(email).set({ role: updates.role }, { merge: true });
+
+    showMsg("✅ User updated", true);
+    loadUsersData();
+  } catch (err) { console.error("updateUserRow error:", err); }
 }
-async function disableUser(email) {
-  await db.collection("users").doc(email).update({ status: "disabled" });
-  showMsg("✅ User disabled", true); loadUsersData();
+
+async function deleteUser(email) {
+  if (!confirm(`Are you sure you want to delete ${email}?`)) return;
+  try {
+    await db.collection("users").doc(email).delete();
+    await db.collection("roles").doc(email).delete();
+    showMsg("🗑️ User deleted", true);
+    loadUsersData();
+  } catch (err) { console.error("deleteUser error:", err); }
 }
-async function promoteUser(email) {
-  await db.collection("roles").doc(email).update({ role: "admin" });
-  showMsg("✅ User promoted to admin", true); loadUsersData();
+
+async function addNewUser(e) {
+  e.preventDefault();
+  const fullName = document.getElementById("newUserName").value.trim();
+  const email = document.getElementById("newUserEmail").value.trim();
+  const role = document.getElementById("newUserRole").value;
+  if (!fullName || !email) { showMsg("⚠️ Name and email required"); return; }
+
+  try {
+    await db.collection("users").doc(email).set({
+      email, fullName, role, status: "approved",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await db.collection("roles").doc(email).set({ email, role });
+    showMsg("✅ User added", true);
+    document.getElementById("addUserForm").reset();
+    loadUsersData();
+  } catch (err) { console.error("addNewUser error:", err); }
 }
-async function demoteUser(email) {
-  await db.collection("roles").doc(email).update({ role: "verifier" });
-  showMsg("✅ User demoted to verifier", true); loadUsersData();
+
+// === Filters ===
+function filterUsers() {
+  const query = document.getElementById("userSearch").value.toLowerCase();
+  const rows = document.querySelectorAll("#usersTable tr");
+  rows.forEach(row => {
+    const text = row.innerText.toLowerCase();
+    row.style.display = text.includes(query) ? "" : "none";
+  });
+}
+function filterLicenses() {
+  const query = document.getElementById("licenseSearch").value.toLowerCase();
+  const rows = document.querySelectorAll("#licensesTable tbody tr");
+  rows.forEach(row => {
+    const text = row.innerText.toLowerCase();
+    row.style.display = text.includes(query) ? "" : "none";
+  });
+}
+function filterRequests() {
+  const query = document.getElementById("requestSearch").value.toLowerCase();
+  const rows = document.querySelectorAll("#requestsTable tr");
+  rows.forEach(row => {
+    const text = row.innerText.toLowerCase();
+    row.style.display = text.includes(query) ? "" : "none";
+  });
+}
+function filterAnalytics() {
+  const query = document.getElementById("analyticsSearch").value.toLowerCase();
+  const rows = document.querySelectorAll("#verificationLogs tr");
+  rows.forEach(row => {
+    const text = row.innerText.toLowerCase();
+    row.style.display = text.includes(query) ? "" : "none";
+  });
+}
+
+// === Export CSV with Date ===
+function exportTableToCSV(tableId, baseFilename) {
+  const table = document.getElementById(tableId);
+  if (!table) return;
+
+  let csv = [];
+  const rows = table.querySelectorAll("tr");
+  rows.forEach(row => {
+    let cols = row.querySelectorAll("th, td");
+    let rowData = [];
+    cols.forEach(col => rowData.push(`"${col.innerText}"`));
+    csv.push(rowData.join(","));
+  });
+
+  const today = new Date().toISOString().split("T")[0];
+  const filename = `${baseFilename}_${today}.csv`;
+
+  const blob = new Blob([csv.join("\n")], { type: "text/csv" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
 }
 
 // === Expose globally ===
@@ -413,7 +515,11 @@ window.verifyLicense = verifyLicense;
 window.loadAnalyticsData = loadAnalyticsData;
 window.loadVerificationRequests = loadVerificationRequests;
 window.loadUsersData = loadUsersData;
-window.approveUser = approveUser;
-window.disableUser = disableUser;
-window.promoteUser = promoteUser;
-window.demoteUser = demoteUser;
+window.addNewUser = addNewUser;
+window.updateUserRow = updateUserRow;
+window.deleteUser = deleteUser;
+window.filterUsers = filterUsers;
+window.filterLicenses = filterLicenses;
+window.filterRequests = filterRequests;
+window.filterAnalytics = filterAnalytics;
+window.exportTableToCSV = exportTableToCSV;
