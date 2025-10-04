@@ -195,19 +195,39 @@ button.inline:hover { background: #1e2d3c; }
 
 /* ===== VERIFICATION REQUESTS PAGE FIX ===== */
 .verification-container {
-  max-width: 1100px;   /* Expanded background to fit wider table */
+  max-width: 1100px;   /* slightly wider to fit table neatly */
   margin: 40px auto;
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   padding: 30px;
-  overflow-x: auto;    /* Prevents table from spilling outside */
+  overflow-x: auto;    /* keep table inside */
+}
+
+.verification-container h2 {
+  margin-bottom: 12px;
+  font-size: 1.4rem;
+}
+
+.verification-container input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.verification-container .btn-export {
+  width: 100%;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 20px;
 }
 
 .verification-container .table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed; /* Forces columns to shrink proportionally */
+  table-layout: fixed;
   margin-top: 20px;
 }
 
@@ -218,13 +238,14 @@ button.inline:hover { background: #1e2d3c; }
   text-align: left;
   vertical-align: middle;
   background: #fff;
-  word-wrap: break-word;
-  white-space: normal; /* Allows wrapping to avoid overflow */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-/* Column width balance (adjust as needed) */
+/* Column widths for clean alignment */
 #requestsTable th:nth-child(1),
-#requestsTable td:nth-child(1) { width: 14%; }  /* License # */
+#requestsTable td:nth-child(1) { width: 14%; }  /* License Number */
 #requestsTable th:nth-child(2),
 #requestsTable td:nth-child(2) { width: 16%; }  /* Organization */
 #requestsTable th:nth-child(3),
@@ -238,7 +259,6 @@ button.inline:hover { background: #1e2d3c; }
 #requestsTable th:nth-child(7),
 #requestsTable td:nth-child(7) { width: 16%; }  /* Requested At */
 
-/* Ensure Requested At is neatly aligned */
 #requestsTable td:last-child {
   white-space: nowrap;
   text-align: right;
