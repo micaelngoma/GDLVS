@@ -11,67 +11,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
-const functions = firebase.functions();
 
-// === i18n init ===
-const resources = {
-  en: { translation: {
-    login: "Login", logout: "Logout", signUp: "Sign Up",
-    dashboard: "Dashboard", addLicense: "Add License",
-    verificationPortal: "Verification", analytics: "Analytics",
-    userManagement: "User Management", verificationRequests: "Verification Requests",
-    totalLicenses: "Total Licenses", activeLicenses: "Active Licenses",
-    licensesList: "Licenses", licenseNumber: "License Number",
-    fullName: "Full Name", class: "Class",
-    issueDate: "Issue Date", expiryDate: "Expiry Date",
-    status: "Status", action: "Action", email: "Email", role: "Role",
-    verify: "Verify", approvalNotice: "Note: Your account must be approved by an administrator before you can use the verification system.",
-    organization: "Organization", country: "Country", purpose: "Purpose"
-  }},
-  fr: { translation: {
-    login: "Connexion", logout: "Déconnexion", signUp: "Créer un compte",
-    dashboard: "Tableau de bord", addLicense: "Ajouter un permis",
-    verificationPortal: "Vérification", analytics: "Analytique",
-    userManagement: "Gestion des utilisateurs", verificationRequests: "Demandes de vérification",
-    totalLicenses: "Nombre total de permis", activeLicenses: "Permis actifs",
-    licensesList: "Permis", licenseNumber: "Numéro de permis",
-    fullName: "Nom complet", class: "Catégorie",
-    issueDate: "Date d’émission", expiryDate: "Date d’expiration",
-    status: "Statut", action: "Action", email: "Email", role: "Rôle",
-    verify: "Vérifier", approvalNotice: "Remarque : votre compte doit être approuvé par un administrateur avant utilisation.",
-    organization: "Organisation", country: "Pays", purpose: "But"
-  }},
-  ja: { translation: {
-    login: "ログイン", logout: "ログアウト", signUp: "サインアップ",
-    dashboard: "ダッシュボード", addLicense: "免許を追加",
-    verificationPortal: "照合", analytics: "分析",
-    userManagement: "ユーザー管理", verificationRequests: "照合リクエスト",
-    totalLicenses: "総免許数", activeLicenses: "有効な免許",
-    licensesList: "免許一覧", licenseNumber: "免許番号",
-    fullName: "氏名", class: "区分",
-    issueDate: "発行日", expiryDate: "有効期限",
-    status: "ステータス", action: "操作", email: "メール", role: "ロール",
-    verify: "照合", approvalNotice: "注意：アカウントは管理者の承認後に利用できます。",
-    organization: "機関", country: "国", purpose: "目的"
-  }}
-};
-
-i18next.use(i18nextBrowserLanguageDetector).init(
-  { resources, fallbackLng: "en" },
-  () => {
-    jqueryI18next.init(i18next, $, { useOptionsAttr: true });
-    $("body").localize();
-  }
-);
-
-document.addEventListener("DOMContentLoaded", () => {
-  const switcher = document.getElementById("languageSwitcher");
-  if (switcher) {
-    switcher.addEventListener("change", function () {
-      i18next.changeLanguage(this.value, () => $("body").localize());
-    });
-  }
-});
 
 // === Utility: Message Alerts ===
 function showMsg(text, ok = false) {
@@ -83,6 +23,7 @@ function showMsg(text, ok = false) {
     alert(text);
   }
 }
+
 
 // === Authentication: Login ===
 async function loginUser(e) {
@@ -123,12 +64,14 @@ async function loginUser(e) {
   }
 }
 
+
 // === Logout ===
 function signOutUser() {
   auth.signOut().then(() => (window.location.href = "index.html"));
 }
 
-// === Signup: New User ===
+
+// === Signup ===
 async function signupUser(e) {
   e.preventDefault();
   const fullName = document.getElementById("signupFullName").value.trim();
@@ -138,7 +81,10 @@ async function signupUser(e) {
     const cred = await auth.createUserWithEmailAndPassword(email, password);
     await db.collection("roles").doc(email).set({ email, role: "verifier" });
     await db.collection("users").doc(email).set({
-      email, fullName, role: "verifier", status: "pending",
+      email,
+      fullName,
+      role: "verifier",
+      status: "pending",
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     await cred.user.updateProfile({ displayName: fullName });
@@ -153,15 +99,23 @@ async function signupUser(e) {
   }
 }
 
+
 // === Role-based Access Control ===
 auth.onAuthStateChanged(async (user) => {
   const currentPage = window.location.pathname.split("/").pop();
-  const adminPages = ["dashboard.html", "add_licenses.html", "analytics.html", "users.html", "verification_requests.html"];
+  const adminPages = [
+    "dashboard.html",
+    "add_license.html",
+    "analytics.html",
+    "users.html",
+    "verification_requests.html"
+  ];
 
   if (!user) {
     if (adminPages.includes(currentPage)) window.location.href = "index.html";
     return;
   }
+
   if (!user.emailVerified) {
     showMsg("⚠️ Please verify your email before using the platform.");
     await auth.signOut();
@@ -179,18 +133,29 @@ auth.onAuthStateChanged(async (user) => {
     return;
   }
 
-  const navRequests = document.getElementById("navVerificationRequests");
-  if (navRequests) navRequests.style.display = (role === "admin") ? "block" : "none";
+  // Auto-load data depending on page
+  switch (currentPage) {
+    case "dashboard.html":
+      loadDashboardData();
+      loadLicensesTable();
+      break;
+    case "analytics.html":
+      loadAnalyticsData();
+      break;
+    case "users.html":
+      loadUsersData();
+      break;
+    case "verification_requests.html":
+      loadVerificationRequests();
+      break;
+  }
 
-  if (role === "admin") {
-    if (currentPage === "dashboard.html") { loadDashboardData?.(); loadLicensesTable?.(); }
-    if (currentPage === "analytics.html") loadAnalyticsData?.();
-    if (currentPage === "users.html") loadUsersData?.();
-    if (currentPage === "verification_requests.html") loadVerificationRequests?.();
-  } else {
-    if (adminPages.includes(currentPage)) window.location.href = "verify.html";
+  // Restrict verifier access to admin-only pages
+  if (role !== "admin" && adminPages.includes(currentPage)) {
+    if (currentPage !== "verify.html") window.location.href = "verify.html";
   }
 });
+
 
 // === License Management ===
 function addLicense() {
@@ -200,30 +165,53 @@ function addLicense() {
   const issueDate = document.getElementById("issueDate").value;
   const expiryDate = document.getElementById("expiryDate").value;
   if (!licenseNumber || !fullName || !licenseClass || !issueDate || !expiryDate) {
-    showMsg("⚠️ All fields are required"); return;
+    showMsg("⚠️ All fields are required");
+    return;
   }
+
   db.collection("licenses").doc(licenseNumber).set({
-    licenseNumber, fullName, class: licenseClass,
-    issueDate, expiryDate, status: "Active",
+    licenseNumber,
+    fullName,
+    class: licenseClass,
+    issueDate,
+    expiryDate,
+    status: "Active",
     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     createdBy: auth.currentUser ? auth.currentUser.uid : null
   })
-  .then(() => { showMsg("✅ License added!", true); document.getElementById("addLicenseForm").reset(); })
-  .catch(err => { showMsg("❌ Error adding license: " + err.message); });
+    .then(() => {
+      showMsg("✅ License added!", true);
+      document.getElementById("addLicenseForm").reset();
+      loadDashboardData();
+      loadLicensesTable();
+    })
+    .catch((err) => {
+      showMsg("❌ Error adding license: " + err.message);
+    });
 }
+
 
 // === Dashboard Data ===
 async function loadDashboardData() {
   try {
     const snapshot = await db.collection("licenses").get();
-    let total = 0, active = 0;
-    snapshot.forEach(doc => { total++; if (doc.data().status === "Active") active++; });
-    document.getElementById("totalLicenses").innerText = total;
-    document.getElementById("activeLicenses").innerText = active;
-  } catch (err) { console.error("Dashboard load error:", err); }
+    let total = 0,
+      active = 0;
+    snapshot.forEach((doc) => {
+      total++;
+      if (doc.data().status === "Active") active++;
+    });
+    const totalEl = document.getElementById("totalLicenses");
+    const activeEl = document.getElementById("activeLicenses");
+    if (totalEl) totalEl.innerText = total;
+    if (activeEl) activeEl.innerText = active;
+  } catch (err) {
+    console.error("Dashboard load error:", err);
+  }
 }
 
-// === License Table (Admin Inline Edit) ===
+
+// === Licenses Table ===
 async function loadLicensesTable() {
   const tbody = document.querySelector("#licensesTable tbody");
   if (!tbody) return;
@@ -231,8 +219,11 @@ async function loadLicensesTable() {
   try {
     const snap = await db.collection("licenses").orderBy("licenseNumber").get();
     tbody.innerHTML = "";
-    if (snap.empty) { tbody.innerHTML = "<tr><td colspan='7'>No licenses</td></tr>"; return; }
-    snap.forEach(doc => {
+    if (snap.empty) {
+      tbody.innerHTML = "<tr><td colspan='7'>No licenses</td></tr>";
+      return;
+    }
+    snap.forEach((doc) => {
       const d = doc.data();
       const tr = document.createElement("tr");
       tr.innerHTML = `
@@ -240,39 +231,45 @@ async function loadLicensesTable() {
         <td contenteditable="true" data-field="fullName">${d.fullName || ""}</td>
         <td>
           <select data-field="class">
-            <option ${d.class==="Class A"?"selected":""}>Class A</option>
-            <option ${d.class==="Class B"?"selected":""}>Class B</option>
-            <option ${d.class==="Class C"?"selected":""}>Class C</option>
+            <option ${d.class === "Class A" ? "selected" : ""}>Class A</option>
+            <option ${d.class === "Class B" ? "selected" : ""}>Class B</option>
+            <option ${d.class === "Class C" ? "selected" : ""}>Class C</option>
           </select>
         </td>
         <td><input type="date" data-field="issueDate" value="${d.issueDate || ""}"></td>
         <td><input type="date" data-field="expiryDate" value="${d.expiryDate || ""}"></td>
         <td>
           <select data-field="status">
-            <option ${d.status==="Active"?"selected":""}>Active</option>
-            <option ${d.status==="Suspended"?"selected":""}>Suspended</option>
-            <option ${d.status==="Expired"?"selected":""}>Expired</option>
+            <option ${d.status === "Active" ? "selected" : ""}>Active</option>
+            <option ${d.status === "Suspended" ? "selected" : ""}>Suspended</option>
+            <option ${d.status === "Expired" ? "selected" : ""}>Expired</option>
           </select>
         </td>
         <td><button class="inline" onclick="saveLicenseRow('${d.licenseNumber}', this)">Save</button></td>`;
       tbody.appendChild(tr);
     });
-  } catch (err) { console.error("loadLicensesTable error:", err); }
+  } catch (err) {
+    console.error("loadLicensesTable error:", err);
+  }
 }
+
 async function saveLicenseRow(licenseNumber, btn) {
   try {
     const tr = btn.closest("tr");
     const payload = {};
-    tr.querySelectorAll("[data-field]").forEach(el => {
+    tr.querySelectorAll("[data-field]").forEach((el) => {
       const key = el.getAttribute("data-field");
-      payload[key] = (el.tagName === "TD") ? el.textContent.trim() : el.value;
+      payload[key] = el.tagName === "TD" ? el.textContent.trim() : el.value;
     });
     await db.collection("licenses").doc(licenseNumber).update(payload);
     showMsg("✅ License updated", true);
-  } catch (err) { console.error("saveLicenseRow error:", err); }
+  } catch (err) {
+    console.error("saveLicenseRow error:", err);
+  }
 }
 
-// === Verify License (Instant Result) ===
+
+// === Verify License ===
 async function verifyLicense(e) {
   if (e) e.preventDefault();
   const licenseNumber = document.getElementById("verifyLicenseNumber").value.trim();
@@ -280,18 +277,27 @@ async function verifyLicense(e) {
   const country = document.getElementById("verifyCountry")?.value.trim() || "";
   const purpose = document.getElementById("verifyPurpose")?.value.trim() || "";
   const resultEl = document.getElementById("verifyResult");
-  if (!licenseNumber) { showMsg("⚠️ License number required"); return; }
+  if (!licenseNumber) {
+    showMsg("⚠️ License number required");
+    return;
+  }
+
   try {
     const doc = await db.collection("licenses").doc(licenseNumber).get();
     const found = doc.exists;
     const result = found ? "License found" : "License not found";
+
     await db.collection("verifications").add({
-      licenseNumber, requestingOrg, country,
+      licenseNumber,
+      requestingOrg,
+      country,
       email: auth.currentUser?.email || "",
-      purpose, result,
+      purpose,
+      result,
       verifiedAt: firebase.firestore.FieldValue.serverTimestamp(),
       verifiedBy: auth.currentUser?.uid || ""
     });
+
     if (resultEl) {
       resultEl.style.display = "block";
       resultEl.innerHTML = `
@@ -301,45 +307,59 @@ async function verifyLicense(e) {
         <p><strong>Country:</strong> ${country}</p>
         <p><strong>Purpose:</strong> ${purpose}</p>`;
     }
+
     showMsg(`✅ ${result}`, true);
-  } catch (err) { console.error("verifyLicense error:", err); }
+  } catch (err) {
+    console.error("verifyLicense error:", err);
+  }
 }
+
 
 // === Analytics Data ===
 async function loadAnalyticsData() {
   try {
     const snapshot = await db.collection("verifications").orderBy("verifiedAt", "desc").limit(10).get();
-    let total = 0, success = 0, fail = 0;
+    let total = 0,
+      success = 0,
+      fail = 0;
     const tbody = document.getElementById("verificationLogs");
     if (!tbody) return;
     tbody.innerHTML = "";
-    snapshot.forEach(doc => {
-      const d = doc.data(); total++;
-      if (d.result === "License found") success++; else fail++;
+    snapshot.forEach((doc) => {
+      const d = doc.data();
+      total++;
+      if (d.result === "License found") success++;
+      else fail++;
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${d.licenseNumber}</td>
         <td>${d.requestingOrg || ""}</td>
         <td>${d.country || ""}</td>
         <td>${d.result || ""}</td>
-        <td>${d.verifiedAt ? d.verifiedAt.toDate().toLocaleString() : ""}</td>`;
+        <td>${d.verifiedAt ? new Date(d.verifiedAt.seconds * 1000).toLocaleString() : ""}</td>`;
       tbody.appendChild(tr);
     });
     document.getElementById("totalVerifications").innerText = total;
     document.getElementById("successfulVerifications").innerText = success;
     document.getElementById("failedVerifications").innerText = fail;
-  } catch (err) { console.error("Analytics load error:", err); }
+  } catch (err) {
+    console.error("Analytics load error:", err);
+  }
 }
+
 
 // === Verification Requests (Admin) ===
 async function loadVerificationRequests() {
   try {
     const snapshot = await db.collection("verifications").orderBy("verifiedAt", "desc").get();
-    const tbody = document.getElementById("requestsTable");
+    const tbody = document.querySelector("#requestsTable tbody");
     if (!tbody) return;
     tbody.innerHTML = "";
-    if (snapshot.empty) { tbody.innerHTML = "<tr><td colspan='7'>No verification requests</td></tr>"; return; }
-    snapshot.forEach(doc => {
+    if (snapshot.empty) {
+      tbody.innerHTML = "<tr><td colspan='7'>No verification requests</td></tr>";
+      return;
+    }
+    snapshot.forEach((doc) => {
       const d = doc.data();
       const tr = document.createElement("tr");
       tr.innerHTML = `
@@ -349,11 +369,14 @@ async function loadVerificationRequests() {
         <td>${d.email || ""}</td>
         <td>${d.purpose || ""}</td>
         <td>${d.result || ""}</td>
-        <td>${d.verifiedAt ? d.verifiedAt.toDate().toLocaleString() : ""}</td>`;
+        <td>${d.verifiedAt ? new Date(d.verifiedAt.seconds * 1000).toLocaleString() : ""}</td>`;
       tbody.appendChild(tr);
     });
-  } catch (err) { console.error("Load requests error:", err); }
+  } catch (err) {
+    console.error("Load requests error:", err);
+  }
 }
+
 
 // === User Management ===
 async function loadUsersData() {
@@ -361,12 +384,15 @@ async function loadUsersData() {
     const usersSnap = await db.collection("users").get();
     const rolesSnap = await db.collection("roles").get();
     const roleMap = {};
-    rolesSnap.forEach(doc => roleMap[doc.id] = (doc.data().role || "verifier"));
-    const tbody = document.getElementById("usersTable");
+    rolesSnap.forEach((doc) => (roleMap[doc.id] = doc.data().role || "verifier"));
+    const tbody = document.getElementById("usersTable").querySelector("tbody");
     if (!tbody) return;
     tbody.innerHTML = "";
-    if (usersSnap.empty) { tbody.innerHTML = "<tr><td colspan='5'>No users found</td></tr>"; return; }
-    usersSnap.forEach(doc => {
+    if (usersSnap.empty) {
+      tbody.innerHTML = "<tr><td colspan='5'>No users found</td></tr>";
+      return;
+    }
+    usersSnap.forEach((doc) => {
       const u = doc.data();
       const role = roleMap[u.email] || u.role || "verifier";
       const tr = document.createElement("tr");
@@ -380,42 +406,42 @@ async function loadUsersData() {
           <button class="inline" onclick="disableUser('${u.email}')">Disable</button>
           <button class="inline" onclick="promoteUser('${u.email}')">Promote</button>
           <button class="inline" onclick="demoteUser('${u.email}')">Demote</button>
-          <button class="delete-btn inline" onclick="deleteUser('${u.email}')">Delete</button>
+          <button class="inline" onclick="deleteUser('${u.email}')">Delete</button>
         </td>`;
       tbody.appendChild(tr);
     });
-  } catch (err) { console.error("User load error:", err); }
+  } catch (err) {
+    console.error("User load error:", err);
+  }
 }
+
 async function approveUser(email) {
   await db.collection("users").doc(email).update({ status: "approved" });
-  showMsg("✅ User approved", true); loadUsersData();
+  showMsg("✅ User approved", true);
+  loadUsersData();
 }
 async function disableUser(email) {
   await db.collection("users").doc(email).update({ status: "disabled" });
-  showMsg("✅ User disabled", true); loadUsersData();
+  showMsg("✅ User disabled", true);
+  loadUsersData();
 }
 async function promoteUser(email) {
   await db.collection("roles").doc(email).update({ role: "admin" });
-  showMsg("✅ User promoted to admin", true); loadUsersData();
+  showMsg("✅ User promoted to admin", true);
+  loadUsersData();
 }
 async function demoteUser(email) {
   await db.collection("roles").doc(email).update({ role: "verifier" });
-  showMsg("✅ User demoted to verifier", true); loadUsersData();
+  showMsg("✅ User demoted to verifier", true);
+  loadUsersData();
 }
 async function deleteUser(email) {
-  if (!confirm(`Are you sure you want to delete ${email}?`)) return;
-  try {
-    await db.collection("users").doc(email).delete();
-    await db.collection("roles").doc(email).delete();
-    // Call Cloud Function (requires Firebase Functions deployment)
-    await functions.httpsCallable("deleteUserAccount")({ email });
-    showMsg("✅ User deleted", true);
-    loadUsersData();
-  } catch (err) {
-    console.error("Delete user error:", err);
-    showMsg("❌ Error deleting user: " + err.message);
-  }
+  await db.collection("users").doc(email).delete();
+  await db.collection("roles").doc(email).delete();
+  showMsg("🗑️ User deleted", true);
+  loadUsersData();
 }
+
 
 // === Expose globally ===
 window.loginUser = loginUser;
