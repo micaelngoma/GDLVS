@@ -204,10 +204,10 @@ button.inline:hover { background: #1e2d3c; }
   border-radius: 4px;
 }
 
-.table td:nth-child(3) { width: 140px; } /* Class column wider */
-.table td:nth-child(5) { width: 140px; } /* Expiry Date */
-.table td:nth-child(6) { width: 120px; } /* Status */
-.table td:nth-child(7) { width: 80px; }  /* Action */
+.table td:nth-child(3) { width: 140px; }
+.table td:nth-child(5) { width: 140px; }
+.table td:nth-child(6) { width: 120px; }
+.table td:nth-child(7) { width: 80px; }
 .table td select[data-field="status"] { margin-left: 8px; }
 
 /* ===== VERIFICATION REQUESTS PAGE ===== */
@@ -218,34 +218,32 @@ button.inline:hover { background: #1e2d3c; }
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   padding: 30px;
-  overflow-x: auto; /* ✅ Added scrollbar for overflow tables */
 }
 
-.verification-container h2 {
-  margin-bottom: 12px;
-  font-size: 1.4rem;
-}
-
-.verification-container input[type="text"] {
+/* ✅ Wrap table in a scrollable container */
+.verification-table-wrapper {
   width: 100%;
-  padding: 10px;
-  margin: 10px 0 16px;
-  border: 1px solid #ccc;
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin-top: 16px;
+}
+
+/* Keep scrollbar inside white box */
+.verification-table-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+.verification-table-wrapper::-webkit-scrollbar-thumb {
+  background: #ccc;
   border-radius: 4px;
 }
-
-.verification-container .btn-export {
-  width: 100%;
-  text-align: center;
-  font-weight: bold;
-  margin-bottom: 20px;
+.verification-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
 }
 
 .verification-container .table {
-  width: 100%;
+  width: 1200px; /* Wider than box to enable scroll */
   border-collapse: collapse;
-  margin-top: 16px;
-  min-width: 900px; /* ✅ ensures table stays within scrollable area */
+  min-width: 900px;
 }
 
 .verification-container .table th,
@@ -255,6 +253,7 @@ button.inline:hover { background: #1e2d3c; }
   text-align: left;
   vertical-align: middle;
   background: #fff;
+  white-space: nowrap;
 }
 
 .verification-container .table th {
