@@ -1,3 +1,4 @@
+/* ===== GLOBAL ===== */
 body {
   font-family: Arial, sans-serif;
   background: #f5f7fa;
@@ -182,7 +183,7 @@ button.inline:hover { background: #1e2d3c; }
 }
 .table th, .table td {
   border: 1px solid #eee;
-  padding: 10px 12px;
+  padding: 10px 14px;
   text-align: left;
   vertical-align: middle;
   background: #fff;
@@ -192,7 +193,7 @@ button.inline:hover { background: #1e2d3c; }
   font-weight: bold;
 }
 
-/* Dashboard Table Inputs (fix for Expiry/Status overlap) */
+/* Dashboard Table Inputs (fix overlap + class width) */
 .table input[type="date"],
 .table select {
   width: 95%;
@@ -202,38 +203,41 @@ button.inline:hover { background: #1e2d3c; }
   border: 1px solid #ccc;
   border-radius: 4px;
 }
-.table td select[data-field="status"] {
-  margin-left: 8px; /* Add clear spacing after expiry date */
-}
+
+.table td:nth-child(3) { width: 140px; } /* Class column wider */
+.table td:nth-child(5) { width: 140px; } /* Expiry Date */
+.table td:nth-child(6) { width: 120px; } /* Status */
+.table td:nth-child(7) { width: 80px; }  /* Action */
+.table td select[data-field="status"] { margin-left: 8px; }
 
 /* ===== VERIFICATION REQUESTS PAGE ===== */
 .verification-container {
   max-width: 1000px;
-  margin: 30px auto;
+  margin: 40px auto;
   background: #fff;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 30px;
 }
 
 .verification-container h2 {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  font-size: 1.4rem;
 }
 
 .verification-container input[type="text"] {
   width: 100%;
   padding: 10px;
-  margin: 10px 0;
+  margin: 10px 0 16px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
 
 .verification-container .btn-export {
   width: 100%;
-  display: block;
   text-align: center;
-  padding: 10px;
   font-weight: bold;
+  margin-bottom: 20px;
 }
 
 .verification-container .table {
@@ -258,9 +262,9 @@ button.inline:hover { background: #1e2d3c; }
 
 /* Align Requested At properly */
 #requestsTable td:last-child {
-  width: 160px;
+  width: 180px;
   white-space: nowrap;
-  text-align: right;
+  text-align: left;
 }
 
 /* ===== FOOTER ===== */
