@@ -57,23 +57,27 @@
           📥 Export Requests
         </button>
 
-        <!-- Requests Table -->
-        <table class="table">
-          <thead>
-            <tr>
-              <th data-i18n="licenseNumber">License #</th>
-              <th data-i18n="organization">Organization</th>
-              <th data-i18n="country">Country</th>
-              <th data-i18n="email">Email</th>
-              <th data-i18n="purpose">Purpose</th>
-              <th data-i18n="result">Result</th>
-              <th data-i18n="requestedAt">Requested At</th>
-            </tr>
-          </thead>
-          <tbody id="requestsTable">
-            <tr><td colspan="7">Loading...</td></tr>
-          </tbody>
-        </table>
+        <!-- ✅ Added Scroll Wrapper -->
+        <div class="verification-table-wrapper">
+          <table class="table" id="requestsTableContainer">
+            <thead>
+              <tr>
+                <th data-i18n="licenseNumber">License #</th>
+                <th data-i18n="organization">Organization</th>
+                <th data-i18n="country">Country</th>
+                <th data-i18n="email">Email</th>
+                <th data-i18n="purpose">Purpose</th>
+                <th data-i18n="result">Result</th>
+                <th data-i18n="requestedAt">Requested At</th>
+              </tr>
+            </thead>
+            <tbody id="requestsTable">
+              <tr><td colspan="7">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- ✅ End Scroll Wrapper -->
+
       </section>
     </div>
   </main>
