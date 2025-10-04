@@ -193,24 +193,7 @@ button.inline:hover { background: #1e2d3c; }
   font-weight: bold;
 }
 
-/* Dashboard Table Inputs (fix overlap + class width) */
-.table input[type="date"],
-.table select {
-  width: 95%;
-  padding: 6px 8px;
-  margin-right: 5px;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.table td:nth-child(3) { width: 140px; } /* Class column wider */
-.table td:nth-child(5) { width: 140px; } /* Expiry Date */
-.table td:nth-child(6) { width: 120px; } /* Status */
-.table td:nth-child(7) { width: 80px; }  /* Action */
-.table td select[data-field="status"] { margin-left: 8px; }
-
-/* ===== VERIFICATION REQUESTS PAGE ===== */
+/* ===== VERIFICATION REQUESTS PAGE FIX ===== */
 .verification-container {
   max-width: 1000px;
   margin: 40px auto;
@@ -220,30 +203,12 @@ button.inline:hover { background: #1e2d3c; }
   padding: 30px;
 }
 
-.verification-container h2 {
-  margin-bottom: 12px;
-  font-size: 1.4rem;
-}
-
-.verification-container input[type="text"] {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.verification-container .btn-export {
-  width: 100%;
-  text-align: center;
-  font-weight: bold;
-  margin-bottom: 20px;
-}
-
+/* Keep table fully inside container and aligned */
 .verification-container .table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 16px;
+  table-layout: fixed;
+  margin-top: 20px;
 }
 
 .verification-container .table th,
@@ -253,18 +218,39 @@ button.inline:hover { background: #1e2d3c; }
   text-align: left;
   vertical-align: middle;
   background: #fff;
-}
-
-.verification-container .table th {
-  background: #f2f2f2;
-  font-weight: bold;
-}
-
-/* Align Requested At properly */
-#requestsTable td:last-child {
-  width: 180px;
+  overflow: hidden;
   white-space: nowrap;
-  text-align: left;
+  text-overflow: ellipsis;
+}
+
+/* Column widths (consistent alignment) */
+#requestsTable th:nth-child(1),
+#requestsTable td:nth-child(1) { width: 16%; }  /* License Number */
+#requestsTable th:nth-child(2),
+#requestsTable td:nth-child(2) { width: 16%; }  /* Organization */
+#requestsTable th:nth-child(3),
+#requestsTable td:nth-child(3) { width: 10%; }  /* Country */
+#requestsTable th:nth-child(4),
+#requestsTable td:nth-child(4) { width: 22%; }  /* Email */
+#requestsTable th:nth-child(5),
+#requestsTable td:nth-child(5) { width: 14%; }  /* Purpose */
+#requestsTable th:nth-child(6),
+#requestsTable td:nth-child(6) { width: 10%; }  /* Result */
+#requestsTable th:nth-child(7),
+#requestsTable td:nth-child(7) { width: 12%; }  /* Requested At */
+
+/* Ensure table is centered visually with export button */
+.verification-container .btn-export {
+  width: 100%;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 18px;
+}
+
+/* Align Requested At */
+#requestsTable td:last-child {
+  white-space: nowrap;
+  text-align: right;
 }
 
 /* ===== FOOTER ===== */
