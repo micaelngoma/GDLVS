@@ -12,6 +12,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+
 // === Utility: Message Alerts ===
 function showMsg(text, ok = false) {
   const el = document.getElementById("msg");
@@ -23,11 +24,13 @@ function showMsg(text, ok = false) {
   }
 }
 
+
 // === Authentication: Login ===
 async function loginUser(e) {
   if (e) e.preventDefault();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
+
   try {
     const cred = await auth.signInWithEmailAndPassword(email, password);
 
@@ -49,23 +52,23 @@ async function loginUser(e) {
       return;
     }
 
-    if (role === "admin") {
-      showMsg("✅ Welcome Admin! Redirecting...", true);
-      setTimeout(() => (window.location.href = "dashboard.html"), 1000);
-    } else {
-      showMsg("✅ Login successful. Redirecting...", true);
-      setTimeout(() => (window.location.href = "verify.html"), 1000);
-    }
+    showMsg("✅ Login successful. Redirecting...", true);
+    setTimeout(() => {
+      window.location.href = role === "admin" ? "dashboard.html" : "verify.html";
+    }, 1000);
+
   } catch (err) {
     showMsg("❌ Login failed: " + err.message);
     console.error("Login error:", err);
   }
 }
 
+
 // === Logout ===
 function signOutUser() {
   auth.signOut().then(() => (window.location.href = "index.html"));
 }
+
 
 // === Signup ===
 async function signupUser(e) {
@@ -73,6 +76,7 @@ async function signupUser(e) {
   const fullName = document.getElementById("signupFullName").value.trim();
   const email = document.getElementById("signupEmail").value.trim();
   const password = document.getElementById("signupPassword").value;
+
   try {
     const cred = await auth.createUserWithEmailAndPassword(email, password);
     await db.collection("roles").doc(email).set({ email, role: "verifier" });
@@ -83,24 +87,27 @@ async function signupUser(e) {
       status: "pending",
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
+
     await cred.user.updateProfile({ displayName: fullName });
     await cred.user.sendEmailVerification();
 
-    showMsg("✅ Account created! Verify email. Your account must be approved by an administrator.", true);
+    showMsg("✅ Account created! Please verify your email. Await admin approval.", true);
     await auth.signOut();
     setTimeout(() => (window.location.href = "index.html"), 3000);
+
   } catch (err) {
-    console.error("Signup error:", err);
     showMsg("❌ Signup failed: " + err.message);
+    console.error("Signup error:", err);
   }
 }
+
 
 // === Role-based Access Control ===
 auth.onAuthStateChanged(async (user) => {
   const currentPage = window.location.pathname.split("/").pop();
   const adminPages = [
     "dashboard.html",
-    "add_licenses.html",   // fixed filename consistency
+    "add_license.html",
     "analytics.html",
     "users.html",
     "verification_requests.html"
@@ -128,7 +135,7 @@ auth.onAuthStateChanged(async (user) => {
     return;
   }
 
-  // Auto-load data depending on page
+  // Load data based on current page
   switch (currentPage) {
     case "dashboard.html":
       loadDashboardData();
@@ -145,11 +152,12 @@ auth.onAuthStateChanged(async (user) => {
       break;
   }
 
-  // Restrict verifier access to admin-only pages
+  // Restrict verifiers
   if (role !== "admin" && adminPages.includes(currentPage)) {
     if (currentPage !== "verify.html") window.location.href = "verify.html";
   }
 });
+
 
 // === License Management ===
 function addLicense() {
@@ -158,6 +166,7 @@ function addLicense() {
   const licenseClass = document.getElementById("licenseClass").value;
   const issueDate = document.getElementById("issueDate").value;
   const expiryDate = document.getElementById("expiryDate").value;
+
   if (!licenseNumber || !fullName || !licenseClass || !issueDate || !expiryDate) {
     showMsg("⚠️ All fields are required");
     return;
@@ -179,10 +188,9 @@ function addLicense() {
       loadDashboardData();
       loadLicensesTable();
     })
-    .catch((err) => {
-      showMsg("❌ Error adding license: " + err.message);
-    });
+    .catch((err) => showMsg("❌ Error adding license: " + err.message));
 }
+
 
 // === Dashboard Data ===
 async function loadDashboardData() {
@@ -193,27 +201,29 @@ async function loadDashboardData() {
       total++;
       if (doc.data().status === "Active") active++;
     });
-    if (document.getElementById("totalLicenses"))
-      document.getElementById("totalLicenses").innerText = total;
-    if (document.getElementById("activeLicenses"))
-      document.getElementById("activeLicenses").innerText = active;
+    document.getElementById("totalLicenses").innerText = total;
+    document.getElementById("activeLicenses").innerText = active;
   } catch (err) {
     console.error("Dashboard load error:", err);
   }
 }
+
 
 // === Licenses Table ===
 async function loadLicensesTable() {
   const tbody = document.querySelector("#licensesTable tbody");
   if (!tbody) return;
   tbody.innerHTML = "<tr><td colspan='7'>Loading...</td></tr>";
+
   try {
     const snap = await db.collection("licenses").orderBy("licenseNumber").get();
     tbody.innerHTML = "";
+
     if (snap.empty) {
-      tbody.innerHTML = "<tr><td colspan='7'>No licenses</td></tr>";
+      tbody.innerHTML = "<tr><td colspan='7'>No licenses found</td></tr>";
       return;
     }
+
     snap.forEach((doc) => {
       const d = doc.data();
       const tr = document.createElement("tr");
@@ -259,6 +269,7 @@ async function saveLicenseRow(licenseNumber, btn) {
   }
 }
 
+
 // === Verify License ===
 async function verifyLicense(e) {
   if (e) e.preventDefault();
@@ -267,10 +278,8 @@ async function verifyLicense(e) {
   const country = document.getElementById("verifyCountry")?.value.trim() || "";
   const purpose = document.getElementById("verifyPurpose")?.value.trim() || "";
   const resultEl = document.getElementById("verifyResult");
-  if (!licenseNumber) {
-    showMsg("⚠️ License number required");
-    return;
-  }
+
+  if (!licenseNumber) return showMsg("⚠️ License number required");
 
   try {
     const doc = await db.collection("licenses").doc(licenseNumber).get();
@@ -304,6 +313,7 @@ async function verifyLicense(e) {
   }
 }
 
+
 // === Analytics Data ===
 async function loadAnalyticsData() {
   try {
@@ -312,11 +322,11 @@ async function loadAnalyticsData() {
     const tbody = document.getElementById("verificationLogs");
     if (!tbody) return;
     tbody.innerHTML = "";
+
     snapshot.forEach((doc) => {
       const d = doc.data();
       total++;
-      if (d.result === "License found") success++;
-      else fail++;
+      if (d.result === "License found") success++; else fail++;
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${d.licenseNumber}</td>
@@ -326,6 +336,7 @@ async function loadAnalyticsData() {
         <td>${d.verifiedAt ? new Date(d.verifiedAt.seconds * 1000).toLocaleString() : ""}</td>`;
       tbody.appendChild(tr);
     });
+
     document.getElementById("totalVerifications").innerText = total;
     document.getElementById("successfulVerifications").innerText = success;
     document.getElementById("failedVerifications").innerText = fail;
@@ -334,6 +345,7 @@ async function loadAnalyticsData() {
   }
 }
 
+
 // === Verification Requests (Admin) ===
 async function loadVerificationRequests() {
   try {
@@ -341,10 +353,12 @@ async function loadVerificationRequests() {
     const tbody = document.querySelector("#requestsTable tbody");
     if (!tbody) return;
     tbody.innerHTML = "";
+
     if (snapshot.empty) {
       tbody.innerHTML = "<tr><td colspan='7'>No verification requests</td></tr>";
       return;
     }
+
     snapshot.forEach((doc) => {
       const d = doc.data();
       const tr = document.createElement("tr");
@@ -363,7 +377,40 @@ async function loadVerificationRequests() {
   }
 }
 
+
 // === User Management ===
+async function addNewUser(e) {
+  e.preventDefault();
+  const fullName = document.getElementById("newFullName").value.trim();
+  const email = document.getElementById("newEmail").value.trim();
+  const role = document.getElementById("newRole").value;
+  const status = document.getElementById("newStatus").value;
+
+  if (!fullName || !email || !role || !status) {
+    showMsg("⚠️ Please complete all fields");
+    return;
+  }
+
+  try {
+    await db.collection("users").doc(email).set({
+      fullName,
+      email,
+      role,
+      status,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await db.collection("roles").doc(email).set({ role });
+
+    showMsg("✅ User added successfully", true);
+    document.getElementById("addUserForm").reset();
+    loadUsersData();
+
+  } catch (err) {
+    console.error("addNewUser error:", err);
+    showMsg("❌ Error adding user: " + err.message);
+  }
+}
+
 async function loadUsersData() {
   try {
     const usersSnap = await db.collection("users").get();
@@ -373,10 +420,12 @@ async function loadUsersData() {
     const tbody = document.getElementById("usersTable").querySelector("tbody");
     if (!tbody) return;
     tbody.innerHTML = "";
+
     if (usersSnap.empty) {
       tbody.innerHTML = "<tr><td colspan='5'>No users found</td></tr>";
       return;
     }
+
     usersSnap.forEach((doc) => {
       const u = doc.data();
       const role = roleMap[u.email] || u.role || "verifier";
@@ -427,37 +476,6 @@ async function deleteUser(email) {
   loadUsersData();
 }
 
-// === NEW: Add New User ===
-async function addNewUser(e) {
-  e.preventDefault();
-  const fullName = document.getElementById("newFullName").value.trim();
-  const email = document.getElementById("newEmail").value.trim();
-  const role = document.getElementById("newRole").value;
-  const status = document.getElementById("newStatus").value;
-  const msgEl = document.getElementById("addUserMsg");
-
-  if (!fullName || !email || !role || !status) {
-    msgEl.textContent = "⚠️ All fields are required.";
-    msgEl.style.color = "red";
-    return;
-  }
-
-  try {
-    await db.collection("roles").doc(email).set({ email, role });
-    await db.collection("users").doc(email).set({
-      fullName, email, role, status,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    msgEl.textContent = `✅ User ${email} added successfully!`;
-    msgEl.style.color = "green";
-    document.getElementById("addUserForm").reset();
-    loadUsersData();
-  } catch (err) {
-    msgEl.textContent = "❌ Error adding user: " + err.message;
-    msgEl.style.color = "red";
-  }
-}
 
 // === Expose globally ===
 window.loginUser = loginUser;
@@ -465,4 +483,12 @@ window.signupUser = signupUser;
 window.signOutUser = signOutUser;
 window.addLicense = addLicense;
 window.loadDashboardData = loadDashboardData;
-window.loadLicensesTable = loadLicenses
+window.loadLicensesTable = loadLicensesTable;
+window.saveLicenseRow = saveLicenseRow;
+window.verifyLicense = verifyLicense;
+window.loadAnalyticsData = loadAnalyticsData;
+window.loadVerificationRequests = loadVerificationRequests;
+window.loadUsersData = loadUsersData;
+window.approveUser = approveUser;
+window.disableUser = disableUser;
+window.promoteUser =
