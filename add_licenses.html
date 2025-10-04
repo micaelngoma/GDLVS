@@ -22,6 +22,7 @@
   <!-- App Logic -->
   <script defer src="script.js"></script>
 </head>
+
 <body>
   <!-- Header -->
   <header>
@@ -43,19 +44,19 @@
     <a href="analytics.html"><i class="fas fa-chart-line"></i> <span data-i18n="analytics">Analytics</span></a>
   </nav>
 
-  <!-- Form Container -->
+  <!-- Main Form -->
   <main>
     <div class="container">
       <form id="addLicenseForm" onsubmit="addLicense(); return false;">
         <label for="licenseNumber" data-i18n="licenseNumber">License Number</label>
-        <input type="text" id="licenseNumber" required>
+        <input type="text" id="licenseNumber" placeholder="Enter license number" required>
 
         <label for="fullName" data-i18n="fullName">Full Name</label>
-        <input type="text" id="fullName" required>
+        <input type="text" id="fullName" placeholder="Enter full name" required>
 
         <label for="licenseClass" data-i18n="class">Class</label>
         <select id="licenseClass" required>
-          <option value="">--Select--</option>
+          <option value="">-- Select Class --</option>
           <option value="Class A">Class A</option>
           <option value="Class B">Class B</option>
           <option value="Class C">Class C</option>
@@ -71,7 +72,7 @@
           <i class="fas fa-plus-circle"></i> <span data-i18n="addLicense">Add License</span>
         </button>
 
-        <!-- Message Feedback -->
+        <!-- Feedback -->
         <p id="msg" class="muted"></p>
       </form>
     </div>
@@ -87,9 +88,9 @@
     </select>
   </footer>
 
-  <!-- Inline Verification for Role -->
+  <!-- Inline Role Check -->
   <script>
-    document.addEventListener("DOMContentLoaded", async () => {
+    document.addEventListener("DOMContentLoaded", () => {
       firebase.auth().onAuthStateChanged(async (user) => {
         if (!user) {
           window.location.href = "index.html";
@@ -103,8 +104,7 @@
 
         // Only admins see Verification Requests
         const navReq = document.getElementById("navVerificationRequests");
-        if (role === "admin") navReq.style.display = "inline-block";
-        else navReq.style.display = "none";
+        navReq.style.display = (role === "admin") ? "inline-block" : "none";
       });
     });
   </script>
