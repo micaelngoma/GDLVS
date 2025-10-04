@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Batch Seeder - GDLVS</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+</head>
+<body>
+  <h2>Batch Seeding Users...</h2>
+  <pre id="output"></pre>
+
+  <script>
+    // === Firebase Setup ===
+    const firebaseConfig = {
+      apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
+      authDomain: "gdlvs-2348e.firebaseapp.com",
+      projectId: "gdlvs-2348e",
+      storageBucket: "gdlvs-2348e.appspot.com",
+      messagingSenderId: "358715790318",
+      appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // === Define Seed Users ===
+    const seedUsers = [
+      {
+        email: "m.ngoma1988@gmail.com", 
+        fullName: "System Administrator",
+        role: "admin",
+        status: "approved"
+      },
+      {
+        email: "verifier1@example.com",
+        fullName: "John Verifier",
+        role: "verifier",
+        status: "approved"
+      },
+      {
+        email: "verifier2@example.com",
+        fullName: "Jane Checker",
+        role: "verifier",
+        status: "pending"
+      },
+      {
+        email: "admin2@example.com",
+        fullName: "Second Admin",
+        role: "admin",
+        status: "approved"
+      }
+    ];
+
+    async function seedBatch() {
+      let results = [];
+      for (let u of seedUsers) {
+        try {
+          // Create/Update role
+          await db.collection("roles").doc(u.email).set({
+            email: u.email,
+            role: u.role
+          });
+
+          // Create/Update user profile
+          await db.collection("users").doc(u.email).set({
+            email: u.email,
+            fullName: u.fullName,
+            role: u.role,
+            status: u.status,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          results.push(`✅ Seeded ${u.role} → ${u.email}`);
+        } catch (err) {
+          results.push(`❌ Error seeding ${u.email}: ${err.message}`);
+        }
+      }
+
+      document.getElementById("output").textContent = results.join("\n");
+      console.log("Seeding complete", results);
+    }
+
+    seedBatch();
+  </script>
+</body>
+</html>
