@@ -12,7 +12,6 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-
 // === Utility: Message Alerts ===
 function showMsg(text, ok = false) {
   const el = document.getElementById("msg");
@@ -23,7 +22,6 @@ function showMsg(text, ok = false) {
     alert(text);
   }
 }
-
 
 // === Authentication: Login ===
 async function loginUser(e) {
@@ -64,12 +62,10 @@ async function loginUser(e) {
   }
 }
 
-
 // === Logout ===
 function signOutUser() {
   auth.signOut().then(() => (window.location.href = "index.html"));
 }
-
 
 // === Signup ===
 async function signupUser(e) {
@@ -99,13 +95,12 @@ async function signupUser(e) {
   }
 }
 
-
 // === Role-based Access Control ===
 auth.onAuthStateChanged(async (user) => {
   const currentPage = window.location.pathname.split("/").pop();
   const adminPages = [
     "dashboard.html",
-    "add_license.html",
+    "add_licenses.html",   // fixed filename consistency
     "analytics.html",
     "users.html",
     "verification_requests.html"
@@ -156,7 +151,6 @@ auth.onAuthStateChanged(async (user) => {
   }
 });
 
-
 // === License Management ===
 function addLicense() {
   const licenseNumber = document.getElementById("licenseNumber").value.trim();
@@ -190,26 +184,23 @@ function addLicense() {
     });
 }
 
-
 // === Dashboard Data ===
 async function loadDashboardData() {
   try {
     const snapshot = await db.collection("licenses").get();
-    let total = 0,
-      active = 0;
+    let total = 0, active = 0;
     snapshot.forEach((doc) => {
       total++;
       if (doc.data().status === "Active") active++;
     });
-    const totalEl = document.getElementById("totalLicenses");
-    const activeEl = document.getElementById("activeLicenses");
-    if (totalEl) totalEl.innerText = total;
-    if (activeEl) activeEl.innerText = active;
+    if (document.getElementById("totalLicenses"))
+      document.getElementById("totalLicenses").innerText = total;
+    if (document.getElementById("activeLicenses"))
+      document.getElementById("activeLicenses").innerText = active;
   } catch (err) {
     console.error("Dashboard load error:", err);
   }
 }
-
 
 // === Licenses Table ===
 async function loadLicensesTable() {
@@ -268,7 +259,6 @@ async function saveLicenseRow(licenseNumber, btn) {
   }
 }
 
-
 // === Verify License ===
 async function verifyLicense(e) {
   if (e) e.preventDefault();
@@ -314,14 +304,11 @@ async function verifyLicense(e) {
   }
 }
 
-
 // === Analytics Data ===
 async function loadAnalyticsData() {
   try {
     const snapshot = await db.collection("verifications").orderBy("verifiedAt", "desc").limit(10).get();
-    let total = 0,
-      success = 0,
-      fail = 0;
+    let total = 0, success = 0, fail = 0;
     const tbody = document.getElementById("verificationLogs");
     if (!tbody) return;
     tbody.innerHTML = "";
@@ -346,7 +333,6 @@ async function loadAnalyticsData() {
     console.error("Analytics load error:", err);
   }
 }
-
 
 // === Verification Requests (Admin) ===
 async function loadVerificationRequests() {
@@ -376,7 +362,6 @@ async function loadVerificationRequests() {
     console.error("Load requests error:", err);
   }
 }
-
 
 // === User Management ===
 async function loadUsersData() {
@@ -442,6 +427,37 @@ async function deleteUser(email) {
   loadUsersData();
 }
 
+// === NEW: Add New User ===
+async function addNewUser(e) {
+  e.preventDefault();
+  const fullName = document.getElementById("newFullName").value.trim();
+  const email = document.getElementById("newEmail").value.trim();
+  const role = document.getElementById("newRole").value;
+  const status = document.getElementById("newStatus").value;
+  const msgEl = document.getElementById("addUserMsg");
+
+  if (!fullName || !email || !role || !status) {
+    msgEl.textContent = "⚠️ All fields are required.";
+    msgEl.style.color = "red";
+    return;
+  }
+
+  try {
+    await db.collection("roles").doc(email).set({ email, role });
+    await db.collection("users").doc(email).set({
+      fullName, email, role, status,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    msgEl.textContent = `✅ User ${email} added successfully!`;
+    msgEl.style.color = "green";
+    document.getElementById("addUserForm").reset();
+    loadUsersData();
+  } catch (err) {
+    msgEl.textContent = "❌ Error adding user: " + err.message;
+    msgEl.style.color = "red";
+  }
+}
 
 // === Expose globally ===
 window.loginUser = loginUser;
@@ -449,14 +465,4 @@ window.signupUser = signupUser;
 window.signOutUser = signOutUser;
 window.addLicense = addLicense;
 window.loadDashboardData = loadDashboardData;
-window.loadLicensesTable = loadLicensesTable;
-window.saveLicenseRow = saveLicenseRow;
-window.verifyLicense = verifyLicense;
-window.loadAnalyticsData = loadAnalyticsData;
-window.loadVerificationRequests = loadVerificationRequests;
-window.loadUsersData = loadUsersData;
-window.approveUser = approveUser;
-window.disableUser = disableUser;
-window.promoteUser = promoteUser;
-window.demoteUser = demoteUser;
-window.deleteUser = deleteUser;
+window.loadLicensesTable = loadLicenses
