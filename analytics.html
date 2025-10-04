@@ -68,6 +68,15 @@
       <!-- Recent Verifications Table -->
       <section class="panel">
         <h3><i class="fas fa-history"></i> <span data-i18n="recentVerifications">Recent Verifications</span></h3>
+
+        <!-- Search Logs -->
+        <input type="text" id="analyticsSearch" placeholder="Search logs by license, org, or country..." onkeyup="filterAnalytics()">
+
+        <!-- Export Analytics -->
+        <button class="btn-export" onclick="exportTableToCSV('verificationLogs','analytics')">
+          📥 Export Analytics
+        </button>
+
         <table class="table">
           <thead>
             <tr>
