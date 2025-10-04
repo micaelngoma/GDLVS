@@ -2,9 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>GDLVS - Verification Portal</title>
-
-  <!-- Styles -->
+  <title>GDLVS - Verification</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
@@ -13,13 +11,12 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-  <!-- i18n + jQuery -->
+  <!-- i18n -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
-  <!-- App Logic -->
   <script defer src="script.js"></script>
 </head>
 <body>
@@ -35,8 +32,9 @@
   <nav>
     <a href="dashboard.html"><i class="fas fa-home"></i> <span data-i18n="dashboard">Dashboard</span></a>
     <a href="verify.html" class="active"><i class="fas fa-search"></i> <span data-i18n="verificationPortal">Verification</span></a>
-    <a href="add_license.html"><i class="fas fa-id-card"></i> <span data-i18n="addLicense">Add License</span></a>
+    <a href="add_licenses.html"><i class="fas fa-id-card"></i> <span data-i18n="addLicense">Add License</span></a>
     <a href="users.html"><i class="fas fa-users-cog"></i> <span data-i18n="userManagement">User Management</span></a>
+    <!-- Admin-only nav -->
     <a id="navVerificationRequests" href="verification_requests.html" style="display:none;">
       <i class="fas fa-inbox"></i> <span data-i18n="verificationRequests">Verification Requests</span>
     </a>
@@ -44,33 +42,26 @@
   </nav>
 
   <!-- Verification Form -->
-  <main>
-    <div class="container">
-      <form id="verifyForm" onsubmit="verifyLicense(event)">
-        <label for="verifyLicenseNumber" data-i18n="licenseNumber">License Number</label>
-        <input type="text" id="verifyLicenseNumber" required>
+  <div class="container">
+    <form id="verifyForm" onsubmit="verifyLicense(event)">
+      <label data-i18n="licenseNumber">License Number</label>
+      <input type="text" id="verifyLicenseNumber" required>
 
-        <label for="verifyOrg" data-i18n="organization">Requesting Organization</label>
-        <input type="text" id="verifyOrg">
+      <label data-i18n="organization">Requesting Organization</label>
+      <input type="text" id="verifyOrg">
 
-        <label for="verifyCountry" data-i18n="country">Country</label>
-        <input type="text" id="verifyCountry">
+      <label data-i18n="country">Country</label>
+      <input type="text" id="verifyCountry">
 
-        <label for="verifyPurpose" data-i18n="purpose">Purpose of Verification</label>
-        <textarea id="verifyPurpose"></textarea>
+      <label data-i18n="purpose">Purpose of Verification</label>
+      <textarea id="verifyPurpose"></textarea>
 
-        <button type="submit">
-          <i class="fas fa-search"></i> <span data-i18n="verify">Verify</span>
-        </button>
-      </form>
+      <button type="submit"><i class="fas fa-search"></i> <span data-i18n="verify">Verify</span></button>
+    </form>
 
-      <!-- Results Panel -->
-      <div id="verifyResult" class="panel" style="display:none;"></div>
-
-      <!-- Message Feedback -->
-      <p id="msg" class="muted"></p>
-    </div>
-  </main>
+    <!-- Results Panel -->
+    <div id="verifyResult" class="panel" style="display:none;"></div>
+  </div>
 
   <!-- Footer -->
   <footer>
@@ -81,24 +72,5 @@
       <option value="ja">🇯🇵 日本語</option>
     </select>
   </footer>
-
-  <!-- Inline Firebase Role Control -->
-  <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      firebase.auth().onAuthStateChanged(async (user) => {
-        if (!user) {
-          window.location.href = "index.html";
-          return;
-        }
-        const db = firebase.firestore();
-        const roleDoc = await db.collection("roles").doc(user.email).get();
-        const role = roleDoc.exists ? roleDoc.data().role : "verifier";
-
-        // Show navVerificationRequests only for admins
-        const navReq = document.getElementById("navVerificationRequests");
-        if (role === "admin") navReq.style.display = "inline-block";
-      });
-    });
-  </script>
 </body>
 </html>
