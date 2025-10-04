@@ -174,17 +174,16 @@ button.inline:hover { background: #1e2d3c; }
   max-width: 1000px;
 }
 
-/* ===== TABLES (default) ===== */
+/* ===== TABLES ===== */
 .table {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0 6px;       /* soft row gaps on dashboard */
+  border-spacing: 0 6px;
   margin-top: 16px;
-  box-sizing: border-box;
 }
 .table th, .table td {
   border: 1px solid #eee;
-  padding: 10px 12px;
+  padding: 10px 14px;
   text-align: left;
   vertical-align: middle;
   background: #fff;
@@ -194,7 +193,7 @@ button.inline:hover { background: #1e2d3c; }
   font-weight: bold;
 }
 
-/* === Dashboard table input spacing & column sizing === */
+/* Dashboard Table Inputs (fix overlap + class width) */
 .table input[type="date"],
 .table select {
   width: 95%;
@@ -204,45 +203,69 @@ button.inline:hover { background: #1e2d3c; }
   border: 1px solid #ccc;
   border-radius: 4px;
 }
-.table td select[data-field="status"] { margin-left: 8px; }
 
-/* Wider "Class" + explicit widths to prevent overlap */
-.table td:nth-child(3) { width: 140px; } /* Class */
+.table td:nth-child(3) { width: 140px; } /* Class column wider */
 .table td:nth-child(5) { width: 140px; } /* Expiry Date */
 .table td:nth-child(6) { width: 120px; } /* Status */
 .table td:nth-child(7) { width: 80px; }  /* Action */
+.table td select[data-field="status"] { margin-left: 8px; }
 
 /* ===== VERIFICATION REQUESTS PAGE ===== */
-/* Only the panel that CONTAINS #requestsTable should be fully collapsed & fixed layout,
-   so it aligns perfectly with the search + export bar and stays inside the white card. */
-.panel:has(#requestsTable) .table {
-  border-collapse: collapse;   /* remove row gaps here */
-  border-spacing: 0;
-  table-layout: fixed;         /* lock width to panel */
+.verification-container {
+  max-width: 1000px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 30px;
+}
+
+.verification-container h2 {
+  margin-bottom: 12px;
+  font-size: 1.4rem;
+}
+
+.verification-container input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.verification-container .btn-export {
+  width: 100%;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.verification-container .table {
+  width: 100%;
+  border-collapse: collapse;
   margin-top: 16px;
 }
 
-/* Column widths for requests table (sum ~100%) */
-#requestsTable td,
-#requestsTable th {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+.verification-container .table th,
+.verification-container .table td {
+  border: 1px solid #eee;
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: middle;
+  background: #fff;
 }
-#requestsTable td:nth-child(1),
-#requestsTable th:nth-child(1) { width: 16%; } /* License Number */
-#requestsTable td:nth-child(2),
-#requestsTable th:nth-child(2) { width: 16%; } /* Organization */
-#requestsTable td:nth-child(3),
-#requestsTable th:nth-child(3) { width: 10%; } /* Country */
-#requestsTable td:nth-child(4),
-#requestsTable th:nth-child(4) { width: 22%; } /* Email */
-#requestsTable td:nth-child(5),
-#requestsTable th:nth-child(5) { width: 14%; } /* Purpose */
-#requestsTable td:nth-child(6),
-#requestsTable th:nth-child(6) { width: 10%; } /* Result */
-#requestsTable td:nth-child(7),
-#requestsTable th:nth-child(7) { width: 12%; } /* Requested At */
+
+.verification-container .table th {
+  background: #f2f2f2;
+  font-weight: bold;
+}
+
+/* Align Requested At properly */
+#requestsTable td:last-child {
+  width: 180px;
+  white-space: nowrap;
+  text-align: left;
+}
 
 /* ===== FOOTER ===== */
 footer {
