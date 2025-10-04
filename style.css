@@ -6,7 +6,7 @@ body {
   color: #333;
 }
 
-/* Header */
+/* ===== HEADER ===== */
 header {
   background: #2a3f54;
   color: white;
@@ -17,7 +17,7 @@ header {
 }
 header h1 { margin: 0; }
 header button {
-  width: auto;              /* Compact logout */
+  width: auto;
   padding: 8px 12px;
   border-radius: 4px;
   background: #1e2d3c;
@@ -27,7 +27,7 @@ header button {
 }
 header button:hover { background: #16222e; }
 
-/* Nav */
+/* ===== NAV ===== */
 nav {
   background: #fff;
   border-bottom: 1px solid #ddd;
@@ -49,33 +49,34 @@ nav a.active {
   padding-bottom: 4px;
 }
 nav div {
-  margin-left: auto; /* For right-aligned section (Verification + Analytics) */
+  margin-left: auto;
   display: flex;
   gap: 15px;
 }
 
-/* Containers */
+/* ===== CONTAINERS ===== */
 .container, .login-container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 40px auto;
-  padding: 20px;
+  padding: 25px;
   background: #fff;
   border-radius: 6px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 .login-container { text-align: center; }
 
-/* Inputs */
+/* ===== INPUTS ===== */
 input, select, textarea, button {
   width: 100%;
   padding: 10px;
   margin: 8px 0;
   border: 1px solid #ccc;
   border-radius: 4px;
+  box-sizing: border-box;
 }
 textarea { resize: vertical; }
 
-/* Search Inputs (Users, Licenses, Requests, Analytics) */
+/* ===== SEARCH BARS ===== */
 #userSearch, #licenseSearch, #requestSearch, #analyticsSearch {
   width: 100%;
   padding: 10px;
@@ -84,15 +85,18 @@ textarea { resize: vertical; }
   border-radius: 4px;
 }
 
-/* Default Buttons */
+/* ===== BUTTONS ===== */
 button {
   background: #2a3f54;
   color: white;
   cursor: pointer;
+  border: none;
+  border-radius: 4px;
 }
 button:hover { background: #1e2d3c; }
+
 button.inline {
-  width: auto;              /* For table action buttons */
+  width: auto;
   padding: 6px 10px;
   margin-right: 6px;
   border: none;
@@ -102,9 +106,9 @@ button.inline {
 }
 button.inline:hover { background: #1e2d3c; }
 
-/* Custom Buttons */
+/* ===== CUSTOM BUTTONS ===== */
 .btn-add {
-  background: #27ae60; /* green */
+  background: #27ae60;
   color: #fff;
   padding: 6px 12px;
   border: none;
@@ -113,7 +117,7 @@ button.inline:hover { background: #1e2d3c; }
 .btn-add:hover { background: #219150; }
 
 .btn-edit {
-  background: #2980b9; /* blue */
+  background: #2980b9;
   color: #fff;
   padding: 6px 12px;
   border: none;
@@ -122,7 +126,7 @@ button.inline:hover { background: #1e2d3c; }
 .btn-edit:hover { background: #216699; }
 
 .btn-delete {
-  background: #c0392b; /* red */
+  background: #c0392b;
   color: #fff;
   padding: 6px 12px;
   border: none;
@@ -131,7 +135,7 @@ button.inline:hover { background: #1e2d3c; }
 .btn-delete:hover { background: #a93226; }
 
 .btn-export {
-  background: #8e44ad; /* purple */
+  background: #8e44ad;
   color: #fff;
   padding: 8px 14px;
   border: none;
@@ -141,7 +145,7 @@ button.inline:hover { background: #1e2d3c; }
 }
 .btn-export:hover { background: #732d91; }
 
-/* Dashboard cards */
+/* ===== DASHBOARD CARDS ===== */
 .dashboard-cards {
   display: flex;
   gap: 20px;
@@ -159,41 +163,119 @@ button.inline:hover { background: #1e2d3c; }
 .card.active { background: #27ae60; }
 .card i { display: block; margin-bottom: 8px; }
 
-/* Panels (used in verify + dashboard tables) */
+/* ===== PANELS ===== */
 .panel {
   background: #fff;
   border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-  padding: 16px;
-  margin: 16px 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 1000px;
 }
 
-/* Tables */
+/* ===== TABLES ===== */
 .table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0 6px;
   margin-top: 16px;
 }
 .table th, .table td {
   border: 1px solid #eee;
-  padding: 8px;
+  padding: 10px 12px;
   text-align: left;
+  vertical-align: middle;
+  background: #fff;
 }
 .table th {
   background: #f2f2f2;
   font-weight: bold;
 }
 
-/* Language Switcher */
-footer { text-align: center; margin-top: 20px; }
+/* Dashboard Table Inputs (fix for Expiry/Status overlap) */
+.table input[type="date"],
+.table select {
+  width: 95%;
+  padding: 6px 8px;
+  margin-right: 5px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.table td select[data-field="status"] {
+  margin-left: 8px; /* Add clear spacing after expiry date */
+}
+
+/* ===== VERIFICATION REQUESTS PAGE ===== */
+.verification-container {
+  max-width: 1000px;
+  margin: 30px auto;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  padding: 25px;
+}
+
+.verification-container h2 {
+  margin-bottom: 10px;
+}
+
+.verification-container input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.verification-container .btn-export {
+  width: 100%;
+  display: block;
+  text-align: center;
+  padding: 10px;
+  font-weight: bold;
+}
+
+.verification-container .table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+.verification-container .table th,
+.verification-container .table td {
+  border: 1px solid #eee;
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: middle;
+  background: #fff;
+}
+
+.verification-container .table th {
+  background: #f2f2f2;
+  font-weight: bold;
+}
+
+/* Align Requested At properly */
+#requestsTable td:last-child {
+  width: 160px;
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* ===== FOOTER ===== */
+footer {
+  text-align: center;
+  margin-top: 30px;
+}
 #languageSwitcher {
-  width: auto;              /* Compact width */
+  width: auto;
   padding: 6px 10px;
   border-radius: 4px;
 }
 
-/* Muted text (approval notices etc.) */
-.muted { 
-  color: #666; 
-  font-size: 0.95rem; 
+/* ===== MUTED TEXT ===== */
+.muted {
+  color: #666;
+  font-size: 0.95rem;
 }
