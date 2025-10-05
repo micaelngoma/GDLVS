@@ -17,18 +17,15 @@
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
+  <!-- Core App Logic -->
   <script defer src="script.js"></script>
 </head>
 <body>
-  <!-- Header -->
   <header>
     <h1><i class="fas fa-search"></i> <span data-i18n="verificationPortal">Verification Portal</span></h1>
-    <button onclick="signOutUser()">
-      <i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span>
-    </button>
+    <button onclick="signOutUser()"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></button>
   </header>
 
-  <!-- Navigation -->
   <nav>
     <a href="dashboard.html"><i class="fas fa-home"></i> <span data-i18n="dashboard">Dashboard</span></a>
     <a href="verify.html" class="active"><i class="fas fa-search"></i> <span data-i18n="verificationPortal">Verification</span></a>
@@ -40,29 +37,33 @@
     <a href="analytics.html"><i class="fas fa-chart-bar"></i> <span data-i18n="analytics">Analytics</span></a>
   </nav>
 
-  <!-- Verification Form -->
   <div class="container">
-    <form id="verifyForm" onsubmit="verifyLicense(event)" autocomplete="off">
+    <form id="verifyForm" onsubmit="verifyLicense(event)">
       <label data-i18n="licenseNumber">License Number</label>
-      <input type="text" id="verifyLicenseNumber" required autofocus>
+      <input type="text" id="verifyLicenseNumber" required>
 
       <label data-i18n="organization">Requesting Organization</label>
-      <input type="text" id="verifyOrg" placeholder="(optional)">
+      <input type="text" id="verifyOrg">
 
       <label data-i18n="country">Country</label>
-      <input type="text" id="verifyCountry" placeholder="(optional)">
+      <input type="text" id="verifyCountry">
 
       <label data-i18n="purpose">Purpose of Verification</label>
-      <textarea id="verifyPurpose" placeholder="(optional)"></textarea>
+      <textarea id="verifyPurpose"></textarea>
 
       <button type="submit"><i class="fas fa-search"></i> <span data-i18n="verify">Verify</span></button>
     </form>
 
-    <!-- Results Panel -->
     <div id="verifyResult" class="panel" style="display:none;"></div>
+
+    <!-- Verify Next container -->
+    <div id="verifyNextContainer" style="display:none; margin-top:15px;">
+      <button type="button" id="verifyNextBtn" class="inline">
+        <i class="fas fa-plus"></i> Verify Next Driver License
+      </button>
+    </div>
   </div>
 
-  <!-- Footer -->
   <footer>
     <label for="languageSwitcher"><i class="fas fa-globe"></i></label>
     <select id="languageSwitcher">
