@@ -274,210 +274,102 @@ async function saveLicenseRow(licenseNumber, btn) {
 // === Verify License (Instant Result) ===
 async function verifyLicense(e) {
   if (e) e.preventDefault();
+
   const licenseNumber = document.getElementById("verifyLicenseNumber").value.trim();
   const requestingOrg = document.getElementById("verifyOrg")?.value.trim() || "";
   const country = document.getElementById("verifyCountry")?.value.trim() || "";
   const purpose = document.getElementById("verifyPurpose")?.value.trim() || "";
   const resultEl = document.getElementById("verifyResult");
+
   if (!licenseNumber) { showMsg("⚠️ License number required"); return; }
+
   try {
-    const doc = await db.collection("licenses").doc(licenseNumber).get();
-    const found = doc.exists;
-    const result = found ? "License found" : "License not found";
+    // lookup license doc
+    const docRef = await db.collection("licenses").doc(licenseNumber).get();
+    const found = docRef.exists;
+    const resultText = found ? "License found" : "License not found";
+
+    // Save verification request for analytics / admin
     await db.collection("verifications").add({
-      licenseNumber, requestingOrg, country,
+      licenseNumber,
+      requestingOrg,
+      country,
       email: auth.currentUser?.email || "",
-      purpose, result,
+      purpose,
+      result: resultText,
       verifiedAt: firebase.firestore.FieldValue.serverTimestamp(),
       verifiedBy: auth.currentUser?.uid || ""
     });
+
+    // Build details display
+    let detailsHtml = `<h3>${resultText}</h3>
+      <p><strong>License #:</strong> ${licenseNumber}</p>`;
+
+    if (found) {
+      const d = docRef.data() || {};
+      // Show license fields if present in DB
+      detailsHtml += `
+        <p><strong>Full name:</strong> ${d.fullName || "—"}</p>
+        <p><strong>Class:</strong> ${d.class || "—"}</p>
+        <p><strong>Issue date:</strong> ${d.issueDate || "—"}</p>
+        <p><strong>Expiry date:</strong> ${d.expiryDate || "—"}</p>
+        <p><strong>Status:</strong> ${d.status || "—"}</p>`;
+    }
+
+    // Show requesting details (even if license not found)
+    detailsHtml += `
+      <hr>
+      <p><strong>Requesting organization:</strong> ${requestingOrg || "—"}</p>
+      <p><strong>Country:</strong> ${country || "—"}</p>
+      <p><strong>Purpose:</strong> ${purpose || "—"}</p>`;
+
+    // Add a Verify Next button so user can immediately verify another license
+    detailsHtml += `
+      <div style="margin-top:16px;">
+        <button id="verifyNextBtn" class="inline" type="button"><i class="fas fa-plus"></i> Verify Next</button>
+      </div>`;
+
+    // Display
     if (resultEl) {
       resultEl.style.display = "block";
-      resultEl.innerHTML = `
-        <h3>${result}</h3>
-        <p><strong>License #:</strong> ${licenseNumber}</p>
-        <p><strong>Organization:</strong> ${requestingOrg}</p>
-        <p><strong>Country:</strong> ${country}</p>
-        <p><strong>Purpose:</strong> ${purpose}</p>`;
+      resultEl.innerHTML = detailsHtml;
+      resultEl.scrollIntoView({ behavior: "smooth", block: "center" });
     }
-    showMsg(`✅ ${result}`, true);
-  } catch (err) { console.error("verifyLicense error:", err); }
+
+    showMsg(`✅ ${resultText}`, true);
+
+    // Attach handler to Verify Next
+    setTimeout(() => {
+      const btn = document.getElementById("verifyNextBtn");
+      if (btn) {
+        btn.addEventListener("click", () => {
+          // Reset form fields but keep language or other UI intact
+          const form = document.getElementById("verifyForm");
+          if (form) form.reset();
+
+          // Hide result panel
+          if (resultEl) {
+            resultEl.style.display = "none";
+            resultEl.innerHTML = "";
+          }
+
+          // focus license input for quicker next verification
+          const input = document.getElementById("verifyLicenseNumber");
+          if (input) {
+            input.focus();
+            // small UX: select text so user can type new quickly (if browser supports)
+            input.select && input.select();
+          }
+        }, { once: true });
+      }
+    }, 50);
+
+  } catch (err) {
+    console.error("verifyLicense error:", err);
+    showMsg("❌ Error verifying license: " + err.message);
+  }
 }
 
-// === Analytics Data ===
-async function loadAnalyticsData() {
-  try {
-    const snapshot = await db.collection("verifications").orderBy("verifiedAt", "desc").limit(10).get();
-    let total = 0, success = 0, fail = 0;
-    const tbody = document.getElementById("verificationLogs");
-    if (!tbody) return;
-    tbody.innerHTML = "";
-    snapshot.forEach(doc => {
-      const d = doc.data(); total++;
-      if (d.result === "License found") success++; else fail++;
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${d.licenseNumber}</td>
-        <td>${d.requestingOrg || ""}</td>
-        <td>${d.country || ""}</td>
-        <td>${d.result || ""}</td>
-        <td>${d.verifiedAt ? d.verifiedAt.toDate().toLocaleString() : ""}</td>`;
-      tbody.appendChild(tr);
-    });
-    document.getElementById("totalVerifications").innerText = total;
-    document.getElementById("successfulVerifications").innerText = success;
-    document.getElementById("failedVerifications").innerText = fail;
-  } catch (err) { console.error("Analytics load error:", err); }
-}
-
-// === Verification Requests (Admin) ===
-async function loadVerificationRequests() {
-  try {
-    const snapshot = await db.collection("verifications").orderBy("verifiedAt", "desc").get();
-    const tbody = document.getElementById("requestsTable");
-    if (!tbody) return;
-    tbody.innerHTML = "";
-    if (snapshot.empty) { tbody.innerHTML = "<tr><td colspan='7'>No verification requests</td></tr>"; return; }
-    snapshot.forEach(doc => {
-      const d = doc.data();
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${d.licenseNumber || ""}</td>
-        <td>${d.requestingOrg || ""}</td>
-        <td>${d.country || ""}</td>
-        <td>${d.email || ""}</td>
-        <td>${d.purpose || ""}</td>
-        <td>${d.result || ""}</td>
-        <td>${d.verifiedAt ? d.verifiedAt.toDate().toLocaleString() : ""}</td>`;
-      tbody.appendChild(tr);
-    });
-  } catch (err) { console.error("Load requests error:", err); }
-}
-
-// === User Management (Enhanced) ===
-async function loadUsersData() {
-  try {
-    const usersSnap = await db.collection("users").get();
-    const rolesSnap = await db.collection("roles").get();
-    const roleMap = {};
-    rolesSnap.forEach(doc => roleMap[doc.id] = (doc.data().role || "verifier"));
-
-    const tbody = document.getElementById("usersTable");
-    if (!tbody) return;
-    tbody.innerHTML = "";
-    if (usersSnap.empty) { tbody.innerHTML = "<tr><td colspan='6'>No users found</td></tr>"; return; }
-
-    usersSnap.forEach(doc => {
-      const u = doc.data();
-      const role = roleMap[u.email] || u.role || "verifier";
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td contenteditable="true" data-field="fullName">${u.fullName || ""}</td>
-        <td>${u.email}</td>
-        <td>
-          <select data-field="role">
-            <option ${role==="verifier"?"selected":""}>verifier</option>
-            <option ${role==="admin"?"selected":""}>admin</option>
-          </select>
-        </td>
-        <td>
-          <select data-field="status">
-            <option ${u.status==="approved"?"selected":""}>approved</option>
-            <option ${u.status==="pending"?"selected":""}>pending</option>
-            <option ${u.status==="disabled"?"selected":""}>disabled</option>
-          </select>
-        </td>
-        <td>
-          <button class="btn-edit" onclick="updateUserRow('${u.email}', this)">Update</button>
-          <button class="btn-delete" onclick="deleteUser('${u.email}')">Delete</button>
-        </td>`;
-      tbody.appendChild(tr);
-    });
-  } catch (err) { console.error("User load error:", err); }
-}
-
-async function updateUserRow(email, btn) {
-  try {
-    const tr = btn.closest("tr");
-    const updates = {};
-    tr.querySelectorAll("[data-field]").forEach(el => {
-      const key = el.getAttribute("data-field");
-      updates[key] = (el.tagName === "TD") ? el.textContent.trim() : el.value;
-    });
-
-    await db.collection("users").doc(email).update({
-      fullName: updates.fullName,
-      status: updates.status
-    });
-    await db.collection("roles").doc(email).set({ role: updates.role }, { merge: true });
-
-    showMsg("✅ User updated", true);
-    loadUsersData();
-  } catch (err) { console.error("updateUserRow error:", err); }
-}
-
-async function deleteUser(email) {
-  if (!confirm(`Are you sure you want to delete ${email}?`)) return;
-  try {
-    await db.collection("users").doc(email).delete();
-    await db.collection("roles").doc(email).delete();
-    showMsg("🗑️ User deleted", true);
-    loadUsersData();
-  } catch (err) { console.error("deleteUser error:", err); }
-}
-
-async function addNewUser(e) {
-  e.preventDefault();
-  const fullName = document.getElementById("newUserName").value.trim();
-  const email = document.getElementById("newUserEmail").value.trim();
-  const role = document.getElementById("newUserRole").value;
-  if (!fullName || !email) { showMsg("⚠️ Name and email required"); return; }
-
-  try {
-    await db.collection("users").doc(email).set({
-      email, fullName, role, status: "approved",
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    await db.collection("roles").doc(email).set({ email, role });
-    showMsg("✅ User added", true);
-    document.getElementById("addUserForm").reset();
-    loadUsersData();
-  } catch (err) { console.error("addNewUser error:", err); }
-}
-
-// === Filters ===
-function filterUsers() {
-  const query = document.getElementById("userSearch").value.toLowerCase();
-  const rows = document.querySelectorAll("#usersTable tr");
-  rows.forEach(row => {
-    const text = row.innerText.toLowerCase();
-    row.style.display = text.includes(query) ? "" : "none";
-  });
-}
-function filterLicenses() {
-  const query = document.getElementById("licenseSearch").value.toLowerCase();
-  const rows = document.querySelectorAll("#licensesTable tbody tr");
-  rows.forEach(row => {
-    const text = row.innerText.toLowerCase();
-    row.style.display = text.includes(query) ? "" : "none";
-  });
-}
-function filterRequests() {
-  const query = document.getElementById("requestSearch").value.toLowerCase();
-  const rows = document.querySelectorAll("#requestsTable tr");
-  rows.forEach(row => {
-    const text = row.innerText.toLowerCase();
-    row.style.display = text.includes(query) ? "" : "none";
-  });
-}
-function filterAnalytics() {
-  const query = document.getElementById("analyticsSearch").value.toLowerCase();
-  const rows = document.querySelectorAll("#verificationLogs tr");
-  rows.forEach(row => {
-    const text = row.innerText.toLowerCase();
-    row.style.display = text.includes(query) ? "" : "none";
-  });
-}
 
 // === Export CSV with Date ===
 function exportTableToCSV(tableId, baseFilename) {
