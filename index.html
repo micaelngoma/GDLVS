@@ -3,65 +3,48 @@
 <head>
   <meta charset="UTF-8" />
   <title>GDLVS - Login</title>
-
-  <!-- Styles -->
   <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
-  <!-- Firebase SDKs -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <!-- Firebase v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
   <!-- i18n + jQuery -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
-
-  <!-- App -->
   <script defer src="script.js"></script>
 </head>
 <body>
-  <!-- Background -->
   <div class="background-image"></div>
 
-  <!-- Welcome / Hero -->
   <section class="welcome-section">
     <i class="fas fa-car car-hero" aria-hidden="true"></i>
     <h1 data-i18n="welcomeTitle">Welcome</h1>
     <p class="welcome-text" data-i18n="welcomeMessage">
-      Welcome to the Gabon Driver’s License Verification System — a secure platform designed to
+      Welcome to the <strong>Gabon Driver’s License Verification System (GDLVS)</strong> — a secure platform designed to
       verify the authenticity of Gabonese driver’s license IDs.
     </p>
   </section>
 
-  <!-- Login Card -->
   <div class="login-container">
     <h2><i class="fas fa-id-card"></i> <span data-i18n="login">Login</span></h2>
-
     <form id="loginForm" onsubmit="loginUser(event)">
-      <input type="email" id="email" required data-i18n="[placeholder]emailPlaceholder"
-             placeholder="Email" />
-      <input type="password" id="password" required data-i18n="[placeholder]passwordPlaceholder"
-             placeholder="Password" />
+      <input type="email" id="email" required data-i18n="[placeholder]emailPlaceholder" placeholder="Email" />
+      <input type="password" id="password" required data-i18n="[placeholder]passwordPlaceholder" placeholder="Password" />
       <button type="submit"><i class="fas fa-sign-in-alt"></i> <span data-i18n="login">Login</span></button>
     </form>
-
     <div class="links-row">
       <a href="#" onclick="resetPassword()" data-i18n="forgotPassword">Forgot Password?</a>
     </div>
-
     <div id="msg" class="muted"></div>
-
     <p class="muted">
       <span data-i18n="noAccount">Don’t have an account?</span>
-      <a href="signup.html" data-i18n="signupHere">Sign up here</a>
+      <a href="request_access.html" data-i18n="requestAccessHere">Request access here</a>
     </p>
   </div>
 
-  <!-- Footer / Language -->
   <footer>
     <label for="languageSwitcher"><i class="fas fa-globe"></i></label>
     <select id="languageSwitcher">
