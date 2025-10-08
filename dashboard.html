@@ -62,10 +62,18 @@
       display: block;
     }
 
-    /* Wider status column */
+    /* 🔹 Stretch Class and Status Columns for better readability */
+    #licensesTable th:nth-child(3),
+    #licensesTable td:nth-child(3) {
+      width: 200px !important;
+      min-width: 200px;
+      white-space: nowrap;
+    }
+
     #licensesTable th:nth-child(6),
     #licensesTable td:nth-child(6) {
-      width: 120px;
+      width: 180px !important;
+      min-width: 180px;
       white-space: nowrap;
     }
 
