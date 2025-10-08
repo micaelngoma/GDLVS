@@ -22,13 +22,23 @@
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
     (function(){
-      // ✅ Initialize EmailJS with your public key
+      // ✅ Initialize EmailJS with your verified public key
       emailjs.init("TfmaZEvxtz2MNUb70");
     })();
   </script>
 
-  <!-- Main Script -->
-  <script defer src="script.js"></script>
+  <!-- Firebase Config -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
+      authDomain: "gdlvs-2348e.firebaseapp.com",
+      projectId: "gdlvs-2348e",
+      storageBucket: "gdlvs-2348e.appspot.com",
+      messagingSenderId: "358715790318",
+      appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  </script>
 </head>
 
 <body>
@@ -38,22 +48,19 @@
     <h2><i class="fas fa-user-plus"></i> <span data-i18n="requestAccess">Request Access</span></h2>
 
     <form id="requestForm" onsubmit="submitAccessRequest(event)">
-      <input type="text" id="requestFullName" required placeholder="Full Name" data-i18n="[placeholder]fullNamePlaceholder" />
-      <input type="email" id="requestEmail" required placeholder="Email" data-i18n="[placeholder]emailPlaceholder" />
-      <input type="text" id="organization" required placeholder="Organization / Agency" data-i18n="[placeholder]organizationPlaceholder" />
-      <input type="tel" id="phone" required placeholder="Phone Number" data-i18n="[placeholder]phonePlaceholder" />
-      <textarea id="purpose" required rows="4" placeholder="Purpose of access (e.g., license verification)" data-i18n="[placeholder]purposePlaceholder"></textarea>
+      <input type="text" id="requestFullName" required placeholder="Full Name" />
+      <input type="email" id="requestEmail" required placeholder="Email" />
+      <input type="text" id="organization" required placeholder="Organization / Agency" />
+      <input type="tel" id="phone" required placeholder="Phone Number" />
+      <textarea id="purpose" required rows="4" placeholder="Purpose of access (e.g., license verification)"></textarea>
 
-      <button type="submit">
-        <i class="fas fa-paper-plane"></i>
-        <span data-i18n="submitRequest">Submit Request</span>
-      </button>
+      <button type="submit"><i class="fas fa-paper-plane"></i> Submit Request</button>
     </form>
 
     <div id="msg" style="margin-top:10px; font-weight:bold;"></div>
 
-    <p class="muted" data-i18n="approvalNotice">Your request will be reviewed by the administrator.</p>
-    <p class="muted"><span data-i18n="alreadyHave">Already have an account?</span> <a href="index.html" data-i18n="loginHere">Login here</a></p>
+    <p class="muted">Your request will be reviewed by the administrator.</p>
+    <p class="muted">Already have an account? <a href="index.html">Login here</a></p>
   </div>
 
   <footer>
@@ -81,7 +88,7 @@
       msgBox.style.color = "#004aad";
 
       try {
-        // ✅ Save Request in Firestore
+        // ✅ 1. Save to Firestore
         await firebase.firestore().collection("requests").add({
           fullName,
           email,
@@ -92,33 +99,22 @@
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
 
-        // ✅ Send Confirmation Email to User
-        await emailjs.send("service_ddq3kka", "template_gdlvs_confirm", {
-          full_name: fullName,
-          user_email: email,
-          organization,
-          phone,
-          purpose,
+        // ✅ 2. Send email via EmailJS
+        await emailjs.send("service_ddq3kka", "template_inl3jsv", {
+          name: fullName,
+          email: email,
+          organization: organization,
+          phone: phone,
+          purpose: purpose
         });
 
-        // ✅ Send Notification Email to Admin
-        await emailjs.send("service_ddq3kka", "template_gdlvs_admin_alert", {
-          admin_email: "m.ngoma1988@gmail.com",
-          requester_name: fullName,
-          requester_email: email,
-          organization,
-          phone,
-          purpose,
-        });
-
-        // ✅ Display Success Message
-        msgBox.innerHTML = "✅ Your access request has been submitted! You’ll receive a confirmation email within 72 hours.";
+        // ✅ 3. Success message
+        msgBox.innerHTML = "✅ Your request has been submitted successfully! You'll receive a confirmation email within 72 hours.";
         msgBox.style.color = "green";
-
         document.getElementById("requestForm").reset();
 
       } catch (error) {
-        console.error("❌ Error submitting access request:", error);
+        console.error("❌ Error submitting request:", error);
         msgBox.innerHTML = "⚠️ Failed to submit request. Please try again later.";
         msgBox.style.color = "red";
       }
