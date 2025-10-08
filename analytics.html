@@ -5,10 +5,15 @@
   <title>GDLVS - Analytics</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+  <!-- Main Script -->
   <script defer src="script.js"></script>
+
   <style>
     .dashboard-cards {
       display: flex;
@@ -18,14 +23,18 @@
       margin-bottom: 20px;
     }
     .card.inactive { background: #e74c3c; }
+    .card h3 { margin: 10px 0; font-weight: 600; }
+    .card i { font-size: 1.4rem; margin-bottom: 5px; display: block; }
   </style>
 </head>
 <body>
+  <!-- 🔹 HEADER -->
   <header>
     <h1><i class="fas fa-chart-bar"></i> Analytics</h1>
     <button onclick="signOutUser()"><i class="fas fa-sign-out-alt"></i> Logout</button>
   </header>
 
+  <!-- 🔹 NAVIGATION -->
   <nav>
     <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
     <a href="verify.html"><i class="fas fa-search"></i> Verification</a>
@@ -35,34 +44,131 @@
     <a href="analytics.html" class="active"><i class="fas fa-chart-bar"></i> Analytics</a>
   </nav>
 
+  <!-- 🔹 MAIN CONTENT -->
   <main>
     <div class="container">
       <h2><i class="fas fa-chart-line"></i> Verification Insights</h2>
 
+      <!-- 🔹 COUNTERS -->
       <div class="dashboard-cards">
-        <div class="card total"><i class="fas fa-search"></i><h3>Total: <span id="totalVerifications">0</span></h3></div>
-        <div class="card active"><i class="fas fa-check-circle"></i><h3>Successful: <span id="successfulVerifications">0</span></h3></div>
-        <div class="card inactive"><i class="fas fa-times-circle"></i><h3>Unsuccessful: <span id="failedVerifications">0</span></h3></div>
+        <div class="card total">
+          <i class="fas fa-search"></i>
+          <h3>Total: <span id="totalVerifications">0</span></h3>
+        </div>
+        <div class="card active">
+          <i class="fas fa-check-circle"></i>
+          <h3>Successful: <span id="successfulVerifications">0</span></h3>
+        </div>
+        <div class="card inactive">
+          <i class="fas fa-times-circle"></i>
+          <h3>Unsuccessful: <span id="failedVerifications">0</span></h3>
+        </div>
       </div>
 
+      <!-- 🔹 RECENT VERIFICATIONS -->
       <section class="panel">
         <h3><i class="fas fa-history"></i> Recent Verifications</h3>
-        <input type="text" id="analyticsSearch" placeholder="Search logs by license, org, or country..." onkeyup="filterAnalytics()">
-        <button class="btn-export" onclick="exportTableToCSV('verificationLogs','analytics')">📥 Export</button>
+        <div class="table-controls">
+          <input type="text" id="analyticsSearch" placeholder="Search logs by license, org, or country..." onkeyup="filterAnalytics()">
+          <button class="btn-export" onclick="exportTableToCSV('verificationLogs','analytics')">
+            <i class="fas fa-file-export"></i> Export
+          </button>
+        </div>
 
         <div class="verification-table-wrapper">
           <table class="table">
-            <thead><tr><th>License #</th><th>Organization</th><th>Country</th><th>Result</th><th>Date</th></tr></thead>
-            <tbody id="verificationLogs"><tr><td colspan="5">Loading...</td></tr></tbody>
+            <thead>
+              <tr>
+                <th>License #</th>
+                <th>Organization</th>
+                <th>Country</th>
+                <th>Result</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="verificationLogs">
+              <tr><td colspan="5">Loading...</td></tr>
+            </tbody>
           </table>
         </div>
       </section>
     </div>
   </main>
 
+  <!-- 🔹 FOOTER -->
   <footer>
     <label for="languageSwitcher"><i class="fas fa-globe"></i></label>
-    <select id="languageSwitcher"><option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option><option value="ja">🇯🇵 日本語</option></select>
+    <select id="languageSwitcher">
+      <option value="en">🇬🇧 English</option>
+      <option value="fr">🇫🇷 Français</option>
+      <option value="ja">🇯🇵 日本語</option>
+    </select>
   </footer>
+
+  <!-- 🔹 FIRESTORE ANALYTICS HANDLER -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const db = firebase.firestore();
+      const verificationsRef = db.collection("verifications");
+      const tbody = document.getElementById("verificationLogs");
+      const totalEl = document.getElementById("totalVerifications");
+      const successEl = document.getElementById("successfulVerifications");
+      const failEl = document.getElementById("failedVerifications");
+
+      // Real-time listener for analytics
+      verificationsRef.orderBy("verifiedAt", "desc").onSnapshot(snapshot => {
+        let total = 0, success = 0, fail = 0;
+        tbody.innerHTML = "";
+
+        if (snapshot.empty) {
+          tbody.innerHTML = "<tr><td colspan='5'>No verification data available.</td></tr>";
+          totalEl.textContent = 0;
+          successEl.textContent = 0;
+          failEl.textContent = 0;
+          return;
+        }
+
+        snapshot.forEach(doc => {
+          const d = doc.data();
+          total++;
+          const result = (d.result || "").toLowerCase();
+
+          if (result.includes("not found") || result.includes("fail") || result.includes("unsuccessful")) {
+            fail++;
+          } else {
+            success++;
+          }
+
+          const date = d.verifiedAt?.toDate
+            ? d.verifiedAt.toDate().toLocaleString()
+            : (d.verifiedAt || "");
+
+          tbody.innerHTML += `
+            <tr>
+              <td>${d.licenseNumber || ""}</td>
+              <td>${d.requestingOrg || ""}</td>
+              <td>${d.country || ""}</td>
+              <td>${d.result || ""}</td>
+              <td>${date}</td>
+            </tr>`;
+        });
+
+        totalEl.textContent = total;
+        successEl.textContent = success;
+        failEl.textContent = fail;
+      });
+    });
+
+    // 🔍 Simple text search filter
+    function filterAnalytics() {
+      const input = document.getElementById("analyticsSearch").value.toLowerCase();
+      const rows = document.querySelectorAll("#verificationLogs tr");
+
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(input) ? "" : "none";
+      });
+    }
+  </script>
 </body>
 </html>
