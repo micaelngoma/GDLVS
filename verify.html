@@ -4,70 +4,166 @@
   <meta charset="UTF-8" />
   <title>GDLVS - Verification</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <!-- ===== Inline CSS (styled like your dashboard) ===== -->
+  <!-- ===== Inline Professional CSS (Dashboard look) ===== -->
   <style>
-    :root{
-      --brand-dark:#2a3f54; --brand-dark-2:#1e2d3c; --text:#333; --muted:#666;
-      --panel-bg:#fff; --card-shadow:0 2px 6px rgba(0,0,0,0.1);
-      --success:#27ae60; --danger:#e74c3c; --warn:#f1c40f; --info:#2980b9;
-      --bg:#f6f8fb;
+    :root {
+      --brand-dark: #2a3f54;
+      --brand-dark-2: #1e2d3c;
+      --text: #333;
+      --panel-bg: #fff;
+      --muted: #666;
+      --success: #27ae60;
+      --danger: #e74c3c;
+      --info: #2980b9;
+      --bg: #f6f8fb;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;font-family:Arial, sans-serif;color:var(--text);background:var(--bg)}
-    header{
-      background:var(--brand-dark);color:#fff;padding:12px 20px;
-      display:flex;justify-content:space-between;align-items:center
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
     }
-    header h1{margin:0;font-size:1.2rem}
-    header button{background:var(--brand-dark-2);color:#fff;border:0;border-radius:8px;padding:8px 12px;cursor:pointer}
-    header button:hover{background:#16222d}
-    nav{
-      background:#fff;border-bottom:1px solid #eaeaea;padding:10px 20px;display:flex;flex-wrap:wrap;gap:15px
+
+    /* === HEADER === */
+    header {
+      background: var(--brand-dark);
+      color: #fff;
+      padding: 10px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #1b2a38;
     }
-    nav a{color:var(--brand-dark);text-decoration:none;font-weight:bold}
-    nav a.active{border-bottom:2px solid var(--brand-dark);padding-bottom:4px}
-    .container{max-width:980px;margin:22px auto 40px;padding:24px;background:var(--panel-bg);border-radius:10px;box-shadow:var(--card-shadow)}
-    label{display:block;margin-top:8px;font-weight:600}
-    input,textarea,button,select{
-      width:100%;padding:10px;margin:8px 0;border:1px solid #dcdcdc;border-radius:8px;font-size:.98rem;background:#fff
+
+    header h1 {
+      margin: 0;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    textarea{min-height:110px;resize:vertical}
-    button{background:var(--brand-dark);color:#fff;cursor:pointer}
-    button:hover{background:var(--brand-dark-2)}
-    button.inline{width:auto;padding:6px 12px;border-radius:8px}
-    .panel{background:#fff;border-radius:10px;box-shadow:var(--card-shadow);padding:20px;margin:20px auto}
-    footer{text-align:center;margin:24px 0 40px}
-    #languageSwitcher{width:auto;padding:6px 10px;border-radius:8px}
-    .muted{color:var(--muted)}
-    /* Result block styling consistent with your current look */
-    #verifyResult h3{margin:0 0 8px}
-    #verifyResult .ok{color:var(--success);font-weight:700}
-    #verifyResult .bad{color:var(--danger);font-weight:700}
-    @media(max-width:900px){nav{justify-content:center}header{flex-direction:column;gap:8px}.container{width:95%}}
+
+    header button {
+      background: #1f2d3a;
+      color: #fff;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    header button:hover {
+      background: #16222d;
+      transform: scale(1.03);
+    }
+
+    /* === NAVBAR === */
+    nav {
+      background: #fff;
+      border-bottom: 1px solid #eaeaea;
+      padding: 10px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    nav a {
+      color: var(--brand-dark);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    nav a.active {
+      border-bottom: 2px solid var(--brand-dark);
+      padding-bottom: 4px;
+    }
+
+    /* === MAIN CONTAINER === */
+    .container {
+      max-width: 980px;
+      margin: 22px auto 40px;
+      background: var(--panel-bg);
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      padding: 24px;
+    }
+
+    label { font-weight: 600; margin-top: 8px; display: block; }
+    input, textarea, button, select {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #dcdcdc;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+
+    textarea { min-height: 110px; resize: vertical; }
+
+    button {
+      background: var(--brand-dark);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover { background: var(--brand-dark-2); }
+
+    .panel {
+      margin-top: 20px;
+      padding: 18px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      background: #fff;
+    }
+
+    #verifyResult h3 { margin: 0 0 8px; }
+    #verifyResult .ok { color: var(--success); font-weight: 700; }
+    #verifyResult .bad { color: var(--danger); font-weight: 700; }
+
+    footer {
+      text-align: center;
+      margin: 24px 0 40px;
+    }
+
+    #languageSwitcher {
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+
+    @media(max-width: 900px) {
+      nav { justify-content: center; }
+      header { flex-direction: column; gap: 8px; }
+      .container { width: 95%; }
+    }
   </style>
 
-  <!-- i18n + jQuery (for placeholders) -->
+  <!-- ===== i18n + jQuery ===== -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
-  <!-- EmailJS (for admin notifications) -->
+  <!-- ===== EmailJS ===== -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
-    // ✅ Initialize EmailJS (uses your existing public key)
     (function(){ emailjs.init("TfmaZEvxtz2MNUb70"); })();
-    // Set your service/template IDs here (reuse your service; template can be the same or a new one)
     window.EMAILJS_SERVICE_ID = "service_ddq3kka";
-    window.EMAILJS_TEMPLATE_ID = "template_inl3jsv"; /* replace with a dedicated verify template if you have one */
-    window.ADMIN_EMAIL = "m.ngoma1988@gmail.com";    /* admin notification target (optional; can be inside your EmailJS template) */
+    window.EMAILJS_TEMPLATE_ID = "template_inl3jsv";
+    window.ADMIN_EMAIL = "m.ngoma1988@gmail.com";
   </script>
 
-  <!-- Firebase (modular) + page logic -->
+  <!-- ===== Firebase (Modular Import) ===== -->
   <script type="module">
     import { auth, db } from './firebase-config.js';
     import {
@@ -77,87 +173,41 @@
       onAuthStateChanged, signOut
     } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-    /* ========= i18n resources (EN/FR/JA) ========= */
+    /* === i18n translations === */
     const resources = {
-      en: {
-        translation: {
-          verificationPortal: "Verification",
-          logout: "Logout",
-          dashboard: "Dashboard",
-          addLicense: "Add License",
-          userManagement: "User Management",
-          verificationRequests: "Verification Requests",
-          analytics: "Analytics",
-          licenseNumber: "License Number",
-          organization: "Requesting Organization",
-          country: "Country",
-          purpose: "Purpose of Verification",
-          verify: "Verify",
-          placeholders: {
-            licenseNumber: "Enter license number",
-            organization: "Enter requesting organization",
-            country: "Enter country",
-            purpose: "Describe the purpose"
-          },
-          adminOnly: "Requests"
-        }
-      },
-      fr: {
-        translation: {
-          verificationPortal: "Vérification",
-          logout: "Déconnexion",
-          dashboard: "Tableau de bord",
-          addLicense: "Ajouter un permis",
-          userManagement: "Gestion des utilisateurs",
-          verificationRequests: "Demandes de vérification",
-          analytics: "Analytique",
-          licenseNumber: "Numéro du permis",
-          organization: "Organisme demandeur",
-          country: "Pays",
-          purpose: "Objet de la vérification",
-          verify: "Vérifier",
-          placeholders: {
-            licenseNumber: "Saisir le numéro du permis",
-            organization: "Saisir l’organisme",
-            country: "Saisir le pays",
-            purpose: "Décrivez l’objet"
-          },
-          adminOnly: "Demandes"
-        }
-      },
-      ja: {
-        translation: {
-          verificationPortal: "照会",
-          logout: "ログアウト",
-          dashboard: "ダッシュボード",
-          addLicense: "免許を追加",
-          userManagement: "ユーザー管理",
-          verificationRequests: "照会リクエスト",
-          analytics: "分析",
-          licenseNumber: "免許番号",
-          organization: "照会機関",
-          country: "国",
-          purpose: "照会の目的",
-          verify: "照会する",
-          placeholders: {
-            licenseNumber: "免許番号を入力",
-            organization: "機関名を入力",
-            country: "国名を入力",
-            purpose: "目的を入力"
-          },
-          adminOnly: "リクエスト"
-        }
-      }
+      en: { translation: {
+        verificationPortal: "Verification", logout: "Logout",
+        dashboard: "Dashboard", addLicense: "Add License",
+        userManagement: "User Management", verificationRequests: "Verification Requests",
+        analytics: "Analytics", licenseNumber: "License Number",
+        organization: "Requesting Organization", country: "Country",
+        purpose: "Purpose of Verification", verify: "Verify",
+        placeholders: { licenseNumber:"Enter license number", organization:"Enter requesting organization", country:"Enter country", purpose:"Describe the purpose" }
+      }},
+      fr: { translation: {
+        verificationPortal: "Vérification", logout: "Déconnexion",
+        dashboard: "Tableau de bord", addLicense: "Ajouter un permis",
+        userManagement: "Gestion des utilisateurs", verificationRequests: "Demandes de vérification",
+        analytics: "Analytique", licenseNumber: "Numéro du permis",
+        organization: "Organisme demandeur", country: "Pays",
+        purpose: "Objet de la vérification", verify: "Vérifier",
+        placeholders: { licenseNumber:"Saisir le numéro du permis", organization:"Saisir l’organisme", country:"Saisir le pays", purpose:"Décrivez l’objet" }
+      }},
+      ja: { translation: {
+        verificationPortal: "照会", logout: "ログアウト",
+        dashboard: "ダッシュボード", addLicense: "免許を追加",
+        userManagement: "ユーザー管理", verificationRequests: "照会リクエスト",
+        analytics: "分析", licenseNumber: "免許番号",
+        organization: "照会機関", country: "国",
+        purpose: "照会の目的", verify: "照会する",
+        placeholders: { licenseNumber:"免許番号を入力", organization:"機関名を入力", country:"国名を入力", purpose:"目的を入力" }
+      }}
     };
 
-    // Init i18n
-    i18next.use(i18nextBrowserLanguageDetector).init({
-      resources, fallbackLng: "en"
-    }, () => {
+    i18next.use(i18nextBrowserLanguageDetector).init({ resources, fallbackLng: "en" }, () => {
       if (typeof jqueryI18next !== "undefined") {
         jqueryI18next.init(i18next, $, { useOptionsAttr: true });
         $("body").localize();
-        // placeholders
         applyPlaceholders();
       }
     });
@@ -171,9 +221,9 @@
         verifyCountry: p.country,
         verifyPurpose: p.purpose
       };
-      Object.keys(map).forEach(id=>{
+      Object.keys(map).forEach(id => {
         const el = document.getElementById(id);
-        if(el) el.setAttribute("placeholder", map[id]);
+        if (el) el.setAttribute("placeholder", map[id]);
       });
     }
 
@@ -181,109 +231,82 @@
       i18next.changeLanguage(e.target.value, ()=> { $("body").localize(); applyPlaceholders(); });
     });
 
-    // Auth gate: show Requests nav only if admin
+    // Auth and role
     onAuthStateChanged(auth, async (user)=>{
       const reqLink = document.getElementById("navVerificationRequests");
-      if(!user){
-        // Not signed in -> go to login
-        window.location.href = "index.html";
-        return;
-      }
-      // If you keep a roles collection, you can pull it here and toggle visibility.
-      // For now we simply show it for signed-in users; uncomment below if needed.
-      // import { getDoc, doc } from 'firebase/firestore'; (already imported)
-      try{
+      if(!user) return window.location.href="index.html";
+      try {
         const snap = await getDoc(doc(db, "roles", user.email));
         const role = snap.exists() ? (snap.data().role || "verifier") : "verifier";
         if(reqLink) reqLink.style.display = (role === "admin") ? "inline-block" : "none";
-      }catch{ if(reqLink) reqLink.style.display = "none"; }
+      } catch { if(reqLink) reqLink.style.display = "none"; }
     });
 
-    // Sign out handler for header button
     window.signOutUser = () => signOut(auth).then(()=> window.location.href="index.html");
 
-    // ======= Verify handler (keeps your current result layout) =======
+    // === Verify License ===
     window.verifyLicense = async (ev)=>{
-      if(ev) ev.preventDefault();
-      const licenseNumber = document.getElementById("verifyLicenseNumber")?.value.trim();
-      const org = document.getElementById("verifyOrg")?.value.trim();
-      const country = document.getElementById("verifyCountry")?.value.trim();
-      const purpose = document.getElementById("verifyPurpose")?.value.trim();
+      ev.preventDefault();
+      const licenseNumber = document.getElementById("verifyLicenseNumber").value.trim();
+      const org = document.getElementById("verifyOrg").value.trim();
+      const country = document.getElementById("verifyCountry").value.trim();
+      const purpose = document.getElementById("verifyPurpose").value.trim();
       const resultEl = document.getElementById("verifyResult");
       const nextContainer = document.getElementById("verifyNextContainer");
 
       if(!licenseNumber){ alert("⚠️ " + i18next.t("licenseNumber") + " required"); return; }
 
-      try{
-        // Lookup
+      try {
         const snap = await getDoc(doc(db, "licenses", licenseNumber));
         const exists = snap.exists();
         const d = exists ? snap.data() : {};
         const resultText = exists ? "License found" : "License not found";
 
-        // Log to Firestore
         await addDoc(collection(db, "verifications"), {
-          licenseNumber,
-          requestingOrg: org || "",
-          country: country || "",
-          purpose: purpose || "",
-          email: (auth.currentUser && auth.currentUser.email) || "",
-          result: resultText,
-          verifiedAt: serverTimestamp(),
-          verifiedBy: (auth.currentUser && auth.currentUser.uid) || ""
+          licenseNumber, requestingOrg: org || "", country: country || "",
+          purpose: purpose || "", email: auth.currentUser?.email || "",
+          result: resultText, verifiedAt: serverTimestamp(), verifiedBy: auth.currentUser?.uid || ""
         });
 
-        // Email admin (optional)
-        try{
-          if(window.emailjs){
-            await emailjs.send(
-              window.EMAILJS_SERVICE_ID,
-              window.EMAILJS_TEMPLATE_ID,
-              {
-                to_email: window.ADMIN_EMAIL,
-                subject: "GDLVS - New Verification",
-                licenseNumber, org, country, purpose,
-                result: resultText,
-                user_email: (auth.currentUser && auth.currentUser.email) || ""
-              }
-            );
-          }
-        }catch(e){ console.warn("EmailJS error:", e); }
+        try {
+          await emailjs.send(window.EMAILJS_SERVICE_ID, window.EMAILJS_TEMPLATE_ID, {
+            to_email: window.ADMIN_EMAIL, subject: "GDLVS - New Verification",
+            licenseNumber, org, country, purpose, result: resultText,
+            user_email: auth.currentUser?.email || ""
+          });
+        } catch(e){ console.warn("EmailJS error:", e); }
 
-        // Render result block (same structure you’ve been using)
-        if(resultEl){
-          resultEl.style.display = "block";
-          resultEl.innerHTML = `
-            <h3 class="${exists ? 'ok' : 'bad'}">${exists ? "✅ License Found" : "❌ License Not Found"}</h3>
-            <p><strong>License #:</strong> ${licenseNumber}</p>
-            ${exists ? `
-              <p><strong>Full Name:</strong> ${d.fullName || "N/A"}</p>
-              <p><strong>Class:</strong> ${d.class || "N/A"}</p>
-              <p><strong>Issue:</strong> ${d.issueDate || "N/A"}</p>
-              <p><strong>Expiry:</strong> ${d.expiryDate || "N/A"}</p>
-              <p><strong>Status:</strong> ${d.status || "N/A"}</p>
-            ` : ""}
-            <hr>
-            <p><strong>Organization:</strong> ${org || "—"}</p>
-            <p><strong>Country:</strong> ${country || "—"}</p>
-            <p><strong>Purpose:</strong> ${purpose || "—"}</p>
-          `;
-        }
-        if(nextContainer){
-          nextContainer.style.display = "block";
-          document.getElementById("verifyNextBtn").onclick = ()=>{
-            document.getElementById("verifyForm").reset();
-            resultEl.style.display = "none";
-            nextContainer.style.display = "none";
-          };
-        }
-      }catch(err){
+        resultEl.style.display="block";
+        resultEl.innerHTML = `
+          <h3 class="${exists ? 'ok':'bad'}">${exists?'✅ License Found':'❌ License Not Found'}</h3>
+          <p><strong>License #:</strong> ${licenseNumber}</p>
+          ${exists ? `
+            <p><strong>Full Name:</strong> ${d.fullName||'N/A'}</p>
+            <p><strong>Class:</strong> ${d.class||'N/A'}</p>
+            <p><strong>Issue:</strong> ${d.issueDate||'N/A'}</p>
+            <p><strong>Expiry:</strong> ${d.expiryDate||'N/A'}</p>
+            <p><strong>Status:</strong> ${d.status||'N/A'}</p>
+          ` : ""}
+          <hr>
+          <p><strong>Organization:</strong> ${org||"—"}</p>
+          <p><strong>Country:</strong> ${country||"—"}</p>
+          <p><strong>Purpose:</strong> ${purpose||"—"}</p>
+        `;
+
+        nextContainer.style.display="block";
+        document.getElementById("verifyNextBtn").onclick = ()=>{
+          document.getElementById("verifyForm").reset();
+          resultEl.style.display="none";
+          nextContainer.style.display="none";
+        };
+      } catch(err){
         console.error(err);
         alert("❌ " + err.message);
       }
     };
   </script>
 </head>
+
 <body>
   <header>
     <h1><i class="fas fa-search"></i> <span data-i18n="verificationPortal">Verification</span></h1>
