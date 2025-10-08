@@ -21,6 +21,61 @@
 
   <!-- Main Script -->
   <script defer src="script.js"></script>
+
+  <style>
+    /* 🔹 Stat cards smaller and horizontally aligned */
+    .dashboard-cards {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 15px auto 20px;
+      max-width: 900px;
+    }
+    .dashboard-cards .card {
+      flex: 1 1 calc(25% - 10px);
+      min-width: 150px;
+      max-width: 200px;
+      padding: 14px;
+      border-radius: 10px;
+      color: #fff;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .dashboard-cards .card h3 {
+      margin: 5px 0;
+      font-size: 0.9rem;
+    }
+    .dashboard-cards .card h2 {
+      margin: 4px 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+    .card .card-icon {
+      font-size: 1.8rem;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    /* 🔹 Adjust column widths for license table */
+    #licensesTable th:nth-child(3),
+    #licensesTable td:nth-child(3) {
+      width: 160px !important;
+      min-width: 160px;
+      white-space: nowrap;
+    }
+
+    /* 🔹 Panels slightly more compact */
+    .panel {
+      margin: 15px auto;
+      padding: 18px;
+    }
+
+    .verification-table-wrapper {
+      overflow-x: auto;
+    }
+  </style>
 </head>
 <body>
   <!-- 🔹 HEADER -->
@@ -51,7 +106,7 @@
       </div>
       <div class="card active">
         <div class="card-icon">✅</div>
-        <h3>Active Licenses</h3>
+        <h3>Active</h3>
         <h2 id="activeLicenses">0</h2>
       </div>
       <div class="card suspended">
@@ -66,28 +121,7 @@
       </div>
     </section>
 
-    <!-- 🔹 RECENT ACCESS REQUESTS -->
-    <section class="panel">
-      <h2><i class="fas fa-envelope"></i> Recent Access Requests</h2>
-      <div class="verification-table-wrapper">
-        <table class="table" id="recentRequestsTable">
-          <thead>
-            <tr>
-              <th>Full Name</th>
-              <th>Email</th>
-              <th>Organization</th>
-              <th>Status</th>
-              <th>Requested At</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td colspan="5">Loading...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- 🔹 LICENSES TABLE -->
+    <!-- 🔹 LICENSES TABLE (now above requests) -->
     <section class="panel">
       <h2><i class="fas fa-id-badge"></i> Licenses</h2>
       <div class="table-controls">
@@ -116,6 +150,27 @@
       </div>
     </section>
 
+    <!-- 🔹 RECENT ACCESS REQUESTS -->
+    <section class="panel">
+      <h2><i class="fas fa-envelope"></i> Recent Access Requests</h2>
+      <div class="verification-table-wrapper">
+        <table class="table" id="recentRequestsTable">
+          <thead>
+            <tr>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Organization</th>
+              <th>Status</th>
+              <th>Requested At</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="5">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
   </main>
 
   <!-- 🔹 FOOTER -->
@@ -128,15 +183,14 @@
     </select>
   </footer>
 
-  <!-- 🔹 DASHBOARD FIRESTORE HANDLER -->
+  <!-- 🔹 SAME FIRESTORE LOGIC (no changes) -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      // === LICENSE COUNTERS ===
       const db = firebase.firestore();
       const licensesRef = db.collection("licenses");
       const requestsRef = db.collection("requests");
 
-      // Load Licenses Summary
+      // Licenses Summary
       licensesRef.onSnapshot(snapshot => {
         let total = 0, active = 0, suspended = 0, expired = 0;
         const tbody = document.querySelector("#licensesTable tbody");
@@ -172,7 +226,7 @@
         document.getElementById("expiredLicenses").textContent = expired;
       });
 
-      // Load 5 Most Recent Requests
+      // Access Requests
       requestsRef.orderBy("createdAt", "desc").limit(5).onSnapshot(snapshot => {
         const tbody = document.querySelector("#recentRequestsTable tbody");
         tbody.innerHTML = "";
@@ -183,9 +237,7 @@
 
         snapshot.forEach(doc => {
           const r = doc.data();
-          const date = r.createdAt?.toDate
-            ? r.createdAt.toDate().toLocaleString()
-            : (r.createdAt || "");
+          const date = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleString() : (r.createdAt || "");
           tbody.innerHTML += `
             <tr>
               <td>${r.fullName || ""}</td>
@@ -198,7 +250,6 @@
       });
     });
 
-    // View License Action
     function viewLicense(id) {
       alert("License ID: " + id);
     }
