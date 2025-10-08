@@ -5,69 +5,33 @@
   <title>GDLVS - Request Access</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <!-- Firebase v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-  <!-- i18n + jQuery -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
-      authDomain: "gdlvs-2348e.firebaseapp.com",
-      projectId: "gdlvs-2348e",
-      storageBucket: "gdlvs-2348e.appspot.com",
-      messagingSenderId: "358715790318",
-      appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    async function submitRequest(e){
-      e.preventDefault();
-      const fullName = document.getElementById("requestFullName").value.trim();
-      const email = document.getElementById("requestEmail").value.trim();
-      const organization = document.getElementById("organization").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      const purpose = document.getElementById("purpose").value.trim();
-      if(!fullName || !email || !organization || !phone || !purpose){
-        document.getElementById("msg").innerHTML = `<p class="error">⚠️ Please fill in all fields.</p>`;
-        return;
-      }
-      try{
-        await db.collection("requests").add({
-          fullName, email, organization, phone, purpose,
-          status: "pending",
-          submittedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        document.getElementById("msg").innerHTML = `
-          <p class="success">✅ Your access request has been submitted. The administrator will review it within 72 hours.</p>`;
-        document.getElementById("requestForm").reset();
-      }catch(err){
-        document.getElementById("msg").innerHTML = `<p class="error">❌ ${err.message}</p>`;
-      }
-    }
-  </script>
+  <script defer src="script.js"></script>
 </head>
 <body>
   <div class="background-image"></div>
 
   <div class="container">
-    <h2><i class="fas fa-id-card"></i> <span data-i18n="requestAccess">Request Access</span></h2>
-    <form id="requestForm" onsubmit="submitRequest(event)">
+    <h2><i class="fas fa-user-plus"></i> <span data-i18n="requestAccess">Request Access</span></h2>
+
+    <form id="requestForm" onsubmit="submitAccessRequest(event)">
       <input type="text" id="requestFullName" required data-i18n="[placeholder]fullNamePlaceholder" placeholder="Full Name" />
       <input type="email" id="requestEmail" required data-i18n="[placeholder]emailPlaceholder" placeholder="Email" />
-      <input type="text" id="organization" required data-i18n="[placeholder]organizationPlaceholder" placeholder="Organization / Company / Agency" />
+      <input type="text" id="organization" required data-i18n="[placeholder]organizationPlaceholder" placeholder="Organization / Agency" />
       <input type="tel" id="phone" required data-i18n="[placeholder]phonePlaceholder" placeholder="Phone Number" />
-      <textarea id="purpose" required rows="4" data-i18n="[placeholder]purposePlaceholder" placeholder="Purpose of access..."></textarea>
-      <button type="submit"><i class="fas fa-paper-plane"></i> Submit Request</button>
+      <textarea id="purpose" required data-i18n="[placeholder]purposePlaceholder" placeholder="Purpose of access (e.g., license verification)" rows="4"></textarea>
+      <button type="submit"><i class="fas fa-paper-plane"></i> <span data-i18n="submitRequest">Submit Request</span></button>
     </form>
+
     <div id="msg"></div>
-    <p class="muted">
-      <a href="index.html">Back to login</a>
-    </p>
+
+    <p class="muted" data-i18n="approvalNotice">Your request will be reviewed by the administrator.</p>
+    <p class="muted"><span data-i18n="alreadyHave">Already have an account?</span> <a href="index.html" data-i18n="loginHere">Login here</a></p>
   </div>
 
   <footer>
