@@ -5,11 +5,9 @@
   <title>GDLVS - Add License</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <!-- Firebase v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-  <!-- i18n + jQuery -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
@@ -18,7 +16,7 @@
 </head>
 <body>
   <header>
-    <h1><i class="fas fa-id-card"></i> Add License</h1>
+    <h1><i class="fas fa-id-card"></i> <span>Add License</span></h1>
     <button onclick="signOutUser()"><i class="fas fa-sign-out-alt"></i> Logout</button>
   </header>
 
@@ -28,21 +26,17 @@
     <a href="add_licenses.html" class="active"><i class="fas fa-id-card"></i> Add License</a>
     <a href="users.html"><i class="fas fa-users-cog"></i> User Management</a>
     <a href="verification_requests.html"><i class="fas fa-list"></i> Verification Requests</a>
-    <a href="requests.html"><i class="fas fa-inbox"></i> Access Requests</a>
     <a href="analytics.html"><i class="fas fa-chart-line"></i> Analytics</a>
   </nav>
 
   <main>
     <div class="container">
       <h2><i class="fas fa-plus-circle"></i> Add a New License</h2>
-
       <form id="addLicenseForm" onsubmit="addLicense(); return false;">
         <label for="licenseNumber">License Number</label>
-        <input type="text" id="licenseNumber" placeholder="Enter license number" required>
-
+        <input type="text" id="licenseNumber" required placeholder="Enter license number">
         <label for="fullName">Full Name</label>
-        <input type="text" id="fullName" placeholder="Enter full name" required>
-
+        <input type="text" id="fullName" required placeholder="Enter full name">
         <label for="licenseClass">Class</label>
         <select id="licenseClass" required>
           <option value="">-- Select Class --</option>
@@ -50,13 +44,10 @@
           <option value="Class B">Class B</option>
           <option value="Class C">Class C</option>
         </select>
-
         <label for="issueDate">Issue Date</label>
         <input type="date" id="issueDate" required>
-
         <label for="expiryDate">Expiry Date</label>
         <input type="date" id="expiryDate" required>
-
         <button type="submit"><i class="fas fa-save"></i> Save License</button>
         <p id="msg" class="muted"></p>
       </form>
@@ -65,9 +56,7 @@
 
   <footer>
     <label for="languageSwitcher"><i class="fas fa-globe"></i></label>
-    <select id="languageSwitcher">
-      <option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option><option value="ja">🇯🇵 日本語</option>
-    </select>
+    <select id="languageSwitcher"><option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option><option value="ja">🇯🇵 日本語</option></select>
   </footer>
 </body>
 </html>
