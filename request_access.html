@@ -3,16 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <title>GDLVS - Request Access</title>
+
+  <!-- Styles -->
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+  <!-- i18n + jQuery -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
+
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    (function(){
+      // ✅ Initialize EmailJS with your public key
+      emailjs.init("TfmaZEvxtz2MNUb70");
+    })();
+  </script>
+
+  <!-- Main Script -->
   <script defer src="script.js"></script>
 </head>
+
 <body>
   <div class="background-image"></div>
 
@@ -20,15 +38,19 @@
     <h2><i class="fas fa-user-plus"></i> <span data-i18n="requestAccess">Request Access</span></h2>
 
     <form id="requestForm" onsubmit="submitAccessRequest(event)">
-      <input type="text" id="requestFullName" required data-i18n="[placeholder]fullNamePlaceholder" placeholder="Full Name" />
-      <input type="email" id="requestEmail" required data-i18n="[placeholder]emailPlaceholder" placeholder="Email" />
-      <input type="text" id="organization" required data-i18n="[placeholder]organizationPlaceholder" placeholder="Organization / Agency" />
-      <input type="tel" id="phone" required data-i18n="[placeholder]phonePlaceholder" placeholder="Phone Number" />
-      <textarea id="purpose" required data-i18n="[placeholder]purposePlaceholder" placeholder="Purpose of access (e.g., license verification)" rows="4"></textarea>
-      <button type="submit"><i class="fas fa-paper-plane"></i> <span data-i18n="submitRequest">Submit Request</span></button>
+      <input type="text" id="requestFullName" required placeholder="Full Name" data-i18n="[placeholder]fullNamePlaceholder" />
+      <input type="email" id="requestEmail" required placeholder="Email" data-i18n="[placeholder]emailPlaceholder" />
+      <input type="text" id="organization" required placeholder="Organization / Agency" data-i18n="[placeholder]organizationPlaceholder" />
+      <input type="tel" id="phone" required placeholder="Phone Number" data-i18n="[placeholder]phonePlaceholder" />
+      <textarea id="purpose" required rows="4" placeholder="Purpose of access (e.g., license verification)" data-i18n="[placeholder]purposePlaceholder"></textarea>
+
+      <button type="submit">
+        <i class="fas fa-paper-plane"></i>
+        <span data-i18n="submitRequest">Submit Request</span>
+      </button>
     </form>
 
-    <div id="msg"></div>
+    <div id="msg" style="margin-top:10px; font-weight:bold;"></div>
 
     <p class="muted" data-i18n="approvalNotice">Your request will be reviewed by the administrator.</p>
     <p class="muted"><span data-i18n="alreadyHave">Already have an account?</span> <a href="index.html" data-i18n="loginHere">Login here</a></p>
@@ -42,5 +64,65 @@
       <option value="ja">🇯🇵 日本語</option>
     </select>
   </footer>
+
+  <!-- 🔹 Inline Script to Handle Access Request -->
+  <script>
+    async function submitAccessRequest(event) {
+      event.preventDefault();
+
+      const fullName = document.getElementById("requestFullName").value.trim();
+      const email = document.getElementById("requestEmail").value.trim();
+      const organization = document.getElementById("organization").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const purpose = document.getElementById("purpose").value.trim();
+      const msgBox = document.getElementById("msg");
+
+      msgBox.innerHTML = "⏳ Submitting your request...";
+      msgBox.style.color = "#004aad";
+
+      try {
+        // ✅ Save Request in Firestore
+        await firebase.firestore().collection("requests").add({
+          fullName,
+          email,
+          organization,
+          phone,
+          purpose,
+          status: "pending",
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+
+        // ✅ Send Confirmation Email to User
+        await emailjs.send("service_ddq3kka", "template_gdlvs_confirm", {
+          full_name: fullName,
+          user_email: email,
+          organization,
+          phone,
+          purpose,
+        });
+
+        // ✅ Send Notification Email to Admin
+        await emailjs.send("service_ddq3kka", "template_gdlvs_admin_alert", {
+          admin_email: "m.ngoma1988@gmail.com",
+          requester_name: fullName,
+          requester_email: email,
+          organization,
+          phone,
+          purpose,
+        });
+
+        // ✅ Display Success Message
+        msgBox.innerHTML = "✅ Your access request has been submitted! You’ll receive a confirmation email within 72 hours.";
+        msgBox.style.color = "green";
+
+        document.getElementById("requestForm").reset();
+
+      } catch (error) {
+        console.error("❌ Error submitting access request:", error);
+        msgBox.innerHTML = "⚠️ Failed to submit request. Please try again later.";
+        msgBox.style.color = "red";
+      }
+    }
+  </script>
 </body>
 </html>
