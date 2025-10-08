@@ -19,14 +19,23 @@
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
-  <!-- App Script -->
+  <!-- App -->
   <script defer src="script.js"></script>
+
+  <style>
+    /* Quick column width tuning for dashboard table */
+    #licensesTable th:nth-child(3), #licensesTable td:nth-child(3) { width: 80px; }
+    #licensesTable th:nth-child(6), #licensesTable td:nth-child(6) { width: 100px; }
+  </style>
 </head>
+
 <body>
   <!-- Header -->
   <header>
     <h1><i class="fas fa-id-card"></i> <span data-i18n="dashboard">Dashboard</span></h1>
-    <button onclick="signOutUser()"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></button>
+    <button class="logout-btn" onclick="signOutUser()">
+      <i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span>
+    </button>
   </header>
 
   <!-- Navigation -->
@@ -43,59 +52,58 @@
 
   <!-- Main -->
   <main class="dashboard-main">
-    <!-- Stat cards -->
+    <!-- Dashboard Counters -->
     <section class="dashboard-cards">
       <div class="card total">
-        <i class="fas fa-id-card"></i>
-        <h3><span data-i18n="totalLicenses">Total Licenses</span>: <span id="totalLicenses">0</span></h3>
+        <div class="card-icon">👤</div>
+        <h3 data-i18n="totalLicenses">Total Licenses</h3>
+        <h2 id="totalLicenses">0</h2>
       </div>
+
       <div class="card active">
-        <i class="fas fa-check-circle"></i>
-        <h3><span data-i18n="activeLicenses">Active</span>: <span id="activeLicenses">0</span></h3>
+        <div class="card-icon">✅</div>
+        <h3 data-i18n="activeLicenses">Active Licenses</h3>
+        <h2 id="activeLicenses">0</h2>
       </div>
+
       <div class="card suspended">
-        <i class="fas fa-exclamation-triangle"></i>
-        <h3><span data-i18n="suspendedLicenses">Suspended</span>: <span id="suspendedLicenses">0</span></h3>
+        <div class="card-icon">⚠️</div>
+        <h3 data-i18n="suspendedLicenses">Suspended Licenses</h3>
+        <h2 id="suspendedLicenses">0</h2>
       </div>
+
       <div class="card expired">
-        <i class="fas fa-clock"></i>
-        <h3><span data-i18n="expiredLicenses">Expired</span>: <span id="expiredLicenses">0</span></h3>
+        <div class="card-icon">⛔</div>
+        <h3 data-i18n="expiredLicenses">Expired Licenses</h3>
+        <h2 id="expiredLicenses">0</h2>
       </div>
     </section>
 
-    <!-- Licenses Table -->
+    <!-- License Table -->
     <section class="panel">
       <h2><i class="fas fa-id-badge"></i> <span data-i18n="licensesList">Licenses</span></h2>
 
-      <input 
-        type="text" 
-        id="licenseSearch" 
-        placeholder="Search licenses by number or name..." 
-        onkeyup="filterLicenses()" 
-      />
-
-      <button class="btn-export" onclick="exportTableToCSV('licensesTable','licenses')">
-        <i class="fas fa-file-export"></i> <span data-i18n="exportLicenses">Export Licenses</span>
-      </button>
-
-      <div class="verification-table-wrapper">
-        <table class="table" id="licensesTable" style="table-layout:auto;">
-          <thead>
-            <tr>
-              <th data-i18n="licenseNumber">License #</th>
-              <th data-i18n="fullName">Full Name</th>
-              <th data-i18n="class">Class</th>
-              <th data-i18n="issueDate">Issue</th>
-              <th data-i18n="expiryDate">Expiry</th>
-              <th data-i18n="status">Status</th>
-              <th data-i18n="action">Action</th>
-            </tr>
-          </thead>
-          <tbody id="licenseTableBody">
-            <tr><td colspan="7">Loading...</td></tr>
-          </tbody>
-        </table>
+      <div class="search-bar">
+        <input type="text" id="licenseSearch" placeholder="Search licenses..." onkeyup="filterLicenses()">
+        <button class="btn inline" onclick="exportTableToCSV('licensesTable','licenses')">📥 Export</button>
       </div>
+
+      <table class="table" id="licensesTable" style="table-layout:auto;">
+        <thead>
+          <tr>
+            <th data-i18n="licenseNumber">License #</th>
+            <th data-i18n="fullName">Full Name</th>
+            <th data-i18n="class">Class</th>
+            <th data-i18n="issueDate">Issue</th>
+            <th data-i18n="expiryDate">Expiry</th>
+            <th data-i18n="status">Status</th>
+            <th data-i18n="action">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="7">Loading...</td></tr>
+        </tbody>
+      </table>
     </section>
   </main>
 
