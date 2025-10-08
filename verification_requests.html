@@ -8,11 +8,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-  <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
-  <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
-  <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
-  <script defer src="script.js"></script>
 </head>
 <body>
   <header>
@@ -25,7 +21,6 @@
     <a href="verify.html"><i class="fas fa-search"></i> Verification</a>
     <a href="add_licenses.html"><i class="fas fa-id-card"></i> Add License</a>
     <a href="users.html"><i class="fas fa-users-cog"></i> User Management</a>
-    <!-- ✅ Only verification_requests.html kept -->
     <a href="verification_requests.html" class="active"><i class="fas fa-inbox"></i> Requests</a>
     <a href="analytics.html"><i class="fas fa-chart-bar"></i> Analytics</a>
   </nav>
@@ -33,22 +28,22 @@
   <main>
     <div class="container">
       <section class="panel">
-        <h2><i class="fas fa-clipboard-list"></i> Access Requests</h2>
+        <h2><i class="fas fa-clipboard-list"></i> Verification Logs</h2>
 
-        <input type="text" id="analyticsSearch" placeholder="Search requests..." onkeyup="filterAnalytics()">
-        <button class="btn-export" onclick="exportTableToCSV('requestsTable','verification_requests')">📥 Export</button>
+        <input type="text" id="searchRequests" placeholder="Search verification logs...">
+        <button class="btn-export" onclick="exportTableToCSV('verificationsTable','verification_logs')">📥 Export</button>
 
         <div class="verification-table-wrapper">
-          <table class="table">
+          <table class="table" id="verificationsTable">
             <thead>
               <tr>
-                <th>Full Name</th>
+                <th>License #</th>
+                <th>Requester Org</th>
                 <th>Email</th>
-                <th>Organization</th>
-                <th>Phone</th>
+                <th>Country</th>
                 <th>Purpose</th>
-                <th>Status</th>
-                <th>Action</th>
+                <th>Result</th>
+                <th>Verified At</th>
               </tr>
             </thead>
             <tbody id="requestsTable">
@@ -68,5 +63,81 @@
       <option value="ja">🇯🇵 日本語</option>
     </select>
   </footer>
+
+  <script>
+    /* === Firebase Initialization === */
+    const firebaseConfig = {
+      apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
+      authDomain: "gdlvs-2348e.firebaseapp.com",
+      projectId: "gdlvs-2348e",
+      storageBucket: "gdlvs-2348e.appspot.com",
+      messagingSenderId: "358715790318",
+      appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    /* === Load verification data === */
+    document.addEventListener("DOMContentLoaded", () => {
+      const tbody = document.getElementById("requestsTable");
+
+      db.collection("verifications").orderBy("verifiedAt", "desc").onSnapshot(snapshot => {
+        tbody.innerHTML = "";
+        if (snapshot.empty) {
+          tbody.innerHTML = "<tr><td colspan='7'>No verification requests found.</td></tr>";
+          return;
+        }
+
+        snapshot.forEach(doc => {
+          const d = doc.data();
+          const date = d.verifiedAt?.toDate ? d.verifiedAt.toDate().toLocaleString() : (d.verifiedAt || "");
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${d.licenseNumber || "—"}</td>
+            <td>${d.requestingOrg || "—"}</td>
+            <td>${d.email || "—"}</td>
+            <td>${d.country || "—"}</td>
+            <td>${d.purpose || "—"}</td>
+            <td>${d.result || "—"}</td>
+            <td>${date}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+
+      // === Search Filter ===
+      const searchInput = document.getElementById("searchRequests");
+      searchInput.addEventListener("keyup", () => {
+        const term = searchInput.value.toLowerCase();
+        document.querySelectorAll("#verificationsTable tbody tr").forEach(row => {
+          const text = row.textContent.toLowerCase();
+          row.style.display = text.includes(term) ? "" : "none";
+        });
+      });
+    });
+
+    /* === Export CSV === */
+    function exportTableToCSV(tableId, filename) {
+      const rows = document.querySelectorAll(`#${tableId} tr`);
+      const csv = [];
+      rows.forEach(row => {
+        const cols = row.querySelectorAll("th, td");
+        const rowData = Array.from(cols).map(c => `"${c.innerText.replace(/"/g, '""')}"`);
+        csv.push(rowData.join(","));
+      });
+      const blob = new Blob([csv.join("\n")], { type: "text/csv" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename + ".csv";
+      link.click();
+    }
+
+    /* === Sign Out === */
+    function signOutUser() {
+      firebase.auth().signOut().then(() => {
+        window.location.href = "index.html";
+      });
+    }
+  </script>
 </body>
 </html>
