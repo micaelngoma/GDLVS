@@ -2,75 +2,172 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>GDLVS - User Management</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>GDLVS - Users</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-  <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
-  <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
-  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
-  <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
-  <script defer src="script.js"></script>
+  <style>
+    :root{--brand:#2a3f54;--brand2:#1e2d3c;--shadow:0 2px 6px rgba(0,0,0,.1);--success:#27ae60;--danger:#e74c3c;--info:#2980b9}
+    body{margin:0;font-family:Arial;background:#f6f8fb;color:#333}
+    header{background:#2a3f54;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:10px 14px}
+    header h1{margin:0;font-size:18px;display:flex;gap:8px;align-items:center}
+    .header-controls{display:flex;gap:8px}
+    .mini-btn{background:#1e2d3c;color:#fff;border:0;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer}
+    .mini-select{border:1px solid #dcdcdc;border-radius:8px;padding:6px 8px;font-size:12px;background:#fff}
+    nav{background:#fff;border-bottom:1px solid #eaeaea;padding:10px 14px;display:flex;gap:14px}
+    nav a{color:#2a3f54;text-decoration:none;font-weight:700}
+    nav a.active{border-bottom:2px solid #2a3f54;padding-bottom:4px}
+    .container{max-width:1100px;margin:20px auto;padding:0 14px}
+    .panel{background:#fff;border-radius:10px;box-shadow:var(--shadow);padding:20px}
+    .table-controls{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .table-controls input{max-width:320px;border:1px solid #dcdcdc;border-radius:8px;padding:8px 10px}
+    .btn-export{background:var(--info);color:#fff;border:0;border-radius:8px;padding:8px 12px;cursor:pointer}
+    table{width:100%;border-collapse:separate;border-spacing:0 6px;margin-top:10px}
+    th,td{background:#fff;border:1px solid #eee;padding:10px 12px}
+    th{background:#f2f2f2}
+    .inline{padding:6px 10px;border-radius:8px;border:0;color:#fff;cursor:pointer;font-size:12px}
+    .btn-green{background:var(--success)} .btn-red{background:var(--danger)}
+    form#addUserForm{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    form#addUserForm input, form#addUserForm select{padding:8px 10px;border:1px solid #dcdcdc;border-radius:8px}
+  </style>
 </head>
 <body>
   <header>
-    <h1>
-      <i class="fas fa-users-cog"></i>
-      <span data-i18n="userManagement">User Management</span>
-    </h1>
-    <button onclick="signOutUser()">
-      <i class="fas fa-sign-out-alt"></i>
-      <span data-i18n="logout">Logout</span>
-    </button>
-  </header>
-  <nav>
-    <a href="dashboard.html"><i class="fas fa-home"></i> <span data-i18n="dashboard">Dashboard</span></a>
-    <a href="verify.html"><i class="fas fa-search"></i> <span data-i18n="verificationPortal">Verification</span></a>
-    <a href="add_licenses.html"><i class="fas fa-id-card"></i> <span data-i18n="addLicense">Add License</span></a>
-    <a href="users.html" class="active"><i class="fas fa-users-cog"></i> <span data-i18n="userManagement">User Management</span></a>
-    <a id="navVerificationRequests" href="verification_requests.html" style="display:none;"><i class="fas fa-inbox"></i> <span data-i18n="verificationRequests">Verification Requests</span></a>
-    <a href="analytics.html"><i class="fas fa-chart-bar"></i> <span data-i18n="analytics">Analytics</span></a>
-  </nav>
-  <main>
-    <div class="container">
-      <h2><i class="fas fa-users"></i> <span data-i18n="userManagement">User Management</span></h2>
-      <p class="muted">Admins can add, edit, or remove users directly from here.</p>
-      <input type="text" id="userSearch" placeholder="Search users by name or email..." onkeyup="filterUsers()">
-      <form id="addUserForm" onsubmit="addNewUser(event)">
-        <input type="text" id="newUserName" placeholder="Full Name" required>
-        <input type="email" id="newUserEmail" placeholder="Email" required>
-        <select id="newUserRole">
-          <option value="verifier">Verifier</option>
-          <option value="admin">Admin</option>
-        </select>
-        <button type="submit" class="btn-edit" style="background:#27ae60;color:#fff;">
-          <i class="fas fa-user-plus"></i> Add User
-        </button>
-      </form>
-      <button class="btn-export" onclick="exportTableToCSV('usersTable','users')">📥 Export Users</button>
-      <table class="table">
-        <thead>
-          <tr>
-            <th data-i18n="fullName">Full Name</th>
-            <th data-i18n="email">Email</th>
-            <th data-i18n="role">Role</th>
-            <th data-i18n="status">Status</th>
-            <th data-i18n="action">Action</th>
-          </tr>
-        </thead>
-        <tbody id="usersTable"><tr><td colspan="5">Loading...</td></tr></tbody>
-      </table>
+    <h1><i class="fa-solid fa-users-cog"></i> <span data-i18n="userManagement">User Management</span></h1>
+    <div class="header-controls">
+      <select id="languageSwitcher" class="mini-select">
+        <option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option><option value="ja">🇯🇵 日本語</option>
+      </select>
+      <button id="logoutBtn" class="mini-btn"><i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="logout">Logout</span></button>
     </div>
+  </header>
+
+  <nav>
+    <a href="dashboard.html"><i class="fa-solid fa-house"></i> <span data-i18n="dashboard">Dashboard</span></a>
+    <a href="verify.html"><i class="fa-solid fa-search"></i> <span data-i18n="verificationPortal">Verification</span></a>
+    <a href="add_licenses.html"><i class="fa-solid fa-id-card"></i> <span data-i18n="addLicense">Add License</span></a>
+    <a class="active" href="users.html"><i class="fa-solid fa-users-cog"></i> <span data-i18n="userManagement">User Management</span></a>
+    <a href="verification_requests.html"><i class="fa-solid fa-inbox"></i> <span data-i18n="requests">Requests</span></a>
+    <a href="analytics.html"><i class="fa-solid fa-chart-bar"></i> <span data-i18n="analytics">Analytics</span></a>
+  </nav>
+
+  <main class="container">
+    <section class="panel">
+      <h2><i class="fa-solid fa-users"></i> <span data-i18n="userManagement">User Management</span></h2>
+      <p class="muted" data-i18n="adminHint">Admins can add, edit, or remove users directly from here.</p>
+
+      <div class="table-controls">
+        <input id="userSearch" type="text" data-i18n="[placeholder]searchUsersPh" placeholder="Search users by name or email...">
+        <button class="btn-export" id="exportUsers"><i class="fa-solid fa-file-export"></i> <span data-i18n="export">Export</span></button>
+      </div>
+
+      <form id="addUserForm">
+        <input id="newUserName" type="text" required data-i18n="[placeholder]fullNamePh" placeholder="Full Name">
+        <input id="newUserEmail" type="email" required data-i18n="[placeholder]emailPh" placeholder="Email">
+        <select id="newUserRole">
+          <option value="verifier">verifier</option>
+          <option value="admin">admin</option>
+        </select>
+        <button class="inline btn-green" type="submit"><i class="fa-solid fa-user-plus"></i> <span data-i18n="addUser">Add User</span></button>
+      </form>
+
+      <div class="verification-table-wrapper">
+        <table id="usersTable">
+          <thead>
+            <tr>
+              <th data-i18n="fullName">Full Name</th>
+              <th data-i18n="email">Email</th>
+              <th data-i18n="role">Role</th>
+              <th data-i18n="status">Status</th>
+              <th data-i18n="action">Action</th>
+            </tr>
+          </thead>
+          <tbody><tr><td colspan="5" data-i18n="loading">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
   </main>
-  <footer>
-    <label for="languageSwitcher"><i class="fas fa-globe"></i></label>
-    <select id="languageSwitcher">
-      <option value="en">🇬🇧 English</option>
-      <option value="fr">🇫🇷 Français</option>
-      <option value="ja">🇯🇵 日本語</option>
-    </select>
-  </footer>
+
+  <script type="module">
+    import { auth, db } from './firebase-config.js';
+    import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+    import { collection, onSnapshot, getDocs, setDoc, doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+    const i18n={en:{userManagement:"User Management",logout:"Logout",dashboard:"Dashboard",verificationPortal:"Verification",addLicense:"Add License",requests:"Requests",analytics:"Analytics",adminHint:"Admins can add, edit, or remove users directly from here.",searchUsersPh:"Search users by name or email...",export:"Export",addUser:"Add User",fullName:"Full Name",email:"Email",role:"Role",status:"Status",action:"Action",loading:"Loading...",fullNamePh:"Full Name",emailPh:"Email",update:"Update",delete:"Delete"},
+               fr:{userManagement:"Gestion des utilisateurs",logout:"Déconnexion",dashboard:"Tableau de bord",verificationPortal:"Vérification",addLicense:"Ajouter un permis",requests:"Demandes",analytics:"Analytique",adminHint:"Les admins peuvent ajouter, modifier ou supprimer des utilisateurs ici.",searchUsersPh:"Rechercher par nom ou e-mail...",export:"Exporter",addUser:"Ajouter",fullName:"Nom complet",email:"E-mail",role:"Rôle",status:"Statut",action:"Action",loading:"Chargement...",fullNamePh:"Nom complet",emailPh:"E-mail",update:"Mettre à jour",delete:"Supprimer"},
+               ja:{userManagement:"ユーザー管理",logout:"ログアウト",dashboard:"ダッシュボード",verificationPortal:"照会",addLicense:"免許を追加",requests:"リクエスト",analytics:"分析",adminHint:"ここでユーザーの追加・編集・削除ができます。",searchUsersPh:"氏名またはメールで検索…",export:"エクスポート",addUser:"ユーザー追加",fullName:"氏名",email:"メール",role:"権限",status:"状態",action:"操作",loading:"読み込み中…",fullNamePh:"氏名",emailPh:"メール",update:"更新",delete:"削除"}};
+    let lang=localStorage.getItem('gdlvs_lang')||'en';
+    const t=(k)=>i18n[lang][k]||i18n.en[k];
+    const apply=()=>document.querySelectorAll('[data-i18n]').forEach(el=>{
+      const k=el.dataset.i18n; if(k.startsWith('[placeholder]')) el.placeholder=t(k.replace('[placeholder]','')); else el.textContent=t(k);
+    });
+    const sel=document.getElementById('languageSwitcher'); sel.value=lang; apply();
+    sel.onchange=()=>{lang=sel.value;localStorage.setItem('gdlvs_lang',lang);apply();};
+
+    onAuthStateChanged(auth,u=>{if(!u) location.href='index.html';});
+    document.getElementById('logoutBtn').onclick=()=>signOut(auth).then(()=>location.href='index.html');
+
+    const tbody=document.querySelector('#usersTable tbody');
+
+    async function paintUsers(){
+      const snap=await getDocs(collection(db,'users'));
+      const rolesSnap=await getDocs(collection(db,'roles')); const roles={}; rolesSnap.forEach(r=>roles[r.id]=r.data().role||'verifier');
+      tbody.innerHTML='';
+      if(snap.empty){ tbody.innerHTML=`<tr><td colspan="5">${t('loading')}</td></tr>`; return; }
+      snap.forEach(d=>{
+        const u=d.data(); const role=roles[u.email]||u.role||'verifier';
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
+          <td contenteditable data-field="fullName">${u.fullName||''}</td>
+          <td>${u.email}</td>
+          <td><select data-field="role"><option ${role==='verifier'?'selected':''}>verifier</option><option ${role==='admin'?'selected':''}>admin</option></select></td>
+          <td><select data-field="status"><option ${u.status==='approved'?'selected':''}>approved</option><option ${u.status==='pending'?'selected':''}>pending</option><option ${u.status==='disabled'?'selected':''}>disabled</option></select></td>
+          <td>
+            <button class="inline btn-green" data-action="update">${t('update')}</button>
+            <button class="inline btn-red" data-action="delete">${t('delete')}</button>
+          </td>`;
+        tbody.appendChild(tr);
+
+        tr.querySelector('[data-action="update"]').onclick=async()=>{
+          const updates={};
+          tr.querySelectorAll('[data-field]').forEach(el=>{
+            const key=el.dataset.field; updates[key]= (el.tagName==='TD')? el.textContent.trim(): el.value;
+          });
+          await setDoc(doc(db,'users',u.email),{fullName:updates.fullName,status:updates.status},{merge:true});
+          await setDoc(doc(db,'roles',u.email),{role:updates.role},{merge:true});
+        };
+        tr.querySelector('[data-action="delete"]').onclick=async()=>{
+          if(!confirm(`${t('delete')} ${u.email}?`)) return;
+          await deleteDoc(doc(db,'users',u.email));
+          await deleteDoc(doc(db,'roles',u.email));
+          tr.remove();
+        };
+      });
+    }
+    paintUsers();
+
+    // Search
+    document.getElementById('userSearch').addEventListener('keyup',(e)=>{
+      const term=e.target.value.toLowerCase();
+      document.querySelectorAll('#usersTable tbody tr').forEach(r=>{
+        r.style.display=r.textContent.toLowerCase().includes(term)?'':'none';
+      });
+    });
+    // Export
+    document.getElementById('exportUsers').onclick=()=>{
+      const rows=[...document.querySelectorAll('#usersTable tr')];
+      const csv=rows.map(r=>[...r.querySelectorAll('th,td')].map(c=>`"${c.innerText.replace(/"/g,'""')}"`).join(',')).join('\n');
+      const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='users.csv'; a.click();
+    };
+    // Add user
+    document.getElementById('addUserForm').onsubmit=async(e)=>{
+      e.preventDefault();
+      const name=document.getElementById('newUserName').value.trim();
+      const email=document.getElementById('newUserEmail').value.trim();
+      const role=document.getElementById('newUserRole').value;
+      if(!name||!email) return;
+      await setDoc(doc(db,'users',email),{fullName:name,email,status:'approved'},{merge:true});
+      await setDoc(doc(db,'roles',email),{role},{merge:true});
+      e.target.reset(); paintUsers();
+    };
+  </script>
 </body>
 </html>
