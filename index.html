@@ -20,6 +20,15 @@
   <script defer src="script.js"></script>
 </head>
 <body>
+  <!-- 🌿 Background image layer -->
+  <div class="background-blur"></div>
+
+  <!-- ✉️ Welcome message -->
+  <div class="welcome-email" aria-labelledby="welcomeEmailTitle">
+    <h3 id="welcomeEmailTitle"><i class="fas fa-envelope-open-text"></i> Welcome</h3>
+    <p>Welcome to the Gabonese Driver’s License Verification System</p>
+  </div>
+
   <div class="login-container">
     <h2><i class="fas fa-id-card"></i> <span data-i18n="login">Login</span></h2>
     <form id="loginForm" onsubmit="loginUser(event)">
