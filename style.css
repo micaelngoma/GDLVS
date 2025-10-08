@@ -1,14 +1,30 @@
-/* ===== SIGNUP BACKGROUND IMAGE ===== */
+/* ===== SIGNUP BACKGROUND IMAGE (added) ===== */
 .background-blur {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') no-repeat center center fixed;
   background-size: cover;
   filter: blur(6px) brightness(0.9);
   z-index: -1;
+}
+
+/* ===== WELCOME EMAIL BOX (added) ===== */
+.welcome-email {
+  max-width: 900px;
+  margin: 10px auto 20px;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.welcome-email h3 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: #2a3f54;
+}
+.welcome-email p {
+  margin: 0;
+  color: #333;
 }
 /* ===== GLOBAL ===== */
 body {
