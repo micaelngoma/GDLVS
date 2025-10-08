@@ -5,48 +5,44 @@
   <title>GDLVS - Dashboard</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <!-- Firebase v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-  <!-- i18n + jQuery -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
   <script defer src="script.js"></script>
   <style>
-    .dashboard-main { width: 95%; margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
+    .dashboard-main{width:95%;margin:0 auto;display:flex;flex-direction:column;align-items:center}
+    .panel{width:100%;max-width:1400px;background:#fff;padding:20px;border-radius:10px;box-shadow:0 2px 5px rgba(0,0,0,.1);margin-top:20px}
   </style>
 </head>
 <body>
   <header>
-    <h1><i class="fas fa-id-card"></i> Dashboard</h1>
-    <button class="logout-btn" onclick="signOutUser()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    <h1><i class="fas fa-id-card"></i> <span data-i18n="dashboard">Dashboard</span></h1>
+    <button onclick="signOutUser()"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></button>
   </header>
 
   <nav>
-    <a href="dashboard.html" class="active"><i class="fas fa-home"></i> Dashboard</a>
-    <a href="verify.html"><i class="fas fa-search"></i> Verification</a>
-    <a href="add_licenses.html"><i class="fas fa-id-card"></i> Add License</a>
-    <a href="users.html"><i class="fas fa-users-cog"></i> User Management</a>
-    <a id="navVerificationRequests" href="verification_requests.html" style="display:none;">
-      <i class="fas fa-inbox"></i> Verification Requests
-    </a>
-    <a href="requests.html"><i class="fas fa-envelope-open-text"></i> Access Requests</a>
-    <a href="analytics.html"><i class="fas fa-chart-bar"></i> Analytics</a>
+    <a href="dashboard.html" class="active"><i class="fas fa-home"></i> <span data-i18n="dashboard">Dashboard</span></a>
+    <a href="verify.html"><i class="fas fa-search"></i> <span data-i18n="verificationPortal">Verification</span></a>
+    <a href="add_licenses.html"><i class="fas fa-id-card"></i> <span data-i18n="addLicense">Add License</span></a>
+    <a href="users.html"><i class="fas fa-users-cog"></i> <span data-i18n="userManagement">User Management</span></a>
+    <a id="navVerificationRequests" href="verification_requests.html" style="display:none;"><i class="fas fa-inbox"></i> <span data-i18n="verificationRequests">Verification Requests</span></a>
+    <a href="analytics.html"><i class="fas fa-chart-bar"></i> <span data-i18n="analytics">Analytics</span></a>
   </nav>
 
   <main class="dashboard-main">
     <section class="dashboard-cards">
-      <div class="card total"><div class="card-icon">👤</div><h3>Total Licenses</h3><h2 id="totalLicenses">0</h2></div>
-      <div class="card active"><div class="card-icon">✅</div><h3>Active</h3><h2 id="activeLicenses">0</h2></div>
-      <div class="card suspended"><div class="card-icon">⚠️</div><h3>Suspended</h3><h2 id="suspendedLicenses">0</h2></div>
-      <div class="card expired"><div class="card-icon">⛔</div><h3>Expired</h3><h2 id="expiredLicenses">0</h2></div>
+      <div class="card total"><div class="card-icon">👤</div><h3 data-i18n="totalLicenses">Total Licenses</h3><h2 id="totalLicenses">0</h2></div>
+      <div class="card active"><div class="card-icon">✅</div><h3 data-i18n="activeLicenses">Active Licenses</h3><h2 id="activeLicenses">0</h2></div>
+      <div class="card suspended"><div class="card-icon">⚠️</div><h3 data-i18n="suspendedLicenses">Suspended</h3><h2 id="suspendedLicenses">0</h2></div>
+      <div class="card expired"><div class="card-icon">⛔</div><h3 data-i18n="expiredLicenses">Expired</h3><h2 id="expiredLicenses">0</h2></div>
     </section>
 
     <section class="panel">
-      <h2><i class="fas fa-id-badge"></i> Licenses</h2>
+      <h2><i class="fas fa-id-badge"></i> <span data-i18n="licensesList">Licenses</span></h2>
       <div class="search-bar" style="margin-bottom:10px;">
         <input type="text" id="licenseSearch" placeholder="Search licenses..." onkeyup="filterLicenses()">
         <button class="btn inline" onclick="exportTableToCSV('licensesTable','licenses')">📥 Export</button>
@@ -54,21 +50,23 @@
       <table class="table" id="licensesTable">
         <thead>
           <tr>
-            <th>License #</th><th>Full Name</th><th>Class</th>
-            <th>Issue</th><th>Expiry</th><th>Status</th><th>Action</th>
+            <th data-i18n="licenseNumber">License #</th>
+            <th data-i18n="fullName">Full Name</th>
+            <th data-i18n="class">Class</th>
+            <th data-i18n="issueDate">Issue</th>
+            <th data-i18n="expiryDate">Expiry</th>
+            <th data-i18n="status">Status</th>
+            <th data-i18n="action">Action</th>
           </tr>
         </thead>
         <tbody><tr><td colspan="7">Loading...</td></tr></tbody>
       </table>
-      <p id="msg" class="muted"></p>
     </section>
   </main>
 
   <footer>
     <label for="languageSwitcher"><i class="fas fa-globe"></i></label>
-    <select id="languageSwitcher">
-      <option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option><option value="ja">🇯🇵 日本語</option>
-    </select>
+    <select id="languageSwitcher"><option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option><option value="ja">🇯🇵 日本語</option></select>
   </footer>
 </body>
 </html>
