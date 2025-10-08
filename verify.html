@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>GDLVS - Verification</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -17,15 +20,17 @@
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
-  <!-- Core App Logic -->
+  <!-- App -->
   <script defer src="script.js"></script>
 </head>
 <body>
+  <!-- Header -->
   <header>
-    <h1><i class="fas fa-search"></i> <span data-i18n="verificationPortal">Verification Portal</span></h1>
+    <h1><i class="fas fa-search"></i> <span data-i18n="verificationPortal">Verification</span></h1>
     <button onclick="signOutUser()"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></button>
   </header>
 
+  <!-- Navigation -->
   <nav>
     <a href="dashboard.html"><i class="fas fa-home"></i> <span data-i18n="dashboard">Dashboard</span></a>
     <a href="verify.html" class="active"><i class="fas fa-search"></i> <span data-i18n="verificationPortal">Verification</span></a>
@@ -37,33 +42,36 @@
     <a href="analytics.html"><i class="fas fa-chart-bar"></i> <span data-i18n="analytics">Analytics</span></a>
   </nav>
 
-  <div class="container">
-    <form id="verifyForm" onsubmit="verifyLicense(event)">
-      <label data-i18n="licenseNumber">License Number</label>
-      <input type="text" id="verifyLicenseNumber" required>
+  <!-- Main -->
+  <main>
+    <div class="container">
+      <form id="verifyForm" onsubmit="verifyLicense(event)">
+        <label data-i18n="licenseNumber">License Number</label>
+        <input type="text" id="verifyLicenseNumber" required>
 
-      <label data-i18n="organization">Requesting Organization</label>
-      <input type="text" id="verifyOrg">
+        <label data-i18n="organization">Requesting Organization</label>
+        <input type="text" id="verifyOrg">
 
-      <label data-i18n="country">Country</label>
-      <input type="text" id="verifyCountry">
+        <label data-i18n="country">Country</label>
+        <input type="text" id="verifyCountry">
 
-      <label data-i18n="purpose">Purpose of Verification</label>
-      <textarea id="verifyPurpose"></textarea>
+        <label data-i18n="purpose">Purpose of Verification</label>
+        <textarea id="verifyPurpose"></textarea>
 
-      <button type="submit"><i class="fas fa-search"></i> <span data-i18n="verify">Verify</span></button>
-    </form>
+        <button type="submit"><i class="fas fa-search"></i> <span data-i18n="verify">Verify</span></button>
+      </form>
 
-    <div id="verifyResult" class="panel" style="display:none;"></div>
+      <div id="verifyResult" class="panel" style="display:none;"></div>
 
-    <!-- Verify Next container -->
-    <div id="verifyNextContainer" style="display:none; margin-top:15px;">
-      <button type="button" id="verifyNextBtn" class="inline">
-        <i class="fas fa-plus"></i> Verify Next Driver License
-      </button>
+      <div id="verifyNextContainer" style="display:none; margin-top:15px;">
+        <button type="button" id="verifyNextBtn" class="inline">
+          <i class="fas fa-plus"></i> Verify Next Driver License
+        </button>
+      </div>
     </div>
-  </div>
+  </main>
 
+  <!-- Footer -->
   <footer>
     <label for="languageSwitcher"><i class="fas fa-globe"></i></label>
     <select id="languageSwitcher">
