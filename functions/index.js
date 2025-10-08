@@ -5,8 +5,9 @@
  *  - Admin role assignment
  *  - Access request notifications
  *  - User creation on approval
+ *  - Role synchronization
  *  - Cleanup on deletion
- *  - Optional bulk re-sync
+ *  - Bulk re-sync for recovery
  *
  * Author: Micael Ngoma
  * Project: Gabon Driver’s License Verification System (GDLVS)
@@ -20,39 +21,43 @@ const sgMail = require("@sendgrid/mail");
 admin.initializeApp();
 const db = admin.firestore();
 
-// === Set your SendGrid API key ===
-// Set once in your Firebase CLI:
-// firebase functions:config:set sendgrid.key="YOUR_SENDGRID_API_KEY"
+// === SendGrid API Configuration ===
+// Set in CLI: firebase functions:config:set sendgrid.key="YOUR_SENDGRID_API_KEY"
 sgMail.setApiKey(functions.config().sendgrid.key);
 
-// === Constants ===
+// === System Constants ===
 const ADMIN_EMAIL = "m.ngoma1988@gmail.com";
 const SYSTEM_EMAIL = "noreply@gdlvs.com";
+const BASE_URL = "https://gdlvs-2348e.web.app";
 
-/**
- * 🔹 Callable: Assign Admin Role
- * ---------------------------------
- * Run manually once via Firebase CLI or callable client.
- * This grants ADMIN rights to the specified email.
- */
+/* ============================================================
+   🔹 Callable: Assign Admin Role
+   ------------------------------------------------------------
+   Run manually once from Firebase CLI or via callable client.
+   Grants ADMIN role to the specified target email.
+   ============================================================ */
 exports.setAdmin = functions.https.onCall(async (data, context) => {
   const targetEmail = "m.ngoma1988@gmail.com";
+
   try {
     const user = await admin.auth().getUserByEmail(targetEmail);
     await admin.auth().setCustomUserClaims(user.uid, { role: "admin" });
 
+    await db.collection("roles").doc(targetEmail).set({ role: "admin" }, { merge: true });
+    console.log(`✅ ${targetEmail} assigned as ADMIN.`);
     return { message: `${targetEmail} is now an ADMIN.` };
   } catch (err) {
+    console.error("❌ Error assigning admin:", err);
     throw new functions.https.HttpsError("unknown", err.message, err);
   }
 });
 
-/**
- * 🔹 Trigger: Notify Admin on New Access Request
- * -----------------------------------------------
- * Fires when a new access request is submitted in /requests.
- * Sends an email alert to the admin.
- */
+/* ============================================================
+   🔹 Trigger: Notify Admin on New Access Request
+   ------------------------------------------------------------
+   When a new access request is added under /requests,
+   send an automatic notification email to the system admin.
+   ============================================================ */
 exports.notifyAdminOnNewRequest = functions.firestore
   .document("requests/{requestId}")
   .onCreate(async (snap) => {
@@ -62,64 +67,67 @@ exports.notifyAdminOnNewRequest = functions.firestore
     const msg = {
       to: ADMIN_EMAIL,
       from: SYSTEM_EMAIL,
-      subject: `🆕 New Access Request: ${fullName}`,
+      subject: `🆕 New GDLVS Access Request: ${fullName}`,
       text: `
-A new access request was submitted to GDLVS.
+A new access request has been submitted to the GDLVS system.
 
 Full Name: ${fullName}
 Email: ${email}
-Organization: ${organization}
-Phone: ${phone}
-Purpose: ${purpose}
+Organization: ${organization || "N/A"}
+Phone: ${phone || "N/A"}
+Purpose: ${purpose || "N/A"}
 
 Please log in to review and approve this request:
-https://gdlvs-2348e.web.app/requests.html
+${BASE_URL}/requests.html
       `,
     };
 
     try {
       await sgMail.send(msg);
-      console.log(`✅ Admin notified of new request from ${fullName}`);
+      console.log(`📨 Admin notified about new request from ${fullName} (${email})`);
     } catch (error) {
       console.error("❌ Error sending admin notification:", error);
     }
   });
 
-/**
- * 🔹 Trigger: Sync User When Request Approved
- * --------------------------------------------
- * When a request’s status changes from pending → approved,
- * a corresponding user and role document are created.
- * Also sends an approval email to the requester.
- */
+/* ============================================================
+   🔹 Trigger: Sync User + Role on Approval
+   ------------------------------------------------------------
+   When a request’s status changes from pending → approved:
+   - Create / update user and role docs.
+   - Email requester with approval confirmation.
+   ============================================================ */
 exports.syncUserOnApproval = functions.firestore
   .document("requests/{requestId}")
   .onUpdate(async (change) => {
     const before = change.before.data();
     const after = change.after.data();
 
+    // Only run if transitioning to "approved"
     if (before.status === "approved" || after.status !== "approved") return;
 
     const { fullName, email, organization, phone } = after;
 
     try {
-      // ✅ Create / Update User Record
-      await db.collection("users").doc(email).set({
-        fullName,
-        email,
-        organization,
-        phone,
-        role: "verifier",
-        status: "approved",
-        approvedAt: admin.firestore.FieldValue.serverTimestamp(),
-      });
+      // 🔸 Create or update user record
+      await db.collection("users").doc(email).set(
+        {
+          fullName,
+          email,
+          organization: organization || "",
+          phone: phone || "",
+          role: "verifier",
+          status: "approved",
+          approvedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
 
-      // ✅ Create / Update Role Record
-      await db.collection("roles").doc(email).set({ role: "verifier" });
+      // 🔸 Assign verifier role in Firestore
+      await db.collection("roles").doc(email).set({ role: "verifier" }, { merge: true });
+      console.log(`✅ Approved user synced: ${email}`);
 
-      console.log(`✅ User ${email} synced to users & roles.`);
-
-      // 📧 Notify the requester
+      // 🔸 Send confirmation email to requester
       const msg = {
         to: email,
         from: SYSTEM_EMAIL,
@@ -127,45 +135,77 @@ exports.syncUserOnApproval = functions.firestore
         text: `
 Dear ${fullName},
 
-Your access request to the Gabon Driver’s License Verification System (GDLVS) has been approved.
+Your access request to the Gabon Driver’s License Verification System (GDLVS)
+has been approved.
 
-You can now log in to your account:
-https://gdlvs-2348e.web.app/index.html
+You can now log in using your registered email address at:
+${BASE_URL}/index.html
 
-Best regards,  
+If you experience any issues, contact the GDLVS administrator at ${ADMIN_EMAIL}.
+
+Best regards,
 GDLVS Administration
         `,
       };
       await sgMail.send(msg);
-      console.log(`📨 Approval email sent to ${email}`);
+      console.log(`📩 Approval confirmation sent to ${email}`);
     } catch (error) {
       console.error("❌ Error syncing approved user:", error);
     }
   });
 
-/**
- * 🔹 Trigger: Clean Up on User Delete
- * -----------------------------------
- * Automatically deletes role entry when a user is removed.
- */
+/* ============================================================
+   🔹 Trigger: Clean Up Role on User Delete
+   ------------------------------------------------------------
+   When a user document is deleted, automatically delete
+   their corresponding role document to maintain consistency.
+   ============================================================ */
 exports.cleanUpUserOnDelete = functions.firestore
   .document("users/{userId}")
   .onDelete(async (snap) => {
     const user = snap.data();
+    if (!user || !user.email) return;
+
     try {
       await db.collection("roles").doc(user.email).delete();
-      console.log(`🗑️ Role for ${user.email} removed.`);
+      console.log(`🗑️ Role for ${user.email} deleted successfully.`);
     } catch (error) {
-      console.error("❌ Error cleaning up user roles:", error);
+      console.error("❌ Error removing user role:", error);
     }
   });
 
-/**
- * 🔹 HTTP Endpoint: Manual Request Re-Sync
- * ----------------------------------------
- * Useful for bulk repairing records or migration tasks.
- * Example: https://us-central1-gdlvs-2348e.cloudfunctions.net/resyncRequests
- */
+/* ============================================================
+   🔹 Trigger: Apply Auth Role Claims
+   ------------------------------------------------------------
+   Keeps Firebase Authentication custom claims synced with
+   Firestore `/roles/{email}` to ensure access consistency.
+   ============================================================ */
+exports.applyRoleClaims = functions.firestore
+  .document("roles/{email}")
+  .onWrite(async (change, context) => {
+    const email = context.params.email;
+    const role = change.after.exists ? change.after.data().role : null;
+
+    if (!role) {
+      console.log(`ℹ️ Role for ${email} deleted or undefined. Skipping.`);
+      return;
+    }
+
+    try {
+      const user = await admin.auth().getUserByEmail(email);
+      await admin.auth().setCustomUserClaims(user.uid, { role });
+      console.log(`🔄 Updated custom claims for ${email} → ${role}`);
+    } catch (err) {
+      console.error(`❌ Error updating claims for ${email}:`, err.message);
+    }
+  });
+
+/* ============================================================
+   🔹 HTTP Endpoint: Manual Bulk Re-Sync
+   ------------------------------------------------------------
+   Re-syncs all approved requests back into /users & /roles.
+   Useful for disaster recovery or bulk migration.
+   ============================================================ */
 exports.resyncRequests = functions.https.onRequest(async (req, res) => {
   try {
     const snapshot = await db.collection("requests").where("status", "==", "approved").get();
@@ -173,22 +213,26 @@ exports.resyncRequests = functions.https.onRequest(async (req, res) => {
 
     for (const doc of snapshot.docs) {
       const r = doc.data();
-      await db.collection("users").doc(r.email).set({
-        fullName: r.fullName,
-        email: r.email,
-        organization: r.organization,
-        phone: r.phone,
-        role: "verifier",
-        status: "approved",
-        approvedAt: admin.firestore.FieldValue.serverTimestamp(),
-      });
-      await db.collection("roles").doc(r.email).set({ role: "verifier" });
+      await db.collection("users").doc(r.email).set(
+        {
+          fullName: r.fullName,
+          email: r.email,
+          organization: r.organization || "",
+          phone: r.phone || "",
+          role: "verifier",
+          status: "approved",
+          approvedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+      await db.collection("roles").doc(r.email).set({ role: "verifier" }, { merge: true });
       count++;
     }
 
+    console.log(`✅ Bulk re-sync complete. ${count} user(s) updated.`);
     res.status(200).send(`✅ Re-sync completed. ${count} records processed.`);
   } catch (err) {
-    console.error("❌ Error during resync:", err);
-    res.status(500).send("Internal Server Error");
+    console.error("❌ Error during bulk re-sync:", err);
+    res.status(500).send("Internal Server Error during re-sync.");
   }
 });
