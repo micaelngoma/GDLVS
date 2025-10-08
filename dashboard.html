@@ -19,7 +19,7 @@
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
-  <!-- App -->
+  <!-- App Script -->
   <script defer src="script.js"></script>
 </head>
 <body>
@@ -51,26 +51,31 @@
       </div>
       <div class="card active">
         <i class="fas fa-check-circle"></i>
-        <h3><span data-i18n="activeLicenses">Active Licenses</span>: <span id="activeLicenses">0</span></h3>
+        <h3><span data-i18n="activeLicenses">Active</span>: <span id="activeLicenses">0</span></h3>
       </div>
       <div class="card suspended">
-        <i class="fas fa-ban"></i>
-        <h3>Suspended: <span id="suspendedLicenses">0</span></h3>
+        <i class="fas fa-exclamation-triangle"></i>
+        <h3><span data-i18n="suspendedLicenses">Suspended</span>: <span id="suspendedLicenses">0</span></h3>
       </div>
       <div class="card expired">
         <i class="fas fa-clock"></i>
-        <h3>Expired: <span id="expiredLicenses">0</span></h3>
+        <h3><span data-i18n="expiredLicenses">Expired</span>: <span id="expiredLicenses">0</span></h3>
       </div>
     </section>
 
-    <!-- Licenses table -->
+    <!-- Licenses Table -->
     <section class="panel">
       <h2><i class="fas fa-id-badge"></i> <span data-i18n="licensesList">Licenses</span></h2>
 
-      <input type="text" id="licenseSearch" placeholder="Search licenses by number or name..." onkeyup="filterLicenses()">
+      <input 
+        type="text" 
+        id="licenseSearch" 
+        placeholder="Search licenses by number or name..." 
+        onkeyup="filterLicenses()" 
+      />
 
       <button class="btn-export" onclick="exportTableToCSV('licensesTable','licenses')">
-        📥 Export Licenses
+        <i class="fas fa-file-export"></i> <span data-i18n="exportLicenses">Export Licenses</span>
       </button>
 
       <div class="verification-table-wrapper">
@@ -86,7 +91,7 @@
               <th data-i18n="action">Action</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="licenseTableBody">
             <tr><td colspan="7">Loading...</td></tr>
           </tbody>
         </table>
