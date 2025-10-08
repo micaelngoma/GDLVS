@@ -23,7 +23,7 @@
   <script defer src="script.js"></script>
 
   <style>
-    /* 🔹 Compact, aligned stat cards */
+    /* Dashboard layout adjustments */
     .dashboard-cards {
       display: flex;
       justify-content: center;
@@ -33,9 +33,10 @@
       margin: 15px auto 20px;
       max-width: 900px;
     }
+
     .dashboard-cards .card {
       flex: 1 1 calc(25% - 10px);
-      min-width: 160px;
+      min-width: 150px;
       max-width: 200px;
       padding: 14px;
       border-radius: 10px;
@@ -43,70 +44,72 @@
       text-align: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
+
     .dashboard-cards .card h3 {
       margin: 5px 0;
       font-size: 0.9rem;
     }
+
     .dashboard-cards .card h2 {
       margin: 4px 0;
       font-size: 1.5rem;
       font-weight: 700;
     }
+
     .card .card-icon {
       font-size: 1.8rem;
       margin-bottom: 4px;
       display: block;
     }
 
-    /* 🔹 Stretch specific table columns */
-    #licensesTable th:nth-child(3),
-    #licensesTable td:nth-child(3) {
-      width: 160px !important;
-      min-width: 160px;
-      white-space: nowrap;
-    }
+    /* Wider status column */
     #licensesTable th:nth-child(6),
     #licensesTable td:nth-child(6) {
-      width: 130px !important;
-      min-width: 130px;
+      width: 120px;
       white-space: nowrap;
     }
 
-    /* 🔹 Approve button in Requests */
-    .btn-approve {
-      background-color: #27ae60;
-      border: none;
-      color: white;
-      padding: 4px 8px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 0.85rem;
-    }
-    .btn-approve:hover { background-color: #1e8c4f; }
-
-    /* 🔹 Export button spacing */
     .table-controls {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 10px;
-      gap: 10px;
+    }
+
+    .btn-export {
+      width: auto;
+      background: #2980b9;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .btn-export:hover {
+      background: #1f6392;
     }
 
     input#licenseSearch {
-      flex: 1;
-      max-width: 300px;
+      max-width: 250px;
+      border-radius: 8px;
+    }
+
+    .verification-table-wrapper {
+      overflow-x: auto;
     }
   </style>
 </head>
+
 <body>
-  <!-- 🔹 HEADER -->
+  <!-- HEADER -->
   <header>
     <h1><i class="fas fa-id-card"></i> Dashboard</h1>
     <button onclick="signOutUser()"><i class="fas fa-sign-out-alt"></i> Logout</button>
   </header>
 
-  <!-- 🔹 NAVIGATION -->
+  <!-- NAVIGATION -->
   <nav>
     <a href="dashboard.html" class="active"><i class="fas fa-home"></i> Dashboard</a>
     <a href="verify.html"><i class="fas fa-search"></i> Verification</a>
@@ -116,9 +119,8 @@
     <a href="analytics.html"><i class="fas fa-chart-bar"></i> Analytics</a>
   </nav>
 
-  <!-- 🔹 MAIN CONTENT -->
+  <!-- MAIN -->
   <main class="dashboard-main">
-
     <!-- LICENSE STATS -->
     <section class="dashboard-cards">
       <div class="card total">
@@ -143,7 +145,7 @@
       </div>
     </section>
 
-    <!-- 🔹 LICENSES TABLE (above requests) -->
+    <!-- LICENSE TABLE -->
     <section class="panel">
       <h2><i class="fas fa-id-badge"></i> Licenses</h2>
       <div class="table-controls">
@@ -170,7 +172,7 @@
       </div>
     </section>
 
-    <!-- 🔹 RECENT ACCESS REQUESTS -->
+    <!-- ACCESS REQUESTS -->
     <section class="panel">
       <h2><i class="fas fa-envelope"></i> Recent Access Requests</h2>
       <div class="verification-table-wrapper">
@@ -182,18 +184,17 @@
               <th>Organization</th>
               <th>Status</th>
               <th>Requested At</th>
-              <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            <tr><td colspan="6">Loading...</td></tr>
+            <tr><td colspan="5">Loading...</td></tr>
           </tbody>
         </table>
       </div>
     </section>
   </main>
 
-  <!-- 🔹 FOOTER -->
+  <!-- FOOTER -->
   <footer>
     <label for="languageSwitcher"><i class="fas fa-globe"></i></label>
     <select id="languageSwitcher">
@@ -203,22 +204,21 @@
     </select>
   </footer>
 
-  <!-- 🔹 FIRESTORE DASHBOARD LOGIC -->
+  <!-- JAVASCRIPT FUNCTIONALITY -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const db = firebase.firestore();
       const licensesRef = db.collection("licenses");
       const requestsRef = db.collection("requests");
-      const licenseTableBody = document.querySelector("#licensesTable tbody");
-      const requestTableBody = document.querySelector("#recentRequestsTable tbody");
+      const tbody = document.querySelector("#licensesTable tbody");
 
-      // === LICENSES ===
+      // 🔹 Load Licenses
       licensesRef.onSnapshot(snapshot => {
         let total = 0, active = 0, suspended = 0, expired = 0;
-        licenseTableBody.innerHTML = "";
+        tbody.innerHTML = "";
 
         if (snapshot.empty) {
-          licenseTableBody.innerHTML = "<tr><td colspan='7'>No licenses found.</td></tr>";
+          tbody.innerHTML = "<tr><td colspan='7'>No licenses found.</td></tr>";
         } else {
           snapshot.forEach(doc => {
             const d = doc.data();
@@ -228,7 +228,7 @@
             else if (status.includes("suspend")) suspended++;
             else if (status.includes("expire")) expired++;
 
-            licenseTableBody.innerHTML += `
+            tbody.innerHTML += `
               <tr>
                 <td>${d.licenseNumber || doc.id}</td>
                 <td>${d.fullName || ""}</td>
@@ -247,7 +247,7 @@
         document.getElementById("expiredLicenses").textContent = expired;
       });
 
-      // === SEARCH FILTER ===
+      // 🔹 Search filter logic
       document.getElementById("licenseSearch").addEventListener("keyup", (e) => {
         const term = e.target.value.toLowerCase();
         document.querySelectorAll("#licensesTable tbody tr").forEach(row => {
@@ -256,68 +256,48 @@
         });
       });
 
-      // === EXPORT CSV ===
+      // 🔹 Export table to CSV
       document.getElementById("exportLicenses").addEventListener("click", () => {
-        const table = document.getElementById("licensesTable");
+        const rows = document.querySelectorAll("#licensesTable tr");
         let csv = [];
-        table.querySelectorAll("tr").forEach(row => {
+
+        rows.forEach(row => {
           const cols = row.querySelectorAll("th, td");
           let rowData = [];
-          cols.forEach(col => rowData.push(`"${col.innerText.replace(/"/g, '""')}"`));
+          cols.forEach(col => rowData.push('"' + col.innerText.replace(/"/g, '""') + '"'));
           csv.push(rowData.join(","));
         });
+
         const blob = new Blob([csv.join("\n")], { type: "text/csv" });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = `licenses_${new Date().toISOString().split("T")[0]}.csv`;
+        link.download = "licenses_export.csv";
         link.click();
       });
 
-      // === RECENT REQUESTS ===
+      // 🔹 Access Requests
       requestsRef.orderBy("createdAt", "desc").limit(5).onSnapshot(snapshot => {
-        requestTableBody.innerHTML = "";
+        const tbody = document.querySelector("#recentRequestsTable tbody");
+        tbody.innerHTML = "";
         if (snapshot.empty) {
-          requestTableBody.innerHTML = "<tr><td colspan='6'>No access requests found.</td></tr>";
+          tbody.innerHTML = "<tr><td colspan='5'>No access requests found.</td></tr>";
           return;
         }
 
         snapshot.forEach(doc => {
           const r = doc.data();
           const date = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleString() : (r.createdAt || "");
-          const status = r.status || "pending";
-          const action = status === "pending"
-            ? `<button class='btn-approve' onclick="approveRequest('${doc.id}', '${r.email}')"><i class='fas fa-check'></i> Approve</button>`
-            : `<em>Approved</em>`;
-
-          requestTableBody.innerHTML += `
+          tbody.innerHTML += `
             <tr>
               <td>${r.fullName || ""}</td>
               <td>${r.email || ""}</td>
               <td>${r.organization || ""}</td>
-              <td>${status}</td>
+              <td>${r.status || "pending"}</td>
               <td>${date}</td>
-              <td>${action}</td>
             </tr>`;
         });
       });
     });
-
-    // 🔹 Approve Request Action
-    async function approveRequest(id, email) {
-      const db = firebase.firestore();
-      try {
-        await db.collection("requests").doc(id).update({ status: "approved" });
-        await db.collection("users").doc(email).set({
-          email,
-          role: "verifier",
-          status: "approved",
-          approvedAt: new Date(),
-        }, { merge: true });
-        alert(`✅ Request approved for ${email}`);
-      } catch (err) {
-        alert("Error approving request: " + err.message);
-      }
-    }
 
     function viewLicense(id) {
       alert("License ID: " + id);
