@@ -20,8 +20,14 @@
   <script defer src="script.js"></script>
 </head>
 <body>
-  <!-- 🌿 Background image layer (No blur) -->
-  <div class="background-image"></div>
+  <!-- 🌿 Background image layer (No blur, embedded directly in HTML) -->
+  <div class="background-image" style="
+    position: fixed;
+    inset: 0;
+    background: url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') no-repeat center center fixed;
+    background-size: cover;
+    z-index: -1;">
+  </div>
 
   <div class="container">
     <h2><i class="fas fa-user-plus"></i> Create an Account</h2>
