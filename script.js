@@ -17,7 +17,7 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 /* === i18n === */
-const i18nResources = { /* (keep your translations exactly as before) */ };
+const i18nResources = {}; // (keep your translations exactly as before)
 i18next.use(i18nextBrowserLanguageDetector).init(
   { resources: i18nResources, fallbackLng: "en" },
   () => {
@@ -95,7 +95,7 @@ async function resetPassword(){
 /* === Auth Gate === */
 auth.onAuthStateChanged(async (user)=>{
   const page = getPage();
-  const adminPages = ["dashboard.html","add_licenses.html","analytics.html","users.html","verification_requests.html","requests.html"];
+  const adminPages = ["dashboard.html","add_licenses.html","analytics.html","users.html","verification_requests.html"];
   if (!user) {
     if (adminPages.includes(page) || page === "verify.html") window.location.href="index.html";
     return;
@@ -161,130 +161,8 @@ function initLicenseListener(){
   });
 }
 
-async function saveLicenseRow(licenseNumber, btn){
-  try {
-    const tr = btn.closest("tr");
-    const payload = {};
-    tr.querySelectorAll("[data-field]").forEach(el=>{
-      const key = el.getAttribute("data-field");
-      payload[key] = (el.tagName === "TD") ? el.textContent.trim() : el.value;
-    });
-    await db.collection("licenses").doc(licenseNumber).set(payload, { merge:true });
-    showMsg("✅ License updated", true);
-  } catch(err){ showMsg("❌ " + err.message); }
-}
-
-async function addLicense(){
-  const form = document.getElementById("addLicenseForm");
-  if (!form) return;
-  const data = {
-    licenseNumber: form.licenseNumber.value.trim(),
-    fullName: form.fullName.value.trim(),
-    class: form.licenseClass.value,
-    issueDate: form.issueDate.value,
-    expiryDate: form.expiryDate.value,
-    status: "Active"
-  };
-  if (!data.licenseNumber) return showMsg("⚠️ License number required");
-  try {
-    await db.collection("licenses").doc(data.licenseNumber).set(data);
-    form.reset(); showMsg("✅ License added", true);
-  } catch(err){ showMsg("❌ Error adding license: " + err.message); }
-}
-
 /* ==========================================================
-   VERIFICATION & ANALYTICS
-   ========================================================== */
-async function verifyLicense(e){
-  if (e) e.preventDefault();
-  const licenseNumber = document.getElementById("verifyLicenseNumber")?.value.trim();
-  const org = document.getElementById("verifyOrg")?.value.trim();
-  const country = document.getElementById("verifyCountry")?.value.trim();
-  const purpose = document.getElementById("verifyPurpose")?.value.trim();
-  const resultEl = document.getElementById("verifyResult");
-  const nextContainer = document.getElementById("verifyNextContainer");
-
-  if(!licenseNumber){ showMsg("⚠️ License number required"); return; }
-
-  try{
-    const docRef = await db.collection("licenses").doc(licenseNumber).get();
-    const found = docRef.exists;
-    const d = docRef.data() || {};
-    const resultText = found ? "License found" : "License not found";
-
-    await db.collection("verifications").add({
-      licenseNumber, requestingOrg: org || "", country: country || "",
-      email: auth.currentUser?.email || "", purpose: purpose || "",
-      result: resultText,
-      verifiedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      verifiedBy: auth.currentUser?.uid || ""
-    });
-
-    if(resultEl){
-      resultEl.style.display = "block";
-      resultEl.innerHTML = `
-        <h3>${found?"✅ License Found":"❌ License Not Found"}</h3>
-        <p><strong>License #:</strong> ${licenseNumber}</p>
-        ${found?`
-          <p><strong>Full Name:</strong> ${d.fullName||"N/A"}</p>
-          <p><strong>Class:</strong> ${d.class||"N/A"}</p>
-          <p><strong>Issue:</strong> ${d.issueDate||"N/A"}</p>
-          <p><strong>Expiry:</strong> ${d.expiryDate||"N/A"}</p>
-          <p><strong>Status:</strong> ${d.status||"N/A"}</p>`:""}
-        <hr>
-        <p><strong>Organization:</strong> ${org||"—"}</p>
-        <p><strong>Country:</strong> ${country||"—"}</p>
-        <p><strong>Purpose:</strong> ${purpose||"—"}</p>`;
-    }
-    if(nextContainer){
-      nextContainer.style.display="block";
-      document.getElementById("verifyNextBtn").onclick=()=>{
-        document.getElementById("verifyForm").reset();
-        resultEl.style.display="none";
-        nextContainer.style.display="none";
-      };
-    }
-    showMsg(`✅ ${resultText}`, true);
-  } catch(err){ console.error(err); showMsg("❌ Error: "+err.message); }
-}
-
-function initVerificationListener(){
-  const tbody = document.getElementById("verificationLogs");
-  const totalEl=document.getElementById("totalVerifications");
-  const okEl=document.getElementById("successfulVerifications");
-  const failEl=document.getElementById("failedVerifications");
-  if(!tbody && !totalEl) return;
-
-  db.collection("verifications").orderBy("verifiedAt","desc").onSnapshot(snapshot=>{
-    let total=0, success=0, fail=0;
-    if(tbody) tbody.innerHTML="";
-    if(snapshot.empty){
-      if(tbody) tbody.innerHTML="<tr><td colspan='5'>No verifications yet</td></tr>";
-    }else{
-      snapshot.forEach(doc=>{
-        const d=doc.data(); total++;
-        const res=(d.result||"").toLowerCase();
-        if(res.includes("not found")||res.includes("fail")) fail++; else success++;
-        if(tbody){
-          const tr=document.createElement("tr");
-          tr.innerHTML=`
-            <td>${d.licenseNumber}</td>
-            <td>${d.requestingOrg||""}</td>
-            <td>${d.country||""}</td>
-            <td>${d.result||""}</td>
-            <td>${d.verifiedAt?d.verifiedAt.toDate().toLocaleString():""}</td>`;
-          tbody.appendChild(tr);
-        }
-      });
-    }
-    if(totalEl) totalEl.textContent=total;
-    if(okEl) okEl.textContent=success;
-    if(failEl) failEl.textContent=fail;
-  });
-}
-
-/* ==========================================================
-   USERS & REQUESTS
+   USERS
    ========================================================== */
 function initUserListener(){
   const tbody=document.getElementById("usersTable");
@@ -306,11 +184,25 @@ function initUserListener(){
         <td>${u.email}</td>
         <td><select data-field="role"><option ${role==="verifier"?"selected":""}>verifier</option><option ${role==="admin"?"selected":""}>admin</option></select></td>
         <td><select data-field="status"><option ${u.status==="approved"?"selected":""}>approved</option><option ${u.status==="pending"?"selected":""}>pending</option><option ${u.status==="disabled"?"selected":""}>disabled</option></select></td>
-        <td><button class="btn-edit inline" onclick="updateUserRow('${u.email}',this)">Update</button>
-        <button class="btn-delete inline" onclick="deleteUser('${u.email}')">Delete</button></td>`;
+        <td>
+          <button class="btn-edit inline" style="background:#27ae60;color:white;" onclick="updateUserRow('${u.email}',this)">Update</button>
+          <button class="btn-delete inline" style="background:#e74c3c;color:white;" onclick="deleteUser('${u.email}')">Delete</button>
+        </td>`;
       tbody.appendChild(tr);
     });
   });
+
+  // ✅ Enable search functionality
+  const searchInput = document.getElementById("userSearch");
+  if (searchInput) {
+    searchInput.addEventListener("keyup", () => {
+      const term = searchInput.value.toLowerCase();
+      document.querySelectorAll("#usersTable tr").forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(term) ? "" : "none";
+      });
+    });
+  }
 }
 
 async function addNewUser(e){
@@ -335,43 +227,12 @@ async function updateUserRow(email,btn){
   await db.collection("roles").doc(email).set({role:updates.role},{merge:true});
   showMsg("✅ User updated",true);
 }
+
 async function deleteUser(email){
   if(!confirm(`Delete ${email}?`)) return;
   await db.collection("users").doc(email).delete();
   await db.collection("roles").doc(email).delete();
   showMsg("🗑️ User deleted",true);
-}
-
-function initRequestListener(){
-  const tbody=document.getElementById("requestsTable");
-  if(!tbody) return;
-  db.collection("requests").orderBy("submittedAt","desc").onSnapshot(snapshot=>{
-    tbody.innerHTML="";
-    if(snapshot.empty){
-      tbody.innerHTML="<tr><td colspan='7'>No requests</td></tr>"; return;
-    }
-    snapshot.forEach(doc=>{
-      const r=doc.data();
-      const tr=document.createElement("tr");
-      tr.innerHTML=`
-        <td>${r.fullName||""}</td><td>${r.email||""}</td><td>${r.organization||""}</td>
-        <td>${r.phone||""}</td><td>${r.purpose||""}</td><td>${r.status||"pending"}</td>
-        <td><button class="btn-edit inline" onclick="approveRequest('${doc.id}','${r.email}','${r.fullName}','${r.organization}','${r.phone}')">Approve</button>
-        <button class="btn-delete inline" onclick="rejectRequest('${doc.id}')">Reject</button></td>`;
-      tbody.appendChild(tr);
-    });
-  });
-}
-
-async function approveRequest(id,email,fullName,organization,phone){
-  await db.collection("requests").doc(id).update({status:"approved"});
-  await db.collection("users").doc(email).set({fullName,email,organization,phone,status:"approved",approved:true},{merge:true});
-  await db.collection("roles").doc(email).set({role:"verifier"},{merge:true});
-  showMsg(`✅ ${fullName} approved`,true);
-}
-async function rejectRequest(id){
-  await db.collection("requests").doc(id).update({status:"rejected"});
-  showMsg("🚫 Request rejected");
 }
 
 /* ==========================================================
@@ -386,7 +247,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     const form=document.getElementById("addUserForm");
     if(form) form.addEventListener("submit",addNewUser);
   }
-  if(page==="verification_requests.html"||page==="requests.html") initRequestListener();
+  if(page==="verification_requests.html") initRequestListener?.(); // optional if you add back later
 });
 
 /* === Expose Globals === */
@@ -399,5 +260,3 @@ window.saveLicenseRow=saveLicenseRow;
 window.addNewUser=addNewUser;
 window.updateUserRow=updateUserRow;
 window.deleteUser=deleteUser;
-window.approveRequest=approveRequest;
-window.rejectRequest=rejectRequest;
