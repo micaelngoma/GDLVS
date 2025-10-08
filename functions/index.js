@@ -32,9 +32,6 @@ const BASE_URL = "https://gdlvs-2348e.web.app";
 
 /* ============================================================
    🔹 Callable: Assign Admin Role
-   ------------------------------------------------------------
-   Run manually once from Firebase CLI or via callable client.
-   Grants ADMIN role to the specified target email.
    ============================================================ */
 exports.setAdmin = functions.https.onCall(async (data, context) => {
   const targetEmail = "m.ngoma1988@gmail.com";
@@ -54,9 +51,6 @@ exports.setAdmin = functions.https.onCall(async (data, context) => {
 
 /* ============================================================
    🔹 Trigger: Notify Admin on New Access Request
-   ------------------------------------------------------------
-   When a new access request is added under /requests,
-   send an automatic notification email to the system admin.
    ============================================================ */
 exports.notifyAdminOnNewRequest = functions.firestore
   .document("requests/{requestId}")
@@ -83,19 +77,39 @@ ${BASE_URL}/requests.html
     };
 
     try {
+      // ✅ Notify Admin
       await sgMail.send(msg);
       console.log(`📨 Admin notified about new request from ${fullName} (${email})`);
+
+      // ✅ Also notify user that their request was received
+      const confirmation = {
+        to: email,
+        from: SYSTEM_EMAIL,
+        subject: "✅ GDLVS Access Request Received",
+        text: `
+Dear ${fullName},
+
+Your access request to the Gabon Driver’s License Verification System (GDLVS) has been received.
+
+It will be reviewed by the administrator within the next 72 hours.
+You will receive an update once your request has been approved.
+
+Thank you for your interest in GDLVS.
+
+Best regards,
+GDLVS Administration
+        `,
+      };
+
+      await sgMail.send(confirmation);
+      console.log(`📨 Confirmation email sent to requester: ${email}`);
     } catch (error) {
-      console.error("❌ Error sending admin notification:", error);
+      console.error("❌ Error sending notifications:", error);
     }
   });
 
 /* ============================================================
    🔹 Trigger: Sync User + Role on Approval
-   ------------------------------------------------------------
-   When a request’s status changes from pending → approved:
-   - Create / update user and role docs.
-   - Email requester with approval confirmation.
    ============================================================ */
 exports.syncUserOnApproval = functions.firestore
   .document("requests/{requestId}")
@@ -156,9 +170,6 @@ GDLVS Administration
 
 /* ============================================================
    🔹 Trigger: Clean Up Role on User Delete
-   ------------------------------------------------------------
-   When a user document is deleted, automatically delete
-   their corresponding role document to maintain consistency.
    ============================================================ */
 exports.cleanUpUserOnDelete = functions.firestore
   .document("users/{userId}")
@@ -176,9 +187,6 @@ exports.cleanUpUserOnDelete = functions.firestore
 
 /* ============================================================
    🔹 Trigger: Apply Auth Role Claims
-   ------------------------------------------------------------
-   Keeps Firebase Authentication custom claims synced with
-   Firestore `/roles/{email}` to ensure access consistency.
    ============================================================ */
 exports.applyRoleClaims = functions.firestore
   .document("roles/{email}")
@@ -202,9 +210,6 @@ exports.applyRoleClaims = functions.firestore
 
 /* ============================================================
    🔹 HTTP Endpoint: Manual Bulk Re-Sync
-   ------------------------------------------------------------
-   Re-syncs all approved requests back into /users & /roles.
-   Useful for disaster recovery or bulk migration.
    ============================================================ */
 exports.resyncRequests = functions.https.onRequest(async (req, res) => {
   try {
