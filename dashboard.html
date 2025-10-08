@@ -3,19 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <title>GDLVS - Dashboard</title>
+
+  <!-- Styles -->
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+  <!-- i18n -->
+  <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
+  <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
+  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
+  <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
+
+  <!-- Main Script -->
   <script defer src="script.js"></script>
 </head>
 <body>
+  <!-- 🔹 HEADER -->
   <header>
     <h1><i class="fas fa-id-card"></i> Dashboard</h1>
     <button onclick="signOutUser()"><i class="fas fa-sign-out-alt"></i> Logout</button>
   </header>
 
+  <!-- 🔹 NAVIGATION -->
   <nav>
     <a href="dashboard.html" class="active"><i class="fas fa-home"></i> Dashboard</a>
     <a href="verify.html"><i class="fas fa-search"></i> Verification</a>
@@ -25,42 +39,169 @@
     <a href="analytics.html"><i class="fas fa-chart-bar"></i> Analytics</a>
   </nav>
 
+  <!-- 🔹 MAIN CONTENT -->
   <main class="dashboard-main">
+
+    <!-- LICENSE STATS -->
     <section class="dashboard-cards">
-      <div class="card total"><div class="card-icon">👤</div><h3>Total Licenses</h3><h2 id="totalLicenses">0</h2></div>
-      <div class="card active"><div class="card-icon">✅</div><h3>Active Licenses</h3><h2 id="activeLicenses">0</h2></div>
-      <div class="card suspended"><div class="card-icon">⚠️</div><h3>Suspended</h3><h2 id="suspendedLicenses">0</h2></div>
-      <div class="card expired"><div class="card-icon">⛔</div><h3>Expired</h3><h2 id="expiredLicenses">0</h2></div>
+      <div class="card total">
+        <div class="card-icon">👤</div>
+        <h3>Total Licenses</h3>
+        <h2 id="totalLicenses">0</h2>
+      </div>
+      <div class="card active">
+        <div class="card-icon">✅</div>
+        <h3>Active Licenses</h3>
+        <h2 id="activeLicenses">0</h2>
+      </div>
+      <div class="card suspended">
+        <div class="card-icon">⚠️</div>
+        <h3>Suspended</h3>
+        <h2 id="suspendedLicenses">0</h2>
+      </div>
+      <div class="card expired">
+        <div class="card-icon">⛔</div>
+        <h3>Expired</h3>
+        <h2 id="expiredLicenses">0</h2>
+      </div>
     </section>
 
-    <!-- 🔹 New Requests Summary -->
+    <!-- 🔹 RECENT ACCESS REQUESTS -->
     <section class="panel">
       <h2><i class="fas fa-envelope"></i> Recent Access Requests</h2>
       <div class="verification-table-wrapper">
         <table class="table" id="recentRequestsTable">
           <thead>
-            <tr><th>Full Name</th><th>Email</th><th>Organization</th><th>Status</th><th>Requested At</th></tr>
+            <tr>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Organization</th>
+              <th>Status</th>
+              <th>Requested At</th>
+            </tr>
           </thead>
-          <tbody><tr><td colspan="5">Loading...</td></tr></tbody>
+          <tbody>
+            <tr><td colspan="5">Loading...</td></tr>
+          </tbody>
         </table>
       </div>
     </section>
 
-    <!-- 🔹 Licenses Section -->
+    <!-- 🔹 LICENSES TABLE -->
     <section class="panel">
       <h2><i class="fas fa-id-badge"></i> Licenses</h2>
-      <input type="text" id="licenseSearch" placeholder="Search licenses..." onkeyup="filterLicenses()">
-      <button class="btn-export" onclick="exportTableToCSV('licensesTable','licenses')">📥 Export</button>
-      <table class="table" id="licensesTable">
-        <thead><tr><th>License #</th><th>Full Name</th><th>Class</th><th>Issue</th><th>Expiry</th><th>Status</th><th>Action</th></tr></thead>
-        <tbody><tr><td colspan="7">Loading...</td></tr></tbody>
-      </table>
+      <div class="table-controls">
+        <input type="text" id="licenseSearch" placeholder="Search licenses..." onkeyup="filterLicenses()" />
+        <button class="btn-export" onclick="exportTableToCSV('licensesTable','licenses')">
+          <i class="fas fa-file-export"></i> Export
+        </button>
+      </div>
+      <div class="verification-table-wrapper">
+        <table class="table" id="licensesTable">
+          <thead>
+            <tr>
+              <th>License #</th>
+              <th>Full Name</th>
+              <th>Class</th>
+              <th>Issue</th>
+              <th>Expiry</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="7">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </section>
+
   </main>
 
+  <!-- 🔹 FOOTER -->
   <footer>
     <label for="languageSwitcher"><i class="fas fa-globe"></i></label>
-    <select id="languageSwitcher"><option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option><option value="ja">🇯🇵 日本語</option></select>
+    <select id="languageSwitcher">
+      <option value="en">🇬🇧 English</option>
+      <option value="fr">🇫🇷 Français</option>
+      <option value="ja">🇯🇵 日本語</option>
+    </select>
   </footer>
+
+  <!-- 🔹 DASHBOARD FIRESTORE HANDLER -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // === LICENSE COUNTERS ===
+      const db = firebase.firestore();
+      const licensesRef = db.collection("licenses");
+      const requestsRef = db.collection("requests");
+
+      // Load Licenses Summary
+      licensesRef.onSnapshot(snapshot => {
+        let total = 0, active = 0, suspended = 0, expired = 0;
+        const tbody = document.querySelector("#licensesTable tbody");
+        tbody.innerHTML = "";
+
+        if (snapshot.empty) {
+          tbody.innerHTML = "<tr><td colspan='7'>No licenses found.</td></tr>";
+        } else {
+          snapshot.forEach(doc => {
+            const d = doc.data();
+            total++;
+            const status = (d.status || "").toLowerCase();
+            if (status.includes("active")) active++;
+            else if (status.includes("suspend")) suspended++;
+            else if (status.includes("expire")) expired++;
+
+            tbody.innerHTML += `
+              <tr>
+                <td>${d.licenseNumber || doc.id}</td>
+                <td>${d.fullName || ""}</td>
+                <td>${d.class || ""}</td>
+                <td>${d.issueDate || ""}</td>
+                <td>${d.expiryDate || ""}</td>
+                <td>${d.status || ""}</td>
+                <td><button class='btn-view' onclick="viewLicense('${doc.id}')">View</button></td>
+              </tr>`;
+          });
+        }
+
+        document.getElementById("totalLicenses").textContent = total;
+        document.getElementById("activeLicenses").textContent = active;
+        document.getElementById("suspendedLicenses").textContent = suspended;
+        document.getElementById("expiredLicenses").textContent = expired;
+      });
+
+      // Load 5 Most Recent Requests
+      requestsRef.orderBy("createdAt", "desc").limit(5).onSnapshot(snapshot => {
+        const tbody = document.querySelector("#recentRequestsTable tbody");
+        tbody.innerHTML = "";
+        if (snapshot.empty) {
+          tbody.innerHTML = "<tr><td colspan='5'>No access requests found.</td></tr>";
+          return;
+        }
+
+        snapshot.forEach(doc => {
+          const r = doc.data();
+          const date = r.createdAt?.toDate
+            ? r.createdAt.toDate().toLocaleString()
+            : (r.createdAt || "");
+          tbody.innerHTML += `
+            <tr>
+              <td>${r.fullName || ""}</td>
+              <td>${r.email || ""}</td>
+              <td>${r.organization || ""}</td>
+              <td>${r.status || "pending"}</td>
+              <td>${date}</td>
+            </tr>`;
+        });
+      });
+    });
+
+    // View License Action
+    function viewLicense(id) {
+      alert("License ID: " + id);
+    }
+  </script>
 </body>
 </html>
