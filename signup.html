@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Sign Up - GDLVS</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <title>GDLVS - Sign Up</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -17,39 +20,49 @@
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
+  <!-- App -->
   <script defer src="script.js"></script>
 </head>
 <body>
-  <!-- 🌿 Background image layer (No blur, embedded directly in HTML) -->
-  <div class="background-image" style="
-    position: fixed;
-    inset: 0;
-    background: url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') no-repeat center center fixed;
-    background-size: cover;
-    z-index: -1;">
-  </div>
+  <!-- Background -->
+  <div class="background-image"></div>
 
   <div class="container">
-    <h2><i class="fas fa-user-plus"></i> Create an Account</h2>
+    <h2><i class="fas fa-user-plus"></i> <span data-i18n="createAccount">Create an Account</span></h2>
+
     <form id="signupForm" onsubmit="signupUser(event)">
-      <input type="text" id="signupFullName" placeholder="Full Name" required>
-      <input type="email" id="signupEmail" placeholder="Enter email" required>
-      <input type="password" id="signupPassword" placeholder="Enter password" required>
-      <button type="submit"><i class="fas fa-user-plus"></i> Sign Up</button>
+      <input type="text" id="signupFullName" required data-i18n="[placeholder]fullNamePlaceholder"
+             placeholder="Full Name" />
+      <input type="email" id="signupEmail" required data-i18n="[placeholder]emailPlaceholder"
+             placeholder="Email" />
+      <input type="password" id="signupPassword" required data-i18n="[placeholder]passwordPlaceholder"
+             placeholder="Password" />
+      <input type="password" id="confirmPassword" required data-i18n="[placeholder]confirmPasswordPlaceholder"
+             placeholder="Confirm Password" />
+
+      <input type="text" id="organization" required
+             data-i18n="[placeholder]organizationPlaceholder"
+             placeholder="Organization / Company / Agency" />
+
+      <input type="tel" id="phone" required data-i18n="[placeholder]phonePlaceholder"
+             placeholder="Phone Number" />
+
+      <button type="submit"><i class="fas fa-user-plus"></i> <span data-i18n="signUp">Sign Up</span></button>
     </form>
+
     <p class="muted" data-i18n="approvalNotice">
       Note: Your account must be approved by an administrator before you can use the verification system.
     </p>
+
     <div id="msg"></div>
-    <p>Already have an account? <a href="index.html">Login here</a></p>
+
+    <p class="muted">
+      <span data-i18n="alreadyHave">Already have an account?</span>
+      <a href="index.html" data-i18n="loginHere">Login here</a>
+    </p>
   </div>
 
-  <!-- ✉️ Welcome email message -->
-  <div class="welcome-email" aria-labelledby="welcomeEmailTitle">
-    <h3 id="welcomeEmailTitle"><i class="fas fa-envelope-open-text"></i> Welcome Email</h3>
-    <p>Welcome to the Gabonese Driver’s License Verification System</p>
-  </div>
-
+  <!-- Footer / Language -->
   <footer>
     <label for="languageSwitcher"><i class="fas fa-globe"></i></label>
     <select id="languageSwitcher">
