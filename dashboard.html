@@ -123,7 +123,8 @@
     <a href="verify.html"><i class="fas fa-search"></i> Verification</a>
     <a href="add_licenses.html"><i class="fas fa-id-card"></i> Add License</a>
     <a href="users.html"><i class="fas fa-users-cog"></i> Users</a>
-    <a id="navVerificationRequests" href="verification_requests.html" style="display:none;"><i class="fas fa-inbox"></i> Requests</a>
+    <!-- ✅ Only keep the correct Requests link -->
+    <a id="navVerificationRequests" href="verification_requests.html"><i class="fas fa-inbox"></i> Requests</a>
     <a href="analytics.html"><i class="fas fa-chart-bar"></i> Analytics</a>
   </nav>
 
@@ -179,27 +180,6 @@
         </table>
       </div>
     </section>
-
-    <!-- ACCESS REQUESTS -->
-    <section class="panel">
-      <h2><i class="fas fa-envelope"></i> Recent Access Requests</h2>
-      <div class="verification-table-wrapper">
-        <table class="table" id="recentRequestsTable">
-          <thead>
-            <tr>
-              <th>Full Name</th>
-              <th>Email</th>
-              <th>Organization</th>
-              <th>Status</th>
-              <th>Requested At</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td colspan="5">Loading...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
   </main>
 
   <!-- FOOTER -->
@@ -217,7 +197,6 @@
     document.addEventListener("DOMContentLoaded", () => {
       const db = firebase.firestore();
       const licensesRef = db.collection("licenses");
-      const requestsRef = db.collection("requests");
       const tbody = document.querySelector("#licensesTable tbody");
 
       // 🔹 Load Licenses
@@ -281,29 +260,6 @@
         link.href = URL.createObjectURL(blob);
         link.download = "licenses_export.csv";
         link.click();
-      });
-
-      // 🔹 Access Requests
-      requestsRef.orderBy("createdAt", "desc").limit(5).onSnapshot(snapshot => {
-        const tbody = document.querySelector("#recentRequestsTable tbody");
-        tbody.innerHTML = "";
-        if (snapshot.empty) {
-          tbody.innerHTML = "<tr><td colspan='5'>No access requests found.</td></tr>";
-          return;
-        }
-
-        snapshot.forEach(doc => {
-          const r = doc.data();
-          const date = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleString() : (r.createdAt || "");
-          tbody.innerHTML += `
-            <tr>
-              <td>${r.fullName || ""}</td>
-              <td>${r.email || ""}</td>
-              <td>${r.organization || ""}</td>
-              <td>${r.status || "pending"}</td>
-              <td>${date}</td>
-            </tr>`;
-        });
       });
     });
 
