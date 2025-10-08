@@ -1,6 +1,4 @@
-/* =======================
-   Firebase Setup  (KEEPING YOUR EXISTING CONFIG)
-======================= */
+/* ========== Firebase (keep your config) ========== */
 const firebaseConfig = {
   apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
   authDomain: "gdlvs-2348e.firebaseapp.com",
@@ -13,9 +11,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-/* =======================
-   i18next (EN/FR/JA)
-======================= */
+/* ========== i18n ========== */
 const resources = {
   en: { translation: {
     login:"Login", logout:"Logout", signUp:"Sign Up",
@@ -33,7 +29,6 @@ const resources = {
     totalVerifications:"Total Verifications", successfulVerifications:"Successful",
     failedVerifications:"Failed",
 
-    // Auth flows
     verifyEmailFirst:"⚠️ Please verify your email before logging in. Verification link has been resent.",
     notApprovedYet:"⏳ Your account is not approved yet. Please wait for administrator approval.",
     loginSuccess:"✅ Login successful. Redirecting...",
@@ -88,38 +83,29 @@ i18next.use(i18nextBrowserLanguageDetector).init(
   function () {
     jqueryI18next.init(i18next, $, { useOptionsAttr: true });
     $("body").localize();
-
-    // Make Firebase emails (reset/verify) match UI language
     auth.useDeviceLanguage();
     auth.languageCode = i18next.language || "en";
   }
 );
 
-// language switcher
 document.addEventListener("DOMContentLoaded", () => {
   const switcher = document.getElementById("languageSwitcher");
   if (switcher) {
     switcher.addEventListener("change", function () {
-      i18next.changeLanguage(this.value, () => {
-        $("body").localize();
-        auth.languageCode = i18next.language;
-      });
+      i18next.changeLanguage(this.value, () => $("body").localize());
+      auth.languageCode = i18next.language;
     });
   }
 });
 
-/* =======================
-   Helpers
-======================= */
+/* ========== Helpers ========== */
 function showMsg(text, ok=false){
   const el = document.getElementById("msg");
   if(el){ el.textContent = text; el.style.color = ok ? "green" : "red"; }
   else { alert(text); }
 }
 
-/* =======================
-   Login / Logout / Auth gating
-======================= */
+/* ========== Auth ========== */
 async function loginUser(e){
   if(e) e.preventDefault();
   const email = document.getElementById("email").value.trim();
@@ -148,14 +134,14 @@ async function loginUser(e){
 
     if(role === "admin"){
       showMsg(i18next.t("adminWelcome"), true);
-      setTimeout(()=> window.location.href="dashboard.html", 800);
+      setTimeout(()=> window.location.href="dashboard.html", 600);
     } else {
       showMsg(i18next.t("loginSuccess"), true);
-      setTimeout(()=> window.location.href="verify.html", 800);
+      setTimeout(()=> window.location.href="verify.html", 600);
     }
   }catch(err){
-    console.error(err);
     showMsg("❌ " + err.message);
+    console.error(err);
   }
 }
 
@@ -170,23 +156,18 @@ async function resetPassword(){
   try{
     await auth.sendPasswordResetEmail(email);
     alert("Password reset email sent!");
-  }catch(err){
-    alert("Error resetting password: " + err.message);
-  }
+  }catch(err){ alert("Error resetting password: " + err.message); }
 }
 
-/* =======================
-   Auth gating on each page load
-======================= */
+/* ========== Auth gate per page ========== */
 auth.onAuthStateChanged(async (user)=>{
   const currentPage = (window.location.pathname.split("/").pop()||"").toLowerCase();
   const adminPages = ["dashboard.html","add_licenses.html","analytics.html","users.html","verification_requests.html"];
 
   if(!user){
-    if(adminPages.includes(currentPage)) window.location.href="index.html";
+    if (adminPages.includes(currentPage)) window.location.href="index.html";
     return;
   }
-
   if(!user.emailVerified){
     showMsg(i18next.t("verifyEmailFirst"));
     await auth.signOut();
@@ -207,32 +188,32 @@ auth.onAuthStateChanged(async (user)=>{
   const navRequests = document.getElementById("navVerificationRequests");
   if (navRequests) navRequests.style.display = (role === "admin") ? "block" : "none";
 
-  // Lazy init per page
   if(role === "admin"){
     if(currentPage === "dashboard.html"){ loadDashboardData(); loadLicensesTable(); }
     if(currentPage === "analytics.html"){ loadAnalyticsData(); }
     if(currentPage === "users.html"){ loadUsersData(); }
-    if(currentPage === "verification_requests.html"){ loadVerificationRequests?.(); }
+    if(currentPage === "verification_requests.html"){ loadVerificationRequests(); }
   } else {
-    if(adminPages.includes(currentPage)) window.location.href = "verify.html";
+    if (adminPages.includes(currentPage)) window.location.href="verify.html";
   }
 });
 
-/* =======================
-   Dashboard counts + License table
-======================= */
+/* ========== Dashboard & Licenses ========== */
 async function loadDashboardData(){
   try{
     const snap = await db.collection("licenses").get();
     let total=0, active=0, suspended=0, expired=0;
+
     snap.forEach(doc=>{
       total++;
-      const s = (doc.data().status||"").toLowerCase();
-      if(s==="active") active++;
-      else if(s==="suspended") suspended++;
-      else if(s==="expired") expired++;
+      const s = String(doc.data().status || "").toLowerCase();
+      // robust matching in case values are saved as short labels like "Ac", "Sus", etc.
+      if (s.startsWith("act")) active++;
+      else if (s.startsWith("sus")) suspended++;
+      else if (s.startsWith("exp")) expired++;
     });
-    const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.innerText = val; };
+
+    const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.textContent = val; };
     set("totalLicenses", total);
     set("activeLicenses", active);
     set("suspendedLicenses", suspended);
@@ -253,18 +234,18 @@ async function loadLicensesTable(){
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${d.licenseNumber}</td>
-        <td contenteditable="true" data-field="fullName">${d.fullName || ""}</td>
+        <td contenteditable="true" data-field="fullName" style="min-width:180px">${d.fullName || ""}</td>
         <td>
-          <select data-field="class">
+          <select data-field="class" style="min-width:110px">
             <option ${d.class==="Class A"?"selected":""}>Class A</option>
             <option ${d.class==="Class B"?"selected":""}>Class B</option>
             <option ${d.class==="Class C"?"selected":""}>Class C</option>
           </select>
         </td>
-        <td><input type="date" data-field="issueDate" value="${d.issueDate || ""}"></td>
-        <td><input type="date" data-field="expiryDate" value="${d.expiryDate || ""}"></td>
+        <td><input type="date" data-field="issueDate" value="${d.issueDate || ""}" style="min-width:140px"></td>
+        <td><input type="date" data-field="expiryDate" value="${d.expiryDate || ""}" style="min-width:140px"></td>
         <td>
-          <select data-field="status">
+          <select data-field="status" style="min-width:140px">
             <option ${d.status==="Active"?"selected":""}>Active</option>
             <option ${d.status==="Suspended"?"selected":""}>Suspended</option>
             <option ${d.status==="Expired"?"selected":""}>Expired</option>
@@ -285,18 +266,16 @@ async function saveLicenseRow(licenseNumber, btn){
       const key = el.getAttribute("data-field");
       payload[key] = (el.tagName === "TD") ? el.textContent.trim() : el.value;
     });
-    await db.collection("licenses").doc(licenseNumber).update(payload);
+    await db.collection("licenses").doc(licenseNumber).set(payload, { merge:true });
     showMsg("✅ License updated", true);
-    // Refresh counts (in case status changed)
     loadDashboardData?.();
   }catch(err){ console.error("saveLicenseRow error:", err); }
 }
 
-/* =======================
-   Verification flow
-======================= */
+/* ========== Verification ========== */
 async function verifyLicense(e){
   if(e) e.preventDefault();
+
   const licenseNumber = document.getElementById("verifyLicenseNumber").value.trim();
   const org = document.getElementById("verifyOrg").value.trim();
   const country = document.getElementById("verifyCountry").value.trim();
@@ -313,15 +292,18 @@ async function verifyLicense(e){
     const d = docRef.data() || {};
 
     await db.collection("verifications").add({
-      licenseNumber, requestingOrg:org, country,
+      licenseNumber,
+      requestingOrg: org,
+      country,
       email: auth.currentUser?.email || "",
-      purpose, result: resultText,
+      purpose,
+      result: resultText,
       verifiedAt: firebase.firestore.FieldValue.serverTimestamp(),
       verifiedBy: auth.currentUser?.uid || ""
     });
 
-    if(resultEl){
-      resultEl.style.display="block";
+    if (resultEl){
+      resultEl.style.display = "block";
       resultEl.innerHTML = `
         <h3>${found ? "✅ License Found" : "❌ License Not Found"}</h3>
         <p><strong>License #:</strong> ${licenseNumber}</p>
@@ -345,8 +327,8 @@ async function verifyLicense(e){
       if(btn){
         btn.onclick = ()=>{
           document.getElementById("verifyForm").reset();
-          resultEl.style.display="none";
-          nextContainer.style.display="none";
+          resultEl.style.display = "none";
+          nextContainer.style.display = "none";
           document.getElementById("verifyLicenseNumber").focus();
         };
       }
@@ -359,38 +341,63 @@ async function verifyLicense(e){
   }
 }
 
-/* =======================
-   Analytics
-======================= */
+/* ========== Verification Requests (Admin page) ========== */
+async function loadVerificationRequests(){
+  try{
+    const snapshot = await db.collection("verifications").orderBy("verifiedAt","desc").get();
+    const tbody = document.getElementById("requestsTable");
+    if(!tbody) return;
+    tbody.innerHTML = "";
+    if (snapshot.empty){
+      tbody.innerHTML = "<tr><td colspan='7'>No verification requests</td></tr>";
+      return;
+    }
+    snapshot.forEach(doc=>{
+      const d = doc.data();
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${d.licenseNumber || ""}</td>
+        <td>${d.requestingOrg || ""}</td>
+        <td>${d.country || ""}</td>
+        <td>${d.email || ""}</td>
+        <td>${d.purpose || ""}</td>
+        <td>${d.result || ""}</td>
+        <td>${d.verifiedAt ? d.verifiedAt.toDate().toLocaleString() : ""}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }catch(err){ console.error("Load requests error:", err); }
+}
+
+/* ========== Analytics ========== */
 async function loadAnalyticsData(){
   try{
-    const snapshot = await db.collection("verifications").orderBy("verifiedAt","desc").limit(10).get();
+    const snapshot = await db.collection("verifications").orderBy("verifiedAt", "desc").limit(10).get();
     let total=0, success=0, fail=0;
     const tbody = document.getElementById("verificationLogs");
-    if(!tbody) return;
+    if (!tbody) return;
     tbody.innerHTML = "";
     snapshot.forEach(doc=>{
       const d = doc.data(); total++;
-      if(d.result === "License found") success++; else fail++;
+      if ((d.result||"").toLowerCase().includes("found")) success++; else fail++;
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${d.licenseNumber}</td>
         <td>${d.requestingOrg || ""}</td>
         <td>${d.country || ""}</td>
         <td>${d.result || ""}</td>
-        <td>${d.verifiedAt ? d.verifiedAt.toDate().toLocaleString() : ""}</td>`;
+        <td>${d.verifiedAt ? d.verifiedAt.toDate().toLocaleString() : ""}</td>
+      `;
       tbody.appendChild(tr);
     });
-    const set=(id,val)=>{ const el=document.getElementById(id); if(el) el.innerText=val; };
+    const set=(id,val)=>{ const el=document.getElementById(id); if(el) el.textContent=val; };
     set("totalVerifications", total);
     set("successfulVerifications", success);
     set("failedVerifications", fail);
   }catch(err){ console.error("Analytics load error:", err); }
 }
 
-/* =======================
-   Users Management
-======================= */
+/* ========== Users ========== */
 async function loadUsersData(){
   try{
     const usersSnap = await db.collection("users").get();
@@ -408,24 +415,24 @@ async function loadUsersData(){
       const role = roleMap[u.email] || u.role || "verifier";
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td contenteditable="true" data-field="fullName">${u.fullName || ""}</td>
+        <td contenteditable="true" data-field="fullName" style="min-width:180px">${u.fullName || ""}</td>
         <td>${u.email}</td>
         <td>
-          <select data-field="role">
+          <select data-field="role" style="min-width:130px">
             <option ${role==="verifier"?"selected":""}>verifier</option>
             <option ${role==="admin"?"selected":""}>admin</option>
           </select>
         </td>
         <td>
-          <select data-field="status">
+          <select data-field="status" style="min-width:130px">
             <option ${u.status==="approved"?"selected":""}>approved</option>
             <option ${u.status==="pending"?"selected":""}>pending</option>
             <option ${u.status==="disabled"?"selected":""}>disabled</option>
           </select>
         </td>
         <td>
-          <button class="btn-edit" onclick="updateUserRow('${u.email}', this)">Update</button>
-          <button class="btn-delete" onclick="deleteUser('${u.email}')">Delete</button>
+          <button class="btn-edit" style="background:#27ae60;color:#fff" onclick="updateUserRow('${u.email}', this)">Update</button>
+          <button class="btn-delete" style="background:#e74c3c;color:#fff" onclick="deleteUser('${u.email}')">Delete</button>
         </td>
       `;
       tbody.appendChild(tr);
@@ -465,9 +472,7 @@ async function deleteUser(email){
   }catch(err){ console.error("deleteUser error:", err); }
 }
 
-/* =======================
-   Filters + CSV
-======================= */
+/* ========== Filters & CSV ========== */
 function filterUsers(){
   const q = (document.getElementById("userSearch")?.value || "").toLowerCase();
   document.querySelectorAll("#usersTable tr").forEach(r=>{
@@ -490,6 +495,7 @@ function filterAnalytics(){
 function exportTableToCSV(tableId, baseFilename){
   const table = document.getElementById(tableId);
   if(!table) return;
+
   const rows = table.querySelectorAll("tr");
   const csv = [];
   rows.forEach(row=>{
@@ -498,8 +504,10 @@ function exportTableToCSV(tableId, baseFilename){
     cols.forEach(col=> rowData.push(`"${col.innerText.replace(/"/g,'""')}"`));
     csv.push(rowData.join(","));
   });
+
   const today = new Date().toISOString().split("T")[0];
   const filename = `${baseFilename}_${today}.csv`;
+
   const blob = new Blob([csv.join("\n")], { type: "text/csv" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
@@ -507,9 +515,7 @@ function exportTableToCSV(tableId, baseFilename){
   link.click();
 }
 
-/* =======================
-   Expose
-======================= */
+/* ========== Expose to DOM ========== */
 window.loginUser = loginUser;
 window.signOutUser = signOutUser;
 window.resetPassword = resetPassword;
@@ -519,6 +525,8 @@ window.loadLicensesTable = loadLicensesTable;
 window.saveLicenseRow = saveLicenseRow;
 
 window.verifyLicense = verifyLicense;
+
+window.loadVerificationRequests = loadVerificationRequests;
 
 window.loadAnalyticsData = loadAnalyticsData;
 
