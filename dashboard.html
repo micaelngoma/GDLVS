@@ -23,7 +23,7 @@
   <script defer src="script.js"></script>
 
   <style>
-    /* 🔹 Stat cards smaller and horizontally aligned */
+    /* 🔹 Compact, aligned stat cards */
     .dashboard-cards {
       display: flex;
       justify-content: center;
@@ -35,7 +35,7 @@
     }
     .dashboard-cards .card {
       flex: 1 1 calc(25% - 10px);
-      min-width: 150px;
+      min-width: 160px;
       max-width: 200px;
       padding: 14px;
       border-radius: 10px;
@@ -58,22 +58,44 @@
       display: block;
     }
 
-    /* 🔹 Adjust column widths for license table */
+    /* 🔹 Stretch specific table columns */
     #licensesTable th:nth-child(3),
     #licensesTable td:nth-child(3) {
       width: 160px !important;
       min-width: 160px;
       white-space: nowrap;
     }
-
-    /* 🔹 Panels slightly more compact */
-    .panel {
-      margin: 15px auto;
-      padding: 18px;
+    #licensesTable th:nth-child(6),
+    #licensesTable td:nth-child(6) {
+      width: 130px !important;
+      min-width: 130px;
+      white-space: nowrap;
     }
 
-    .verification-table-wrapper {
-      overflow-x: auto;
+    /* 🔹 Approve button in Requests */
+    .btn-approve {
+      background-color: #27ae60;
+      border: none;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .btn-approve:hover { background-color: #1e8c4f; }
+
+    /* 🔹 Export button spacing */
+    .table-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 10px;
+    }
+
+    input#licenseSearch {
+      flex: 1;
+      max-width: 300px;
     }
   </style>
 </head>
@@ -121,14 +143,12 @@
       </div>
     </section>
 
-    <!-- 🔹 LICENSES TABLE (now above requests) -->
+    <!-- 🔹 LICENSES TABLE (above requests) -->
     <section class="panel">
       <h2><i class="fas fa-id-badge"></i> Licenses</h2>
       <div class="table-controls">
-        <input type="text" id="licenseSearch" placeholder="Search licenses..." onkeyup="filterLicenses()" />
-        <button class="btn-export" onclick="exportTableToCSV('licensesTable','licenses')">
-          <i class="fas fa-file-export"></i> Export
-        </button>
+        <input type="text" id="licenseSearch" placeholder="Search licenses..." />
+        <button class="btn-export" id="exportLicenses"><i class="fas fa-file-export"></i> Export</button>
       </div>
       <div class="verification-table-wrapper">
         <table class="table" id="licensesTable">
@@ -162,15 +182,15 @@
               <th>Organization</th>
               <th>Status</th>
               <th>Requested At</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            <tr><td colspan="5">Loading...</td></tr>
+            <tr><td colspan="6">Loading...</td></tr>
           </tbody>
         </table>
       </div>
     </section>
-
   </main>
 
   <!-- 🔹 FOOTER -->
@@ -183,21 +203,22 @@
     </select>
   </footer>
 
-  <!-- 🔹 SAME FIRESTORE LOGIC (no changes) -->
+  <!-- 🔹 FIRESTORE DASHBOARD LOGIC -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const db = firebase.firestore();
       const licensesRef = db.collection("licenses");
       const requestsRef = db.collection("requests");
+      const licenseTableBody = document.querySelector("#licensesTable tbody");
+      const requestTableBody = document.querySelector("#recentRequestsTable tbody");
 
-      // Licenses Summary
+      // === LICENSES ===
       licensesRef.onSnapshot(snapshot => {
         let total = 0, active = 0, suspended = 0, expired = 0;
-        const tbody = document.querySelector("#licensesTable tbody");
-        tbody.innerHTML = "";
+        licenseTableBody.innerHTML = "";
 
         if (snapshot.empty) {
-          tbody.innerHTML = "<tr><td colspan='7'>No licenses found.</td></tr>";
+          licenseTableBody.innerHTML = "<tr><td colspan='7'>No licenses found.</td></tr>";
         } else {
           snapshot.forEach(doc => {
             const d = doc.data();
@@ -207,7 +228,7 @@
             else if (status.includes("suspend")) suspended++;
             else if (status.includes("expire")) expired++;
 
-            tbody.innerHTML += `
+            licenseTableBody.innerHTML += `
               <tr>
                 <td>${d.licenseNumber || doc.id}</td>
                 <td>${d.fullName || ""}</td>
@@ -226,29 +247,77 @@
         document.getElementById("expiredLicenses").textContent = expired;
       });
 
-      // Access Requests
+      // === SEARCH FILTER ===
+      document.getElementById("licenseSearch").addEventListener("keyup", (e) => {
+        const term = e.target.value.toLowerCase();
+        document.querySelectorAll("#licensesTable tbody tr").forEach(row => {
+          const text = row.textContent.toLowerCase();
+          row.style.display = text.includes(term) ? "" : "none";
+        });
+      });
+
+      // === EXPORT CSV ===
+      document.getElementById("exportLicenses").addEventListener("click", () => {
+        const table = document.getElementById("licensesTable");
+        let csv = [];
+        table.querySelectorAll("tr").forEach(row => {
+          const cols = row.querySelectorAll("th, td");
+          let rowData = [];
+          cols.forEach(col => rowData.push(`"${col.innerText.replace(/"/g, '""')}"`));
+          csv.push(rowData.join(","));
+        });
+        const blob = new Blob([csv.join("\n")], { type: "text/csv" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `licenses_${new Date().toISOString().split("T")[0]}.csv`;
+        link.click();
+      });
+
+      // === RECENT REQUESTS ===
       requestsRef.orderBy("createdAt", "desc").limit(5).onSnapshot(snapshot => {
-        const tbody = document.querySelector("#recentRequestsTable tbody");
-        tbody.innerHTML = "";
+        requestTableBody.innerHTML = "";
         if (snapshot.empty) {
-          tbody.innerHTML = "<tr><td colspan='5'>No access requests found.</td></tr>";
+          requestTableBody.innerHTML = "<tr><td colspan='6'>No access requests found.</td></tr>";
           return;
         }
 
         snapshot.forEach(doc => {
           const r = doc.data();
           const date = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleString() : (r.createdAt || "");
-          tbody.innerHTML += `
+          const status = r.status || "pending";
+          const action = status === "pending"
+            ? `<button class='btn-approve' onclick="approveRequest('${doc.id}', '${r.email}')"><i class='fas fa-check'></i> Approve</button>`
+            : `<em>Approved</em>`;
+
+          requestTableBody.innerHTML += `
             <tr>
               <td>${r.fullName || ""}</td>
               <td>${r.email || ""}</td>
               <td>${r.organization || ""}</td>
-              <td>${r.status || "pending"}</td>
+              <td>${status}</td>
               <td>${date}</td>
+              <td>${action}</td>
             </tr>`;
         });
       });
     });
+
+    // 🔹 Approve Request Action
+    async function approveRequest(id, email) {
+      const db = firebase.firestore();
+      try {
+        await db.collection("requests").doc(id).update({ status: "approved" });
+        await db.collection("users").doc(email).set({
+          email,
+          role: "verifier",
+          status: "approved",
+          approvedAt: new Date(),
+        }, { merge: true });
+        alert(`✅ Request approved for ${email}`);
+      } catch (err) {
+        alert("Error approving request: " + err.message);
+      }
+    }
 
     function viewLicense(id) {
       alert("License ID: " + id);
