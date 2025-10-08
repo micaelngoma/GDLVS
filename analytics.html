@@ -4,27 +4,21 @@
   <meta charset="UTF-8" />
   <title>GDLVS - Analytics</title>
 
-  <!-- Styles -->
   <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-  <!-- i18n + jQuery -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
-  <!-- App -->
   <script defer src="script.js"></script>
 </head>
 <body>
-  <!-- Header -->
   <header>
     <h1><i class="fas fa-chart-bar"></i> <span data-i18n="analytics">Analytics</span></h1>
     <button onclick="signOutUser()">
@@ -32,7 +26,6 @@
     </button>
   </header>
 
-  <!-- Navigation -->
   <nav>
     <a href="dashboard.html"><i class="fas fa-home"></i> <span data-i18n="dashboard">Dashboard</span></a>
     <a href="verify.html"><i class="fas fa-search"></i> <span data-i18n="verificationPortal">Verification</span></a>
@@ -44,13 +37,11 @@
     <a href="analytics.html" class="active"><i class="fas fa-chart-bar"></i> <span data-i18n="analytics">Analytics</span></a>
   </nav>
 
-  <!-- Main -->
   <main>
     <div class="container">
       <h2><i class="fas fa-chart-line"></i> <span data-i18n="analytics">Analytics Overview</span></h2>
       <p data-i18n="analyticsDesc">Verification statistics and system insights</p>
 
-      <!-- Cards -->
       <div class="dashboard-cards">
         <div class="card total">
           <i class="fas fa-search"></i>
@@ -66,7 +57,6 @@
         </div>
       </div>
 
-      <!-- Recent Verifications -->
       <section class="panel">
         <h3><i class="fas fa-history"></i> <span data-i18n="recentVerifications">Recent Verifications</span></h3>
 
@@ -94,7 +84,6 @@
     </div>
   </main>
 
-  <!-- Footer -->
   <footer>
     <label for="languageSwitcher"><i class="fas fa-globe"></i></label>
     <select id="languageSwitcher">
