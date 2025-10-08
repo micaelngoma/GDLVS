@@ -23,9 +23,59 @@
   <script defer src="script.js"></script>
 
   <style>
-    /* Quick column width tuning for dashboard table */
-    #licensesTable th:nth-child(3), #licensesTable td:nth-child(3) { width: 80px; }
-    #licensesTable th:nth-child(6), #licensesTable td:nth-child(6) { width: 100px; }
+    /* === Make the main panel full width === */
+    .dashboard-main {
+      width: 95%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .panel {
+      width: 100%;
+      max-width: 1400px;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-top: 20px;
+    }
+
+    /* === Adjust table === */
+    #licensesTable th:nth-child(3),
+    #licensesTable td:nth-child(3) { width: 80px; }
+    #licensesTable th:nth-child(6),
+    #licensesTable td:nth-child(6) { width: 100px; }
+
+    /* === Cards layout === */
+    .dashboard-cards {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      width: 100%;
+      max-width: 1400px;
+      margin: 20px auto;
+      gap: 15px;
+    }
+
+    .dashboard-cards .card {
+      flex: 1;
+      min-width: 200px;
+      background: #f5f5f5;
+      border-radius: 10px;
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .card.total { background-color: #2980b9; color: white; }
+    .card.active { background-color: #27ae60; color: white; }
+    .card.suspended { background-color: #f1c40f; color: #333; }
+    .card.expired { background-color: #e74c3c; color: white; }
+
+    .card h2 { margin: 5px 0; font-size: 1.8em; }
+    .card-icon { font-size: 2em; margin-bottom: 8px; }
   </style>
 </head>
 
@@ -79,11 +129,11 @@
       </div>
     </section>
 
-    <!-- License Table -->
+    <!-- Licenses Table -->
     <section class="panel">
       <h2><i class="fas fa-id-badge"></i> <span data-i18n="licensesList">Licenses</span></h2>
 
-      <div class="search-bar">
+      <div class="search-bar" style="margin-bottom:10px;">
         <input type="text" id="licenseSearch" placeholder="Search licenses..." onkeyup="filterLicenses()">
         <button class="btn inline" onclick="exportTableToCSV('licensesTable','licenses')">📥 Export</button>
       </div>
