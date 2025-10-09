@@ -5,6 +5,7 @@
   <title>GDLVS - Verification Records</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
   <style>
     :root {
       --dark:#2a3f54; --light:#f6f8fb; --panel:#fff;
@@ -164,7 +165,6 @@
     const db = getFirestore(app);
 
     let showReviewed = false;
-
     const tbody = document.getElementById("requestsTable");
     const toggleBtn = document.getElementById("toggleReviewed");
 
@@ -177,11 +177,17 @@
     });
 
     function renderInsights(docs) {
-      const active = docs.filter((d) => !d.archived);
-      const visible = showReviewed ? docs.filter(d=>d.archived) : active;
+      const visible = docs.filter((d) => showReviewed ? d.archived : !d.archived);
       const total = visible.length;
-      const success = visible.filter(d=>String(d.result||"").toLowerCase().includes("found")).length;
-      const fail = total - success;
+      let success = 0;
+      let fail = 0;
+
+      visible.forEach((d) => {
+        const res = (d.result || "").toLowerCase().trim();
+        if (res.includes("not found")) fail++;
+        else if (res.includes("found")) success++;
+      });
+
       document.getElementById("totalVerifications").textContent = total;
       document.getElementById("successfulVerifications").textContent = success;
       document.getElementById("unsuccessfulVerifications").textContent = fail;
@@ -214,10 +220,11 @@
       toggleBtn.textContent = showReviewed ? "Hide Reviewed Verifications" : "Show Reviewed Verifications";
     });
 
-    // Modal
+    // Modal logic
     const modal = document.getElementById("modalOverlay");
     const modalBody = document.getElementById("modalBody");
     let currentId = null;
+
     tbody.addEventListener("click", async (e) => {
       if (!e.target.classList.contains("btn-view")) return;
       currentId = e.target.dataset.id;
@@ -237,6 +244,7 @@
         <p><strong>Status:</strong> ${d.archived ? "Reviewed ✅" : "Pending 🔄"}</p>`;
       modal.style.display = "flex";
     });
+
     document.getElementById("closeBtn").onclick = () => (modal.style.display = "none");
     modal.onclick = (e) => { if (e.target === modal) modal.style.display = "none"; };
     document.getElementById("archiveBtn").onclick = async () => {
@@ -253,7 +261,6 @@
       alert("🗑️ Deleted!");
     };
 
-    // Auth + Logout
     onAuthStateChanged(auth, (user) => { if (!user) location.href = "index.html"; });
     document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth).then(() => location.href = "index.html"));
   </script>
