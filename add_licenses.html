@@ -5,29 +5,39 @@
   <title>GDLVS - Add License</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    :root{--brand:#2a3f54;--brand2:#1e2d3c;--shadow:0 2px 6px rgba(0,0,0,.1);--success:#27ae60}
-    body{margin:0;font-family:Arial;background:#f6f8fb;color:#333}
-    header{background:#2a3f54;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:10px 14px}
-    header h1{margin:0;font-size:18px;display:flex;gap:8px;align-items:center}
-    .header-controls{display:flex;gap:8px}
-    .mini-btn{background:#1e2d3c;color:#fff;border:0;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer}
-    .mini-select{border:1px solid #dcdcdc;border-radius:8px;padding:6px 8px;font-size:12px;background:#fff}
-    nav{background:#fff;border-bottom:1px solid #eaeaea;padding:10px 14px;display:flex;gap:14px}
-    nav a{color:#2a3f54;text-decoration:none;font-weight:700}
-    nav a.active{border-bottom:2px solid #2a3f54;padding-bottom:4px}
-    .container{max-width:800px;margin:20px auto;padding:0 14px}
-    .panel{background:#fff;border-radius:10px;box-shadow:var(--shadow);padding:20px}
-    form label{font-weight:700;margin-top:8px;display:block}
-    form input, form select{width:100%;padding:10px;border:1px solid #dcdcdc;border-radius:8px;margin:6px 0}
-    .btn-save{background:var(--success);color:#fff;border:0;border-radius:8px;padding:10px 14px;cursor:pointer}
-    #msg{margin-top:8px;font-weight:700}
+    :root {
+      --brand:#2a3f54;
+      --brand2:#1e2d3c;
+      --success:#27ae60;
+      --danger:#e74c3c;
+      --shadow:0 2px 6px rgba(0,0,0,.1);
+    }
+    body {margin:0;font-family:"Segoe UI",sans-serif;background:#f6f8fb;color:#333;}
+    header {background:var(--brand);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:10px 14px;}
+    header h1 {margin:0;font-size:18px;display:flex;gap:8px;align-items:center;}
+    .header-controls {display:flex;gap:8px;}
+    .mini-btn {background:var(--brand2);color:#fff;border:0;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;}
+    .mini-select {border:1px solid #ccc;border-radius:8px;padding:6px 8px;font-size:12px;}
+    nav {background:#fff;border-bottom:1px solid #eaeaea;padding:10px 14px;display:flex;gap:14px;}
+    nav a {color:var(--brand);text-decoration:none;font-weight:700;}
+    nav a.active {border-bottom:2px solid var(--brand);padding-bottom:4px;}
+    .container {max-width:800px;margin:20px auto;padding:0 14px;}
+    .panel {background:#fff;border-radius:10px;box-shadow:var(--shadow);padding:20px;}
+    form label {font-weight:700;margin-top:8px;display:block;}
+    form input, form select {width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;margin:6px 0;}
+    .btn-save {background:var(--success);color:#fff;border:0;border-radius:8px;padding:10px 14px;cursor:pointer;}
+    #msg {margin-top:8px;font-weight:700;}
   </style>
 </head>
 <body>
   <header>
     <h1><i class="fa-solid fa-id-card"></i> <span data-i18n="addLicense">Add License</span></h1>
     <div class="header-controls">
-      <select id="languageSwitcher" class="mini-select"><option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option><option value="ja">🇯🇵 日本語</option></select>
+      <select id="languageSwitcher" class="mini-select">
+        <option value="en">🇬🇧 English</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="ja">🇯🇵 日本語</option>
+      </select>
       <button id="logoutBtn" class="mini-btn"><i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="logout">Logout</span></button>
     </div>
   </header>
@@ -52,7 +62,11 @@
         <label for="licenseClass" data-i18n="class">Class</label>
         <select id="licenseClass" required>
           <option value="" data-i18n="selectClass">-- Select Class --</option>
-          <option value="Class A">Class A</option><option value="Class B">Class B</option><option value="Class C">Class C</option>
+          <option value="Class A">Class A</option>
+          <option value="Class B">Class B</option>
+          <option value="Class C">Class C</option>
+          <option value="Class D">Class D</option>
+          <option value="Class E">Class E</option>
         </select>
         <label for="issueDate" data-i18n="issue">Issue</label>
         <input id="issueDate" type="date" required>
@@ -65,35 +79,75 @@
   </main>
 
   <script type="module">
-    import { auth, db } from './firebase-config.js';
-    import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-    import { setDoc, doc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { getFirestore, setDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    const i18n={en:{addLicense:"Add License",logout:"Logout",dashboard:"Dashboard",verificationPortal:"Verification",userManagement:"User Management",requests:"Requests",analytics:"Analytics",addNewLicense:"Add a New License",licenseNumber:"License #",fullName:"Full Name",class:"Class",issue:"Issue",expiry:"Expiry",saveLicense:"Save License",enterLicensePh:"Enter license number",enterFullnamePh:"Enter full name",selectClass:"-- Select Class --",saved:"✅ License saved.",missing:"⚠️ Please fill all fields."},
-               fr:{addLicense:"Ajouter un permis",logout:"Déconnexion",dashboard:"Tableau de bord",verificationPortal:"Vérification",userManagement:"Gestion des utilisateurs",requests:"Demandes",analytics:"Analytique",addNewLicense:"Ajouter un nouveau permis",licenseNumber:"N° de permis",fullName:"Nom complet",class:"Catégorie",issue:"Émission",expiry:"Expiration",saveLicense:"Enregistrer",enterLicensePh:"Saisir le numéro",enterFullnamePh:"Saisir le nom complet",selectClass:"-- Sélectionner la catégorie --",saved:"✅ Permis enregistré.",missing:"⚠️ Veuillez remplir tous les champs."},
-               ja:{addLicense:"免許を追加",logout:"ログアウト",dashboard:"ダッシュボード",verificationPortal:"照会",userManagement:"ユーザー管理",requests:"リクエスト",analytics:"分析",addNewLicense:"新しい免許を追加",licenseNumber:"免許番号",fullName:"氏名",class:"区分",issue:"発行日",expiry:"有効期限",saveLicense:"保存",enterLicensePh:"免許番号を入力",enterFullnamePh:"氏名を入力",selectClass:"-- 区分を選択 --",saved:"✅ 保存しました。",missing:"⚠️ すべて入力してください。"}};
-    let lang=localStorage.getItem('gdlvs_lang')||'en';
-    const t=(k)=>i18n[lang][k]||i18n.en[k];
-    const apply=()=>document.querySelectorAll('[data-i18n]').forEach(el=>{
-      const k=el.dataset.i18n; if(k.startsWith('[placeholder]')) el.placeholder=t(k.replace('[placeholder]','')); else el.textContent=t(k);
+    // ✅ Firebase Initialization
+    const firebaseConfig = {
+      apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
+      authDomain: "gdlvs-2348e.firebaseapp.com",
+      projectId: "gdlvs-2348e",
+      storageBucket: "gdlvs-2348e.appspot.com",
+      messagingSenderId: "358715790318",
+      appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // 🌐 Simple i18n
+    const i18n = {
+      en: {addLicense:"Add License",logout:"Logout",dashboard:"Dashboard",verificationPortal:"Verification",userManagement:"User Management",requests:"Requests",analytics:"Analytics",addNewLicense:"Add a New License",licenseNumber:"License #",fullName:"Full Name",class:"Class",issue:"Issue",expiry:"Expiry",saveLicense:"Save License",enterLicensePh:"Enter license number",enterFullnamePh:"Enter full name",selectClass:"-- Select Class --",saved:"✅ License saved.",missing:"⚠️ Please fill all fields.",error:"❌ Error saving license."},
+      fr: {addLicense:"Ajouter un permis",logout:"Déconnexion",dashboard:"Tableau de bord",verificationPortal:"Vérification",userManagement:"Gestion des utilisateurs",requests:"Demandes",analytics:"Analytique",addNewLicense:"Ajouter un nouveau permis",licenseNumber:"N° de permis",fullName:"Nom complet",class:"Catégorie",issue:"Émission",expiry:"Expiration",saveLicense:"Enregistrer",enterLicensePh:"Saisir le numéro",enterFullnamePh:"Saisir le nom complet",selectClass:"-- Sélectionner la catégorie --",saved:"✅ Permis enregistré.",missing:"⚠️ Veuillez remplir tous les champs.",error:"❌ Erreur lors de l'enregistrement."},
+      ja: {addLicense:"免許を追加",logout:"ログアウト",dashboard:"ダッシュボード",verificationPortal:"照会",userManagement:"ユーザー管理",requests:"リクエスト",analytics:"分析",addNewLicense:"新しい免許を追加",licenseNumber:"免許番号",fullName:"氏名",class:"区分",issue:"発行日",expiry:"有効期限",saveLicense:"保存",enterLicensePh:"免許番号を入力",enterFullnamePh:"氏名を入力",selectClass:"-- 区分を選択 --",saved:"✅ 保存しました。",missing:"⚠️ すべて入力してください。",error:"❌ 保存中にエラーが発生しました。"}
+    };
+    let lang = localStorage.getItem("gdlvs_lang") || "en";
+    const t = (key) => i18n[lang][key] || i18n.en[key];
+    const apply = () => document.querySelectorAll("[data-i18n]").forEach(el => {
+      const key = el.dataset.i18n;
+      if (key.startsWith("[placeholder]")) el.placeholder = t(key.replace("[placeholder]", ""));
+      else el.textContent = t(key);
     });
-    const sel=document.getElementById('languageSwitcher'); sel.value=lang; apply();
-    sel.onchange=()=>{lang=sel.value;localStorage.setItem('gdlvs_lang',lang);apply();};
+    const switcher = document.getElementById("languageSwitcher");
+    switcher.value = lang; apply();
+    switcher.onchange = () => { lang = switcher.value; localStorage.setItem("gdlvs_lang", lang); apply(); };
 
-    onAuthStateChanged(auth,u=>{if(!u) location.href='index.html';});
-    document.getElementById('logoutBtn').onclick=()=>signOut(auth).then(()=>location.href='index.html');
+    // 🔒 Auth
+    onAuthStateChanged(auth, (user) => { if (!user) location.href = "index.html"; });
+    document.getElementById("logoutBtn").onclick = () => signOut(auth).then(() => location.href = "index.html");
 
-    const msg=document.getElementById('msg');
-    document.getElementById('addLicenseForm').onsubmit=async(e)=>{
+    // 🧾 Save License
+    const msg = document.getElementById("msg");
+    document.getElementById("addLicenseForm").onsubmit = async (e) => {
       e.preventDefault();
-      const licenseNumber=document.getElementById('licenseNumber').value.trim();
-      const fullName=document.getElementById('fullName').value.trim();
-      const licenseClass=document.getElementById('licenseClass').value;
-      const issueDate=document.getElementById('issueDate').value;
-      const expiryDate=document.getElementById('expiryDate').value;
-      if(!licenseNumber||!fullName||!licenseClass||!issueDate||!expiryDate){ msg.textContent=t('missing'); msg.style.color='#e74c3c'; return; }
-      await setDoc(doc(db,'licenses',licenseNumber),{licenseNumber,fullName,class:licenseClass,issueDate,expiryDate,status:'Active'},{merge:true});
-      msg.textContent=t('saved'); msg.style.color='#27ae60'; e.target.reset();
+      const licenseNumber = document.getElementById("licenseNumber").value.trim();
+      const fullName = document.getElementById("fullName").value.trim();
+      const licenseClass = document.getElementById("licenseClass").value;
+      const issueDate = document.getElementById("issueDate").value;
+      const expiryDate = document.getElementById("expiryDate").value;
+
+      if (!licenseNumber || !fullName || !licenseClass || !issueDate || !expiryDate) {
+        msg.textContent = t("missing"); msg.style.color = "var(--danger)"; return;
+      }
+
+      try {
+        await setDoc(doc(db, "licenses", licenseNumber), {
+          licenseNumber,
+          fullName,
+          class: licenseClass,
+          issueDate,
+          expiryDate,
+          status: "Active",
+          createdBy: auth.currentUser?.uid || "admin",
+          createdAt: serverTimestamp()
+        });
+        msg.textContent = t("saved"); msg.style.color = "var(--success)";
+        e.target.reset();
+      } catch (err) {
+        console.error("Error adding license:", err);
+        msg.textContent = t("error"); msg.style.color = "var(--danger)";
+      }
     };
   </script>
 </body>
