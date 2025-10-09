@@ -8,102 +8,46 @@
   <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <!-- i18n + jQuery (UMD) -->
+  <!-- 🔧 Load order matters: jQuery → i18next → detector → jquery-i18next -->
+  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
+  <script>window.$ = window.jQuery = window.$ || window.jQuery;</script>
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
-  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
   <style>
-    :root{
-      --dark:#2a3f54; --dark-2:#1e2d3c;
-      --panel:rgba(255,255,255,.92);
-      --shadow:0 2px 8px rgba(0,0,0,.25);
-      --info:#2980b9; --success:#27ae60; --danger:#e74c3c;
-      --muted:#666;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#333;background:#f6f8fb}
-
-    /* Background */
-    .background-image{
-      position:fixed; inset:0;
-      background:url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') no-repeat center center fixed;
-      background-size:cover; filter:brightness(.92);
-      z-index:-1;
-    }
-
-    /* Header & Nav */
+    :root{ --dark:#2a3f54; --dark-2:#1e2d3c; --panel:rgba(255,255,255,.92);
+      --shadow:0 2px 8px rgba(0,0,0,.25); --info:#2980b9; --success:#27ae60; --danger:#e74c3c; --muted:#666;}
+    *{box-sizing:border-box} html,body{height:100%} body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#333;background:#f6f8fb}
+    .background-image{position:fixed; inset:0; background:url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') no-repeat center center fixed; background-size:cover; filter:brightness(.92); z-index:-1;}
     header, nav{position:fixed; left:0; right:0; z-index:1000}
-    header{
-      top:0; background:var(--dark); color:#fff;
-      padding:10px 18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;
-      box-shadow:var(--shadow);
-    }
+    header{top:0; background:var(--dark); color:#fff; padding:10px 18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; box-shadow:var(--shadow)}
     header h1{margin:0; font-size:1.1rem; display:flex; align-items:center; gap:8px}
     .controls{display:flex; align-items:center; gap:10px}
-    .controls select, .controls button{border:0; border-radius:8px; padding:6px 10px; font-size:.9rem}
-    .controls select{background:#fff; color:#000}
-    .controls button{background:var(--dark-2); color:#fff; cursor:pointer}
-    .controls button:hover{background:#16222d}
-
-    nav{
-      top:48px; background:rgba(255,255,255,.9); backdrop-filter:blur(6px);
-      border-bottom:1px solid #e0e0e0; padding:10px 18px; display:flex; gap:18px; flex-wrap:wrap; align-items:center
-    }
-    nav a{color:var(--dark); text-decoration:none; font-weight:700}
-    nav a:hover{color:#1f2d3a}
-    nav a.active{border-bottom:2px solid var(--dark); padding-bottom:3px}
-
+    .controls select,.controls button{border:0; border-radius:8px; padding:6px 10px; font-size:.9rem}
+    .controls select{background:#fff; color:#000} .controls button{background:var(--dark-2); color:#fff; cursor:pointer} .controls button:hover{background:#16222d}
+    nav{top:48px; background:rgba(255,255,255,.9); backdrop-filter:blur(6px); border-bottom:1px solid #e0e0e0; padding:10px 18px; display:flex; gap:18px; flex-wrap:wrap; align-items:center}
+    nav a{color:var(--dark); text-decoration:none; font-weight:700} nav a:hover{color:#1f2d3a} nav a.active{border-bottom:2px solid var(--dark); padding-bottom:3px}
     body{padding-top:110px}
-
-    /* Container */
-    .container{
-      max-width:1100px; margin:24px auto 40px; background:var(--panel);
-      border-radius:12px; box-shadow:var(--shadow); padding:22px; backdrop-filter:blur(6px);
-      display:flex; flex-direction:column; gap:14px;
-    }
-
-    /* Insight cards */
+    .container{max-width:1100px; margin:24px auto 40px; background:var(--panel); border-radius:12px; box-shadow:var(--shadow); padding:22px; backdrop-filter:blur(6px); display:flex; flex-direction:column; gap:14px}
     .insights{display:flex; gap:15px; flex-wrap:wrap; justify-content:space-between}
-    .insight-card{
-      flex:1; min-width:220px; border-radius:12px; padding:16px; text-align:center; color:#fff;
-      box-shadow:0 2px 6px rgba(0,0,0,.2);
-    }
-    .insight-total{background:var(--info)}
-    .insight-success{background:var(--success)}
-    .insight-fail{background:var(--danger)}
-    .insight-card h3{margin:4px 0; font-size:.95rem}
-    .insight-card h2{margin:2px 0 0; font-size:1.6rem; font-weight:800}
+    .insight-card{flex:1; min-width:220px; border-radius:12px; padding:16px; text-align:center; color:#fff; box-shadow:0 2px 6px rgba(0,0,0,.2)}
+    .insight-total{background:var(--info)} .insight-success{background:var(--success)} .insight-fail{background:var(--danger)}
+    .insight-card h3{margin:4px 0; font-size:.95rem} .insight-card h2{margin:2px 0 0; font-size:1.6rem; font-weight:800}
     .success-rate{font-size:.85rem; color:#eafbe4}
-
-    /* Table controls */
     .table-controls{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap}
     #searchRequests{max-width:320px; border:1px solid #ddd; border-radius:8px; padding:8px; background:#fff}
-    .btn-export{background:var(--info); color:#fff; border:0; border-radius:8px; padding:8px 12px; cursor:pointer}
-    .btn-export:hover{background:#1f6392}
-
-    /* Table */
+    .btn-export{background:var(--info); color:#fff; border:0; border-radius:8px; padding:8px 12px; cursor:pointer} .btn-export:hover{background:#1f6392}
     .table-wrapper{overflow:auto; border-top:1px solid #eee; border-bottom:1px solid #eee}
     table{width:100%; border-collapse:separate; border-spacing:0 6px}
     th,td{border:1px solid #eee; background:#fff; padding:10px 12px; text-align:left; vertical-align:middle}
     th{background:#f2f2f2; font-weight:700; position:sticky; top:0; z-index:1}
-
     .btn-action{border:0; border-radius:8px; padding:6px 10px; cursor:pointer; color:#fff}
-    .btn-view{background:var(--info)} .btn-view:hover{opacity:.95}
-    .btn-delete{background:var(--danger)} .btn-delete:hover{opacity:.95}
-
-    /* Modal */
+    .btn-view{background:var(--info)} .btn-view:hover{opacity:.95} .btn-delete{background:var(--danger)} .btn-delete:hover{opacity:.95}
     .modal-overlay{position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:2000}
-    .modal{background:#fff; border-radius:12px; width:min(460px,92vw); box-shadow:0 8px 28px rgba(0,0,0,.25); padding:20px; animation:fadeIn .2s ease}
-    @keyframes fadeIn{from{opacity:0; transform:translateY(-8px)} to{opacity:1; transform:translateY(0)}}
-    .modal h3{margin:0 0 8px 0}
-    .modal p strong{display:inline-block; width:130px; color:#333}
-    .modal-buttons{display:flex; gap:8px; justify-content:space-between; margin-top:16px}
-    .btn-close{background:#555; color:#fff; border:0; border-radius:8px; padding:8px 12px; cursor:pointer}
-    .btn-close:hover{background:#333}
-
+    .modal{background:#fff; border-radius:12px; width:min(460px,92vw); box-shadow:0 8px 28px rgba(0,0,0,.25); padding:20px}
+    .modal h3{margin:0 0 8px} .modal p strong{display:inline-block; width:130px} .modal-buttons{display:flex; gap:8px; justify-content:space-between; margin-top:16px}
+    .btn-close{background:#555; color:#fff; border:0; border-radius:8px; padding:8px 12px; cursor:pointer} .btn-close:hover{background:#333}
     .muted{color:var(--muted)}
   </style>
 </head>
@@ -210,7 +154,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    /* ===== i18n resources (with interpolation) ===== */
+    /* ===== i18n resources ===== */
     const i18nResources = {
       en:{translation:{
         title:"GDLVS - Verification Records",
@@ -238,34 +182,34 @@
       }}
     };
 
-    /* ===== i18n init + apply ===== */
+    /* ===== i18n init + helpers ===== */
     function applyI18n(){
-      if (typeof jqueryI18next !== "undefined"){
-        $("body").localize();
-      }
-      // Ensure <title> is updated too
-      document.title = i18next.t("title");
-      // Normalize the selector's current value to the active language
+      if (window.jqueryI18next && typeof $("body").localize === "function") $("body").localize();
+      document.title = i18next.t("title");  // ensure <title> updates
+      // keep selector synced with active language short code
       const sel = document.getElementById("languageSwitcher");
       const short = (i18next.language || "en").split("-")[0];
       if (sel && sel.value !== short) sel.value = short;
+      // also set <html lang="">
+      document.documentElement.setAttribute("lang", short);
     }
 
     i18next
       .use(i18nextBrowserLanguageDetector)
       .init({ resources:i18nResources, fallbackLng:"en" }, () => {
-        if (typeof jqueryI18next !== "undefined") {
-          jqueryI18next.init(i18next, $, { useOptionsAttr:true });
-        }
+        if (window.jqueryI18next) { jqueryI18next.init(i18next, $, { useOptionsAttr:true }); }
         applyI18n();
       });
 
+    // re-apply on every language change (covers dropdown and auto-detect)
+    i18next.on("languageChanged", applyI18n);
+
     document.getElementById("languageSwitcher").addEventListener("change", function(){
-      i18next.changeLanguage(this.value).then(applyI18n);
+      i18next.changeLanguage(this.value);
     });
 
     /* ===== Auth guard & Logout ===== */
-    onAuthStateChanged(auth, user => { if(!user) location.href="index.html"; });
+    onAuthStateChanged(auth, user => { if(!user) location.href = "index.html"; });
     document.getElementById("logoutBtn").addEventListener("click", ()=>signOut(auth).then(()=>location.href="index.html"));
 
     /* ===== Data load ===== */
@@ -286,8 +230,7 @@
       let success = 0, fail = 0;
       docs.forEach(d=>{
         const res = (d.result||"").toLowerCase();
-        if(res.includes("not found")) fail++;
-        else if(res.includes("found")) success++;
+        if(res.includes("not found")) fail++; else if(res.includes("found")) success++;
       });
       const rate = total ? ((success/total)*100).toFixed(1) : 0;
       document.getElementById("totalVerifications").textContent = total;
@@ -335,13 +278,8 @@
     document.getElementById("exportBtn").addEventListener("click", ()=>{
       if(allDocs.length===0) return alert("No data to export.");
       const headers = [
-        i18next.t("table.license"),
-        i18next.t("table.org"),
-        i18next.t("table.purpose"),
-        i18next.t("table.country"),
-        i18next.t("table.result"),
-        i18next.t("table.email"),
-        i18next.t("table.date")
+        i18next.t("table.license"), i18next.t("table.org"), i18next.t("table.purpose"),
+        i18next.t("table.country"), i18next.t("table.result"), i18next.t("table.email"), i18next.t("table.date")
       ];
       const rows = allDocs.map(d=>[
         d.licenseNumber||"", d.requestingOrg||"", d.purpose||"", d.country||"",
