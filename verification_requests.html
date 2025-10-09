@@ -4,291 +4,122 @@
   <meta charset="UTF-8" />
   <title data-i18n="title">GDLVS - Verification Records</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- i18n + jQuery (UMD) -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
   <style>
-    :root {
-      --dark: #2a3f54;
-      --light: #f6f8fb;
-      --info: #2980b9;
-      --success: #27ae60;
-      --danger: #e74c3c;
+    :root{
+      --dark:#2a3f54; --dark-2:#1e2d3c;
+      --panel:rgba(255,255,255,.92);
+      --shadow:0 2px 8px rgba(0,0,0,.25);
+      --info:#2980b9; --success:#27ae60; --danger:#e74c3c;
+      --muted:#666;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#333;background:#f6f8fb}
+
+    /* === Background (same as dashboard) === */
+    .background-image{
+      position:fixed; inset:0;
+      background:url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') no-repeat center center fixed;
+      background-size:cover; filter:brightness(.92);
+      z-index:-1;
     }
 
-    * {
-      box-sizing: border-box;
+    /* === Header & Nav (fixed like dashboard) === */
+    header, nav{position:fixed; left:0; right:0; z-index:1000}
+    header{
+      top:0; background:var(--dark); color:#fff;
+      padding:10px 18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;
+      box-shadow:var(--shadow);
+    }
+    header h1{margin:0; font-size:1.1rem; display:flex; align-items:center; gap:8px}
+    .controls{display:flex; align-items:center; gap:10px}
+    .controls select, .controls button{
+      border:0; border-radius:8px; padding:6px 10px; font-size:.9rem
+    }
+    .controls select{background:#fff; color:#000}
+    .controls button{background:var(--dark-2); color:#fff; cursor:pointer}
+    .controls button:hover{background:#16222d}
+
+    nav{
+      top:48px; background:rgba(255,255,255,.9); backdrop-filter:blur(6px);
+      border-bottom:1px solid #e0e0e0; padding:10px 18px; display:flex; gap:18px; flex-wrap:wrap; align-items:center
+    }
+    nav a{color:var(--dark); text-decoration:none; font-weight:700}
+    nav a:hover{color:#1f2d3a}
+    nav a.active{border-bottom:2px solid var(--dark); padding-bottom:3px}
+
+    /* Push page below fixed bars */
+    body{padding-top:110px}
+
+    /* === Container === */
+    .container{
+      max-width:1100px; margin:24px auto 40px; background:var(--panel);
+      border-radius:12px; box-shadow:var(--shadow); padding:22px; backdrop-filter:blur(6px);
+      display:flex; flex-direction:column; gap:14px;
     }
 
-    html, body {
-      margin: 0;
-      height: 100%;
-      font-family: "Segoe UI", sans-serif;
-      background: var(--light);
-      color: #333;
+    /* === Insight Cards (equal widths) === */
+    .insights{display:flex; gap:15px; flex-wrap:wrap; justify-content:space-between}
+    .insight-card{
+      flex:1; min-width:220px;
+      border-radius:12px; padding:16px; text-align:center; color:#fff;
+      box-shadow:0 2px 6px rgba(0,0,0,.2);
     }
+    .insight-total{background:var(--info)}
+    .insight-success{background:var(--success)}
+    .insight-fail{background:var(--danger)}
+    .insight-card h3{margin:4px 0; font-size:.95rem}
+    .insight-card h2{margin:2px 0 0; font-size:1.6rem; font-weight:800}
+    .success-rate{font-size:.85rem; color:#eafbe4}
 
-    /* === Header & Menu (Dashboard Style) === */
-    header, nav {
-      position: fixed;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-    }
+    /* === Table controls === */
+    .table-controls{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap}
+    #searchRequests{max-width:320px; border:1px solid #ddd; border-radius:8px; padding:8px; background:#fff}
+    .btn-export{background:var(--info); color:#fff; border:0; border-radius:8px; padding:8px 12px; cursor:pointer}
+    .btn-export:hover{background:#1f6392}
 
-    header {
-      top: 0;
-      background: var(--dark);
-      color: #fff;
-      padding: 10px 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-    }
+    /* === Table === */
+    .table-wrapper{overflow:auto; border-top:1px solid #eee; border-bottom:1px solid #eee}
+    table{width:100%; border-collapse:separate; border-spacing:0 6px}
+    th,td{border:1px solid #eee; background:#fff; padding:10px 12px; text-align:left; vertical-align:middle}
+    th{background:#f2f2f2; font-weight:700; position:sticky; top:0; z-index:1}
 
-    header h1 {
-      margin: 0;
-      font-size: 1.1rem;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-weight: 600;
-    }
+    .btn-action{border:0; border-radius:8px; padding:6px 10px; cursor:pointer; color:#fff}
+    .btn-view{background:var(--info)} .btn-view:hover{opacity:.95}
+    .btn-delete{background:var(--danger)} .btn-delete:hover{opacity:.95}
 
-    .controls {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    /* === Modal === */
+    .modal-overlay{position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:2000}
+    .modal{background:#fff; border-radius:12px; width:min(460px,92vw); box-shadow:0 8px 28px rgba(0,0,0,.25); padding:20px; animation:fadeIn .2s ease}
+    @keyframes fadeIn{from{opacity:0; transform:translateY(-8px)} to{opacity:1; transform:translateY(0)}}
+    .modal h3{margin:0 0 8px 0}
+    .modal p strong{display:inline-block; width:130px; color:#333}
+    .modal-buttons{display:flex; gap:8px; justify-content:space-between; margin-top:16px}
+    .btn-close{background:#555; color:#fff; border:0; border-radius:8px; padding:8px 12px; cursor:pointer}
+    .btn-close:hover{background:#333}
 
-    .controls select {
-      background: #fff;
-      color: #000;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      padding: 5px 9px;
-      font-size: 0.85rem;
-      cursor: pointer;
-    }
-
-    .controls button {
-      background: #1f2d3a;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 6px 10px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 500;
-    }
-
-    .controls button:hover {
-      background: #16222d;
-    }
-
-    /* Navigation Bar */
-    nav {
-      top: 48px;
-      background: #fff;
-      border-bottom: 1px solid #e0e0e0;
-      padding: 10px 18px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      align-items: center;
-    }
-
-    nav a {
-      color: #2a3f54;
-      text-decoration: none;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding-bottom: 3px;
-      transition: color 0.2s, border-bottom 0.2s;
-    }
-
-    nav a:hover {
-      color: #1f2d3a;
-    }
-
-    nav a.active {
-      border-bottom: 2px solid #2a3f54;
-    }
-
-    body {
-      padding-top: 100px;
-    }
-
-    /* === Page Content === */
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      padding: 20px;
-      height: calc(100vh - 120px);
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Insights */
-    .insights {
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-    }
-
-    .insight-card {
-      flex: 1 1 30%;
-      min-width: 200px;
-      border-radius: 10px;
-      padding: 18px;
-      text-align: center;
-      color: #fff;
-    }
-
-    .insight-total { background: var(--info); }
-    .insight-success { background: var(--success); }
-    .insight-fail { background: var(--danger); }
-
-    .insight-card h3 { margin: 0; font-size: .95rem; font-weight: 600; }
-    .insight-card h2 { margin: 6px 0 0; font-size: 1.4rem; font-weight: 700; }
-    .success-rate { font-size: .85rem; margin-top: 4px; font-weight: 500; color: #eafbe4; }
-
-    /* Table Controls */
-    .table-controls {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    input#searchRequests {
-      max-width: 260px;
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-    }
-
-    .btn-export {
-      background: var(--info);
-      color: #fff;
-      padding: 8px 12px;
-      border: 0;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    .btn-export:hover {
-      background: #1f6392;
-    }
-
-    /* Scrollable Table */
-    .table-wrapper {
-      flex: 1;
-      overflow-y: auto;
-      border-top: 1px solid #eee;
-      border-bottom: 1px solid #eee;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      padding: 10px 12px;
-      border: 1px solid #eee;
-    }
-
-    th {
-      background: #f2f2f2;
-      font-weight: 600;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    .btn-action {
-      border: 0;
-      border-radius: 6px;
-      padding: 6px 10px;
-      cursor: pointer;
-      color: #fff;
-    }
-
-    .btn-view { background: var(--info); }
-    .btn-view:hover { background: #1f6392; }
-    .btn-delete { background: var(--danger); }
-    .btn-delete:hover { background: #c0392b; }
-
-    /* Modal */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
-
-    .modal {
-      background: #fff;
-      border-radius: 10px;
-      max-width: 440px;
-      width: 90%;
-      padding: 22px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-      animation: fadeIn .25s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .modal h3 { margin-top: 0; }
-    .modal p strong { display: inline-block; width: 130px; }
-    .modal-buttons {
-      margin-top: 18px;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .modal-buttons button {
-      flex: 1;
-      margin: 0 4px;
-      padding: 8px 10px;
-      border-radius: 6px;
-      border: 0;
-      color: #fff;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .btn-close { background: #555; }
-    .btn-close:hover { background: #333; }
+    .muted{color:var(--muted)}
   </style>
 </head>
 
 <body>
+  <div class="background-image"></div>
+
   <!-- Header -->
   <header>
-    <h1 data-i18n="header.title"><i class="fas fa-clipboard-check"></i> Verification Records</h1>
+    <h1 data-i18n="header.title"><i class="fas fa-clipboard-check"></i> <span data-i18n="header.title">Verification Records</span></h1>
     <div class="controls">
-      <select id="languageSwitcher">
+      <select id="languageSwitcher" aria-label="Language">
         <option value="en">🇬🇧 English</option>
         <option value="fr">🇫🇷 Français</option>
         <option value="ja">🇯🇵 日本語</option>
@@ -299,55 +130,55 @@
 
   <!-- Navigation -->
   <nav>
-    <a href="dashboard.html"><i class="fas fa-id-card"></i> Dashboard</a>
-    <a href="verify.html"><i class="fas fa-search"></i> Verification</a>
-    <a href="add_license.html"><i class="fas fa-id-card"></i> Add License</a>
-    <a href="users.html"><i class="fas fa-users"></i> User Management</a>
-    <a href="verification_requests.html" class="active"><i class="fas fa-clipboard-list"></i> Verification Requests</a>
-    <a href="analytics.html"><i class="fas fa-chart-bar"></i> Analytics</a>
+    <a href="dashboard.html"><i class="fas fa-id-card"></i> <span data-i18n="nav.dashboard">Dashboard</span></a>
+    <a href="verify.html"><i class="fas fa-search"></i> <span data-i18n="nav.verification">Verification</span></a>
+    <a href="add_licenses.html"><i class="fas fa-id-card"></i> <span data-i18n="nav.addLicense">Add License</span></a>
+    <a href="users.html"><i class="fas fa-users"></i> <span data-i18n="nav.users">User Management</span></a>
+    <a href="verification_requests.html" class="active"><i class="fas fa-clipboard-list"></i> <span data-i18n="nav.verificationRequests">Verification Requests</span></a>
+    <a href="analytics.html"><i class="fas fa-chart-bar"></i> <span data-i18n="nav.analytics">Analytics</span></a>
   </nav>
 
-  <!-- Main Content -->
+  <!-- Main -->
   <main class="container">
     <section>
-      <h2><i class="fas fa-chart-line"></i> Verification Insights</h2>
+      <h2><i class="fas fa-chart-line"></i> <span data-i18n="insights.title">Verification Insights</span></h2>
       <div class="insights">
         <div class="insight-card insight-total">
-          <h3><i class="fas fa-search"></i> Total:</h3>
+          <h3><i class="fas fa-search"></i> <span data-i18n="insights.total">Total</span></h3>
           <h2 id="totalVerifications">0</h2>
         </div>
         <div class="insight-card insight-success">
-          <h3><i class="fas fa-check-circle"></i> Successful:</h3>
+          <h3><i class="fas fa-check-circle"></i> <span data-i18n="insights.success">Successful</span></h3>
           <h2 id="successfulVerifications">0</h2>
-          <div class="success-rate" id="successRate">Success Rate: 0%</div>
+          <div class="success-rate" id="successRate" data-i18n="insights.successRate">Success Rate: 0%</div>
         </div>
         <div class="insight-card insight-fail">
-          <h3><i class="fas fa-times-circle"></i> Unsuccessful:</h3>
+          <h3><i class="fas fa-times-circle"></i> <span data-i18n="insights.unsuccessful">Unsuccessful</span></h3>
           <h2 id="unsuccessfulVerifications">0</h2>
         </div>
       </div>
     </section>
 
     <div class="table-controls">
-      <input type="text" id="searchRequests" placeholder="Search verifications...">
-      <button class="btn-export" id="exportBtn">📥 Export</button>
+      <input type="text" id="searchRequests" data-i18n="[placeholder]table.search" placeholder="Search verifications..." />
+      <button class="btn-export" id="exportBtn"><i class="fas fa-file-export"></i> <span data-i18n="table.export">Export</span></button>
     </div>
 
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th>License #</th>
-            <th>Organization</th>
-            <th>Purpose</th>
-            <th>Country</th>
-            <th>Result</th>
-            <th>Email</th>
-            <th>Date</th>
-            <th>Action</th>
+            <th data-i18n="table.license">License #</th>
+            <th data-i18n="table.org">Organization</th>
+            <th data-i18n="table.purpose">Purpose</th>
+            <th data-i18n="table.country">Country</th>
+            <th data-i18n="table.result">Result</th>
+            <th data-i18n="table.email">Email</th>
+            <th data-i18n="table.date">Date</th>
+            <th data-i18n="table.action">Action</th>
           </tr>
         </thead>
-        <tbody id="requestsTable"><tr><td colspan="8">Loading...</td></tr></tbody>
+        <tbody id="requestsTable"><tr><td colspan="8" data-i18n="table.loading">Loading...</td></tr></tbody>
       </table>
     </div>
   </main>
@@ -355,21 +186,22 @@
   <!-- Modal -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
-      <h3><i class="fas fa-file-alt"></i> Verification Details</h3>
+      <h3><i class="fas fa-file-alt"></i> <span data-i18n="modal.title">Verification Details</span></h3>
       <div id="modalBody"></div>
       <div class="modal-buttons">
-        <button id="deleteBtn" class="btn-delete">Delete</button>
-        <button id="closeBtn" class="btn-close">Close</button>
+        <button id="deleteBtn" class="btn-delete" data-i18n="modal.delete">Delete</button>
+        <button id="closeBtn" class="btn-close" data-i18n="modal.close">Close</button>
       </div>
     </div>
   </div>
 
-  <!-- JS Logic -->
+  <!-- Firebase + Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
     import { getFirestore, collection, onSnapshot, doc, deleteDoc, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
+    /* ===== Firebase ===== */
     const firebaseConfig = {
       apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
       authDomain: "gdlvs-2348e.firebaseapp.com",
@@ -378,120 +210,172 @@
       messagingSenderId: "358715790318",
       appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
     };
-
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    /* ===== i18n (minimal resources) ===== */
+    const i18nResources = {
+      en:{translation:{
+        title:"GDLVS - Verification Records",
+        header:{title:"Verification Records", logout:"Logout"},
+        nav:{dashboard:"Dashboard", verification:"Verification", addLicense:"Add License", users:"User Management", verificationRequests:"Verification Requests", analytics:"Analytics"},
+        insights:{title:"Verification Insights", total:"Total", success:"Successful", unsuccessful:"Unsuccessful", successRate:"Success Rate: 0%"},
+        table:{search:"Search verifications...", export:"Export", license:"License #", org:"Organization", purpose:"Purpose", country:"Country", result:"Result", email:"Email", date:"Date", action:"Action", loading:"Loading..."},
+        modal:{title:"Verification Details", delete:"Delete", close:"Close"}
+      }},
+      fr:{translation:{
+        title:"GDLVS - Enregistrements de vérification",
+        header:{title:"Enregistrements de vérification", logout:"Déconnexion"},
+        nav:{dashboard:"Tableau de bord", verification:"Vérification", addLicense:"Ajouter un permis", users:"Gestion des utilisateurs", verificationRequests:"Demandes de vérification", analytics:"Analytique"},
+        insights:{title:"Aperçus de vérification", total:"Total", success:"Réussies", unsuccessful:"Échouées", successRate:"Taux de réussite : 0%"},
+        table:{search:"Rechercher des vérifications…", export:"Exporter", license:"N° de permis", org:"Organisation", purpose:"Objet", country:"Pays", result:"Résultat", email:"E-mail", date:"Date", action:"Action", loading:"Chargement..."},
+        modal:{title:"Détails de la vérification", delete:"Supprimer", close:"Fermer"}
+      }},
+      ja:{translation:{
+        title:"GDLVS - 照合記録",
+        header:{title:"照合記録", logout:"ログアウト"},
+        nav:{dashboard:"ダッシュボード", verification:"照合", addLicense:"免許を追加", users:"ユーザー管理", verificationRequests:"照合リクエスト", analytics:"分析"},
+        insights:{title:"照合インサイト", total:"合計", success:"成功", unsuccessful:"失敗", successRate:"成功率: 0%"},
+        table:{search:"照合を検索…", export:"エクスポート", license:"免許番号", org:"組織", purpose:"目的", country:"国", result:"結果", email:"メール", date:"日時", action:"操作", loading:"読み込み中…"},
+        modal:{title:"照合の詳細", delete:"削除", close:"閉じる"}
+      }}
+    };
+
+    i18next.use(i18nextBrowserLanguageDetector).init(
+      {resources:i18nResources, fallbackLng:"en"},
+      ()=>{ if(typeof jqueryI18next!=="undefined"){ jqueryI18next.init(i18next,$,{useOptionsAttr:true}); $("body").localize(); } }
+    );
+    document.getElementById("languageSwitcher").addEventListener("change", function(){
+      i18next.changeLanguage(this.value, () => $("body").localize());
+    });
+
+    /* ===== Auth guard & Logout ===== */
+    onAuthStateChanged(auth, user => { if(!user) location.href="index.html"; });
+    document.getElementById("logoutBtn").addEventListener("click", ()=>signOut(auth).then(()=>location.href="index.html"));
+
+    /* ===== Data load ===== */
     const tbody = document.getElementById("requestsTable");
     const searchInput = document.getElementById("searchRequests");
     let allDocs = [];
 
-    const qVer = query(collection(db, "verifications"), orderBy("verifiedAt", "desc"));
-    onSnapshot(qVer, snap => {
+    const qVer = query(collection(db,"verifications"), orderBy("verifiedAt","desc"));
+    onSnapshot(qVer, snap=>{
       allDocs = [];
-      snap.forEach(d => allDocs.push({ id: d.id, ...d.data() }));
+      snap.forEach(d=> allDocs.push({ id:d.id, ...d.data() }));
       renderTable(allDocs);
       renderInsights(allDocs);
     });
 
-    function renderInsights(docs) {
+    function renderInsights(docs){
       const total = docs.length;
       let success = 0, fail = 0;
-      docs.forEach(d => {
-        const res = (d.result || "").toLowerCase();
-        if (res.includes("not found")) fail++;
-        else if (res.includes("found")) success++;
+      docs.forEach(d=>{
+        const res = (d.result||"").toLowerCase();
+        if(res.includes("not found")) fail++;
+        else if(res.includes("found")) success++;
       });
-      const rate = total > 0 ? ((success / total) * 100).toFixed(1) : 0;
+      const rate = total ? ((success/total)*100).toFixed(1) : 0;
       document.getElementById("totalVerifications").textContent = total;
       document.getElementById("successfulVerifications").textContent = success;
       document.getElementById("unsuccessfulVerifications").textContent = fail;
-      document.getElementById("successRate").textContent = `Success Rate: ${rate}%`;
+      document.getElementById("successRate").textContent = `${i18next.t('insights.successRate').split(':')[0]}: ${rate}%`;
     }
 
-    function renderTable(docs) {
+    function renderTable(docs){
       tbody.innerHTML = "";
-      if (docs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8">No verification records found.</td></tr>`;
+      if(docs.length===0){
+        tbody.innerHTML = `<tr><td colspan="8">${i18next.t('table.loading')}</td></tr>`;
         return;
       }
-      docs.forEach(d => {
+      docs.forEach(d=>{
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>${d.licenseNumber || ""}</td>
-          <td>${d.requestingOrg || ""}</td>
-          <td>${d.purpose || ""}</td>
-          <td>${d.country || ""}</td>
-          <td>${d.result || ""}</td>
-          <td>${d.email || ""}</td>
+          <td>${d.licenseNumber||""}</td>
+          <td>${d.requestingOrg||""}</td>
+          <td>${d.purpose||""}</td>
+          <td>${d.country||""}</td>
+          <td>${d.result||""}</td>
+          <td>${d.email||""}</td>
           <td>${d.verifiedAt?.toDate ? d.verifiedAt.toDate().toLocaleString() : ""}</td>
-          <td><button class="btn-action btn-view" data-id="${d.id}"><i class="fas fa-eye"></i></button></td>`;
+          <td>
+            <button class="btn-action btn-view" data-id="${d.id}" title="View"><i class="fas fa-eye"></i></button>
+            <button class="btn-action btn-delete" data-del="${d.id}" title="Delete"><i class="fas fa-trash-alt"></i></button>
+          </td>`;
         tbody.appendChild(tr);
       });
     }
 
-    searchInput.addEventListener("input", e => {
+    /* ===== Search ===== */
+    searchInput.addEventListener("input", e=>{
       const kw = e.target.value.toLowerCase();
-      const filtered = allDocs.filter(d => Object.values(d).some(v => String(v).toLowerCase().includes(kw)));
+      const filtered = allDocs.filter(d =>
+        ["licenseNumber","requestingOrg","purpose","country","result","email"]
+          .some(k => String(d[k]||"").toLowerCase().includes(kw))
+        || (d.verifiedAt?.toDate && d.verifiedAt.toDate().toLocaleString().toLowerCase().includes(kw))
+      );
       renderTable(filtered);
     });
 
-    document.getElementById("exportBtn").addEventListener("click", () => {
-      if (allDocs.length === 0) return alert("No data to export.");
-      const headers = ["License #", "Organization", "Purpose", "Country", "Result", "Email", "Date"];
-      const rows = allDocs.map(d => [d.licenseNumber || "", d.requestingOrg || "", d.purpose || "", d.country || "", d.result || "", d.email || "", d.verifiedAt?.toDate ? d.verifiedAt.toDate().toLocaleString() : ""]);
-      const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
-      const blob = new Blob([csv], { type: "text/csv" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "verifications_export.csv";
-      link.click();
+    /* ===== Export ===== */
+    document.getElementById("exportBtn").addEventListener("click", ()=>{
+      if(allDocs.length===0) return alert("No data to export.");
+      const headers = ["License #","Organization","Purpose","Country","Result","Email","Date"];
+      const rows = allDocs.map(d=>[
+        d.licenseNumber||"", d.requestingOrg||"", d.purpose||"", d.country||"",
+        d.result||"", d.email||"", d.verifiedAt?.toDate ? d.verifiedAt.toDate().toLocaleString() : ""
+      ]);
+      const csv = [headers, ...rows].map(r => r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+      const blob = new Blob([csv], {type:"text/csv"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "verifications_export.csv";
+      a.click();
     });
 
+    /* ===== Modal: view + delete ===== */
     const modal = document.getElementById("modalOverlay");
     const modalBody = document.getElementById("modalBody");
     let currentId = null;
 
-    tbody.addEventListener("click", async e => {
-      if (!e.target.closest(".btn-view")) return;
-      const button = e.target.closest(".btn-view");
-      currentId = button.dataset.id;
-      const snapshot = await getDoc(doc(db, "verifications", currentId));
-      if (!snapshot.exists()) return;
-      const d = snapshot.data();
-      modalBody.innerHTML = `
-        <p><strong>License #:</strong> ${d.licenseNumber || ""}</p>
-        <p><strong>Organization:</strong> ${d.requestingOrg || ""}</p>
-        <p><strong>Country:</strong> ${d.country || ""}</p>
-        <p><strong>Purpose:</strong> ${d.purpose || ""}</p>
-        <p><strong>Result:</strong> ${d.result || ""}</p>
-        <p><strong>Email:</strong> ${d.email || ""}</p>
-        <p><strong>Date:</strong> ${d.verifiedAt?.toDate ? d.verifiedAt.toDate().toLocaleString() : ""}</p>`;
-      modal.style.display = "flex";
+    tbody.addEventListener("click", async e=>{
+      const viewBtn = e.target.closest(".btn-view");
+      const delBtn = e.target.closest(".btn-delete");
+
+      if(viewBtn){
+        currentId = viewBtn.dataset.id;
+        const snapshot = await getDoc(doc(db,"verifications", currentId));
+        if(!snapshot.exists()) return;
+        const d = snapshot.data();
+        modalBody.innerHTML = `
+          <p><strong>${i18next.t('table.license')}:</strong> ${d.licenseNumber||""}</p>
+          <p><strong>${i18next.t('table.org')}:</strong> ${d.requestingOrg||""}</p>
+          <p><strong>${i18next.t('table.country')}:</strong> ${d.country||""}</p>
+          <p><strong>${i18next.t('table.purpose')}:</strong> ${d.purpose||""}</p>
+          <p><strong>${i18next.t('table.result')}:</strong> ${d.result||""}</p>
+          <p><strong>${i18next.t('table.email')}:</strong> ${d.email||""}</p>
+          <p><strong>${i18next.t('table.date')}:</strong> ${d.verifiedAt?.toDate ? d.verifiedAt.toDate().toLocaleString() : ""}</p>`;
+        modal.style.display = "flex";
+      }
+
+      if(delBtn){
+        const id = delBtn.dataset.del;
+        if(confirm("Delete this verification record?")){
+          await deleteDoc(doc(db,"verifications", id));
+          alert("🗑️ Verification record deleted!");
+        }
+      }
     });
 
     document.getElementById("closeBtn").onclick = () => modal.style.display = "none";
-    modal.onclick = e => {
-      if (e.target === modal) modal.style.display = "none";
+    modal.onclick = e => { if(e.target===modal) modal.style.display = "none"; };
+    document.getElementById("deleteBtn").onclick = async ()=>{
+      if(!currentId) return;
+      if(confirm("Delete this verification record?")){
+        await deleteDoc(doc(db,"verifications", currentId));
+        modal.style.display = "none";
+      }
     };
-
-    document.getElementById("deleteBtn").onclick = async () => {
-      if (!currentId) return;
-      if (!confirm("Delete this verification record?")) return;
-      await deleteDoc(doc(db, "verifications", currentId));
-      modal.style.display = "none";
-      alert("🗑️ Verification record deleted!");
-    };
-
-    /* 🔒 Authentication Management */
-    onAuthStateChanged(auth, user => {
-      if (!user) location.href = "index.html";
-    });
-
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      signOut(auth).then(() => location.href = "index.html");
-    });
   </script>
 </body>
 </html>
