@@ -99,26 +99,23 @@
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
 
-        // ✅ 2. Send multilingual email to requester (CC admin)
+        // ✅ 2. Send email via EmailJS
         await emailjs.send("service_ddq3kka", "template_inl3jsv", {
           name: fullName,
-          email: email,                    // main recipient
+          email: email,
           organization: organization,
           phone: phone,
-          purpose: purpose,
-          cc_admin: "m.ngoma1988@gmail.com" // ✅ CC admin here
+          purpose: purpose
         });
 
         // ✅ 3. Success message
-        msgBox.innerHTML =
-          "✅ Your request has been submitted successfully! A multilingual confirmation email has been sent to you and the administrator.";
+        msgBox.innerHTML = "✅ Your request has been submitted successfully! You'll receive a confirmation email within 72 hours.";
         msgBox.style.color = "green";
         document.getElementById("requestForm").reset();
 
       } catch (error) {
         console.error("❌ Error submitting request:", error);
-        msgBox.innerHTML =
-          "⚠️ Failed to submit request. Please try again later.";
+        msgBox.innerHTML = "⚠️ Failed to submit request. Please try again later.";
         msgBox.style.color = "red";
       }
     }
