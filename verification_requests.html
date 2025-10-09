@@ -5,7 +5,6 @@
   <title>GDLVS - Verification Records</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
   <style>
     :root {
       --dark:#2a3f54; --light:#f6f8fb; --panel:#fff;
@@ -13,21 +12,35 @@
     }
     *{box-sizing:border-box;}
     body{margin:0;font-family:"Segoe UI",sans-serif;background:var(--light);color:#333;}
-    header{background:var(--dark);color:#fff;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
+    header, nav{position:fixed;left:0;right:0;z-index:1000;}
+    header{top:0;background:var(--dark);color:#fff;padding:8px 14px;
+      display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
+    nav{top:46px;background:#fff;border-bottom:1px solid #eee;padding:10px 16px;
+      display:flex;flex-wrap:wrap;gap:14px;}
+    body{padding-top:100px;}
     header h1{margin:0;font-size:1.1rem;display:flex;align-items:center;gap:6px;}
     .controls{display:flex;align-items:center;gap:8px;}
     .controls select,.controls button{padding:5px 9px;border:0;border-radius:6px;font-size:.85rem;cursor:pointer;}
     .controls select{background:#1f2d3a;color:#fff;}
     .controls button{background:#1f2d3a;color:#fff;}
     .controls button:hover{background:#16222d;}
-    nav{background:#fff;border-bottom:1px solid #eee;padding:10px 16px;display:flex;flex-wrap:wrap;gap:14px;}
     nav a{color:var(--dark);text-decoration:none;font-weight:600;}
     nav a.active{border-bottom:2px solid var(--dark);padding-bottom:3px;}
-    .container{max-width:1000px;margin:20px auto;background:#fff;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.1);padding:20px;}
-    .table-controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+
+    .container{max-width:1000px;margin:20px auto;background:#fff;border-radius:10px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.1);padding:20px;}
+    .insights{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:18px;}
+    .insight-card{flex:1 1 30%;min-width:200px;border-radius:10px;padding:18px;text-align:center;color:#fff;}
+    .insight-total{background:var(--info);}
+    .insight-success{background:var(--success);}
+    .insight-fail{background:var(--danger);}
+    .insight-card h3{margin:0;font-size:.95rem;font-weight:600;}
+    .insight-card h2{margin:6px 0 0;font-size:1.4rem;font-weight:700;}
+
+    .table-controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:10px;}
     input#searchRequests{max-width:260px;padding:8px;border:1px solid #ddd;border-radius:8px;}
-    .btn-export{background:var(--info);color:#fff;padding:8px 12px;border:0;border-radius:8px;cursor:pointer;}
-    .btn-export:hover{background:#1f6392;}
+    .btn-export,.btn-toggle{background:var(--info);color:#fff;padding:8px 12px;border:0;border-radius:8px;cursor:pointer;}
+    .btn-export:hover,.btn-toggle:hover{background:#1f6392;}
     table{width:100%;border-collapse:collapse;}
     th,td{padding:10px 12px;border:1px solid #eee;}
     th{background:#f2f2f2;font-weight:600;}
@@ -35,14 +48,16 @@
     .btn-view{background:var(--info);} .btn-view:hover{background:#1f6392;}
     .btn-delete{background:var(--danger);} .btn-delete:hover{background:#c0392b;}
     .btn-archive{background:var(--success);} .btn-archive:hover{background:#219150;}
-    /* Modal */
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:999;}
-    .modal{background:#fff;border-radius:10px;max-width:440px;width:90%;padding:22px;box-shadow:0 4px 12px rgba(0,0,0,0.25);animation:fadeIn .25s ease;}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;
+      align-items:center;justify-content:center;z-index:9999;}
+    .modal{background:#fff;border-radius:10px;max-width:440px;width:90%;padding:22px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.25);animation:fadeIn .25s ease;}
     @keyframes fadeIn{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
     .modal h3{margin-top:0;}
     .modal p strong{display:inline-block;width:130px;}
     .modal-buttons{margin-top:18px;display:flex;justify-content:space-between;}
-    .modal-buttons button{flex:1;margin:0 4px;padding:8px 10px;border-radius:6px;border:0;color:#fff;font-weight:600;cursor:pointer;}
+    .modal-buttons button{flex:1;margin:0 4px;padding:8px 10px;border-radius:6px;border:0;
+      color:#fff;font-weight:600;cursor:pointer;}
     .btn-close{background:#555;} .btn-close:hover{background:#333;}
   </style>
 </head>
@@ -69,17 +84,37 @@
   </nav>
 
   <main class="container">
+    <!-- Insights Section -->
     <section>
-      <h2><i class="fas fa-database"></i> <span data-i18n="verificationsList">Verifications List</span></h2>
+      <h2><i class="fas fa-chart-line"></i> Verification Insights</h2>
+      <div class="insights">
+        <div class="insight-card insight-total">
+          <h3><i class="fas fa-search"></i> Total:</h3>
+          <h2 id="totalVerifications">0</h2>
+        </div>
+        <div class="insight-card insight-success">
+          <h3><i class="fas fa-check-circle"></i> Successful:</h3>
+          <h2 id="successfulVerifications">0</h2>
+        </div>
+        <div class="insight-card insight-fail">
+          <h3><i class="fas fa-times-circle"></i> Unsuccessful:</h3>
+          <h2 id="unsuccessfulVerifications">0</h2>
+        </div>
+      </div>
+    </section>
+
+    <section>
       <div class="table-controls">
-        <input type="text" id="searchRequests" data-i18n="[placeholder]searchVerifications" placeholder="Search verifications...">
+        <button class="btn-toggle" id="toggleReviewed">Show Reviewed Verifications</button>
+        <input type="text" id="searchRequests" placeholder="Search verifications...">
         <button class="btn-export" id="exportBtn">📥 Export</button>
       </div>
+
       <table>
         <thead>
           <tr>
             <th>License #</th>
-            <th>Requesting Org</th>
+            <th>Organization</th>
             <th>Purpose</th>
             <th>Country</th>
             <th>Result</th>
@@ -93,6 +128,7 @@
     </section>
   </main>
 
+  <!-- Modal -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
       <h3><i class="fas fa-file-alt"></i> Verification Details</h3>
@@ -104,8 +140,6 @@
       </div>
     </div>
   </div>
-
-  <footer style="text-align:center;margin:22px 0 40px;">GDLVS</footer>
 
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
@@ -129,94 +163,99 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    /* === i18n === */
-    const i18nResources = {
-      en:{translation:{verificationRecords:"Verification Records",verificationsList:"Verifications List",logout:"Logout",searchVerifications:"Search verifications..."}},
-      fr:{translation:{verificationRecords:"Registres de vérification",verificationsList:"Liste des vérifications",logout:"Déconnexion",searchVerifications:"Rechercher des vérifications..."}},
-      ja:{translation:{verificationRecords:"照会記録",verificationsList:"照会リスト",logout:"ログアウト",searchVerifications:"照会を検索…"}}
-    };
-    i18next.use(i18nextBrowserLanguageDetector).init({resources:i18nResources,fallbackLng:"en"},()=>{jqueryI18next.init(i18next,$,{useOptionsAttr:true});$("body").localize();});
-    document.getElementById("languageSwitcher").addEventListener("change",e=>{i18next.changeLanguage(e.target.value,()=>{$("body").localize();});});
-    document.getElementById("logoutBtn").addEventListener("click",()=>signOut(auth).then(()=>location.href="index.html"));
+    let showReviewed = false;
 
-    /* === Auth Gate === */
-    onAuthStateChanged(auth,user=>{if(!user)location.href="index.html";});
+    const tbody = document.getElementById("requestsTable");
+    const toggleBtn = document.getElementById("toggleReviewed");
 
-    /* === Realtime Verifications === */
-    const tbody=document.getElementById("requestsTable");
-    const qVer=query(collection(db,"verifications"),orderBy("verifiedAt","desc"));
-    onSnapshot(qVer,snap=>{
-      tbody.innerHTML="";
-      if(snap.empty){tbody.innerHTML="<tr><td colspan='8'>No verifications yet</td></tr>";return;}
-      snap.forEach(docSnap=>{
-        const d=docSnap.data();
-        const tr=document.createElement("tr");
-        tr.innerHTML=`
-          <td>${d.licenseNumber||""}</td>
-          <td>${d.requestingOrg||""}</td>
-          <td>${d.purpose||""}</td>
-          <td>${d.country||""}</td>
-          <td>${d.result||""}</td>
-          <td>${d.email||""}</td>
-          <td>${d.verifiedAt?.toDate?d.verifiedAt.toDate().toLocaleString():""}</td>
-          <td><button class="btn-action btn-view" data-id="${docSnap.id}">View</button></td>`;
+    const qVer = query(collection(db, "verifications"), orderBy("verifiedAt", "desc"));
+    onSnapshot(qVer, (snap) => {
+      const docs = [];
+      snap.forEach((d) => docs.push({ id: d.id, ...d.data() }));
+      renderTable(docs);
+      renderInsights(docs);
+    });
+
+    function renderInsights(docs) {
+      const active = docs.filter((d) => !d.archived);
+      const visible = showReviewed ? docs.filter(d=>d.archived) : active;
+      const total = visible.length;
+      const success = visible.filter(d=>String(d.result||"").toLowerCase().includes("found")).length;
+      const fail = total - success;
+      document.getElementById("totalVerifications").textContent = total;
+      document.getElementById("successfulVerifications").textContent = success;
+      document.getElementById("unsuccessfulVerifications").textContent = fail;
+    }
+
+    function renderTable(docs) {
+      tbody.innerHTML = "";
+      const filtered = docs.filter((d) => showReviewed ? d.archived : !d.archived);
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8">No verifications found</td></tr>`;
+        return;
+      }
+      filtered.forEach((d) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${d.licenseNumber || ""}</td>
+          <td>${d.requestingOrg || ""}</td>
+          <td>${d.purpose || ""}</td>
+          <td>${d.country || ""}</td>
+          <td>${d.result || ""}</td>
+          <td>${d.email || ""}</td>
+          <td>${d.verifiedAt?.toDate ? d.verifiedAt.toDate().toLocaleString() : ""}</td>
+          <td><button class="btn-action btn-view" data-id="${d.id}">View</button></td>`;
         tbody.appendChild(tr);
       });
+    }
+
+    toggleBtn.addEventListener("click", () => {
+      showReviewed = !showReviewed;
+      toggleBtn.textContent = showReviewed ? "Hide Reviewed Verifications" : "Show Reviewed Verifications";
     });
 
-    /* === Modal === */
-    const modal=document.getElementById("modalOverlay");
-    const modalBody=document.getElementById("modalBody");
-    let currentId=null;
-    tbody.addEventListener("click",async(e)=>{
-      if(!e.target.classList.contains("btn-view"))return;
-      const id=e.target.dataset.id; currentId=id;
-      const snap=(await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js")).getDoc;
-      const {getDoc,doc}=await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
-      const s=await getDoc(doc(db,"verifications",id));
-      if(!s.exists())return;
-      const d=s.data();
-      modalBody.innerHTML=`
-        <p><strong>License #:</strong> ${d.licenseNumber||""}</p>
-        <p><strong>Organization:</strong> ${d.requestingOrg||""}</p>
-        <p><strong>Country:</strong> ${d.country||""}</p>
-        <p><strong>Purpose:</strong> ${d.purpose||""}</p>
-        <p><strong>Result:</strong> ${d.result||""}</p>
-        <p><strong>Email:</strong> ${d.email||""}</p>
-        <p><strong>Verified At:</strong> ${d.verifiedAt?.toDate?d.verifiedAt.toDate().toLocaleString():""}</p>
-        <p><strong>Verified By:</strong> ${d.verifiedBy||""}</p>`;
-      modal.style.display="flex";
+    // Modal
+    const modal = document.getElementById("modalOverlay");
+    const modalBody = document.getElementById("modalBody");
+    let currentId = null;
+    tbody.addEventListener("click", async (e) => {
+      if (!e.target.classList.contains("btn-view")) return;
+      currentId = e.target.dataset.id;
+      const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
+      const s = await getDoc(doc(db, "verifications", currentId));
+      if (!s.exists()) return;
+      const d = s.data();
+      modalBody.innerHTML = `
+        <p><strong>License #:</strong> ${d.licenseNumber || ""}</p>
+        <p><strong>Organization:</strong> ${d.requestingOrg || ""}</p>
+        <p><strong>Country:</strong> ${d.country || ""}</p>
+        <p><strong>Purpose:</strong> ${d.purpose || ""}</p>
+        <p><strong>Result:</strong> ${d.result || ""}</p>
+        <p><strong>Email:</strong> ${d.email || ""}</p>
+        <p><strong>Verified At:</strong> ${d.verifiedAt?.toDate ? d.verifiedAt.toDate().toLocaleString() : ""}</p>
+        <p><strong>Verified By:</strong> ${d.verifiedBy || ""}</p>
+        <p><strong>Status:</strong> ${d.archived ? "Reviewed ✅" : "Pending 🔄"}</p>`;
+      modal.style.display = "flex";
     });
-    document.getElementById("closeBtn").onclick=()=>modal.style.display="none";
-    modal.onclick=e=>{if(e.target===modal)modal.style.display="none";};
-
-    /* === Archive / Delete === */
-    document.getElementById("archiveBtn").onclick=async()=>{
-      if(!currentId)return;
-      await updateDoc(doc(db,"verifications",currentId),{archived:true});
-      modal.style.display="none";
-      alert("✅ Marked as reviewed!");
+    document.getElementById("closeBtn").onclick = () => (modal.style.display = "none");
+    modal.onclick = (e) => { if (e.target === modal) modal.style.display = "none"; };
+    document.getElementById("archiveBtn").onclick = async () => {
+      if (!currentId) return;
+      await updateDoc(doc(db, "verifications", currentId), { archived: true });
+      modal.style.display = "none";
+      alert("✅ Marked as reviewed");
     };
-    document.getElementById("deleteBtn").onclick=async()=>{
-      if(!currentId)return;
-      if(!confirm("Delete this verification?"))return;
-      await deleteDoc(doc(db,"verifications",currentId));
-      modal.style.display="none";
+    document.getElementById("deleteBtn").onclick = async () => {
+      if (!currentId) return;
+      if (!confirm("Delete this verification?")) return;
+      await deleteDoc(doc(db, "verifications", currentId));
+      modal.style.display = "none";
       alert("🗑️ Deleted!");
     };
 
-    /* === Search === */
-    document.getElementById("searchRequests").addEventListener("keyup",e=>{
-      const term=e.target.value.toLowerCase();
-      document.querySelectorAll("#requestsTable tr").forEach(r=>r.style.display=r.textContent.toLowerCase().includes(term)?"":"none");
-    });
-    /* === Export === */
-    document.getElementById("exportBtn").addEventListener("click",()=>{
-      const rows=document.querySelectorAll("table tr");const csv=[];
-      rows.forEach(r=>{const cols=r.querySelectorAll("th,td");csv.push(Array.from(cols).map(c=>`"${c.innerText.replace(/"/g,'""')}"`).join(","));});
-      const blob=new Blob([csv.join("\n")],{type:"text/csv"});const a=document.createElement("a");
-      a.href=URL.createObjectURL(blob);a.download="verifications.csv";a.click();
-    });
+    // Auth + Logout
+    onAuthStateChanged(auth, (user) => { if (!user) location.href = "index.html"; });
+    document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth).then(() => location.href = "index.html"));
   </script>
 </body>
 </html>
