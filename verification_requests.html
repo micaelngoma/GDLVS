@@ -282,3 +282,55 @@
       const headers=["License #","Organization","Purpose","Country","Result","Email","Date"];
       const rows=allDocs.map(d=>[d.licenseNumber||"",d.requestingOrg||"",d.purpose||"",d.country||"",d.result||"",d.email||"",d.verifiedAt?.toDate?d.verifiedAt.toDate().toLocaleString():""]);
       const
+      csv=[headers,...rows].map(r=>r.join(",")).join("\n");
+      const blob=new Blob([csv],{type:"text/csv"});
+      const link=document.createElement("a");
+      link.href=URL.createObjectURL(blob);
+      link.download="verifications_export.csv";
+      link.click();
+    });
+
+    /* 🧾 Modal Logic */
+    const modal=document.getElementById("modalOverlay");
+    const modalBody=document.getElementById("modalBody");
+    let currentId=null;
+
+    tbody.addEventListener("click",async e=>{
+      if(!e.target.closest(".btn-view")) return;
+      const button=e.target.closest(".btn-view");
+      currentId=button.dataset.id;
+      const snapshot=await getDoc(doc(db,"verifications",currentId));
+      if(!snapshot.exists()) return;
+      const d=snapshot.data();
+      modalBody.innerHTML=`
+        <p><strong>${i18next.t('table.license')}:</strong> ${d.licenseNumber||""}</p>
+        <p><strong>${i18next.t('table.org')}:</strong> ${d.requestingOrg||""}</p>
+        <p><strong>${i18next.t('table.country')}:</strong> ${d.country||""}</p>
+        <p><strong>${i18next.t('table.purpose')}:</strong> ${d.purpose||""}</p>
+        <p><strong>${i18next.t('table.result')}:</strong> ${d.result||""}</p>
+        <p><strong>${i18next.t('table.email')}:</strong> ${d.email||""}</p>
+        <p><strong>${i18next.t('table.date')}:</strong> ${d.verifiedAt?.toDate?d.verifiedAt.toDate().toLocaleString():""}</p>`;
+      modal.style.display="flex";
+    });
+
+    document.getElementById("closeBtn").onclick=()=>modal.style.display="none";
+    modal.onclick=e=>{if(e.target===modal) modal.style.display="none";};
+
+    document.getElementById("deleteBtn").onclick=async()=>{
+      if(!currentId) return;
+      if(!confirm("Delete this verification record?")) return;
+      await deleteDoc(doc(db,"verifications",currentId));
+      modal.style.display="none";
+      alert("🗑️ Verification record deleted!");
+    };
+
+    /* 🔒 Auth Management */
+    onAuthStateChanged(auth,user=>{
+      if(!user) location.href="index.html";
+    });
+    document.getElementById("logoutBtn").addEventListener("click",()=>{
+      signOut(auth).then(()=>location.href="index.html");
+    });
+  </script>
+</body>
+</html>
