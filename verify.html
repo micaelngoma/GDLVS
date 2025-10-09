@@ -139,11 +139,6 @@
     #verifyResult .ok { color: var(--success); font-weight: 700; }
     #verifyResult .bad { color: var(--danger); font-weight: 700; }
 
-    footer {
-      text-align: center;
-      margin: 24px 0 40px;
-    }
-
     @media(max-width: 900px) {
       header { flex-direction: column; gap: 8px; }
       .container { width: 95%; }
@@ -157,15 +152,15 @@
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
-  <!-- ===== Firebase ===== -->
+  <!-- ===== Firebase Modular SDK ===== -->
   <script type="module">
     import { auth, db } from "./firebase-config.js";
-    import {
-      doc, getDoc, collection, addDoc, serverTimestamp
+    import { 
+      doc, getDoc, collection, addDoc, serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-    /* 🌍 Multilingual setup */
+    // 🌐 Multilingual Setup
     const resources = {
       en: { translation: { verificationPortal:"Verification",logout:"Logout",licenseNumber:"License Number",organization:"Organization",country:"Country",purpose:"Purpose",verify:"Verify" }},
       fr: { translation: { verificationPortal:"Vérification",logout:"Déconnexion",licenseNumber:"Numéro du permis",organization:"Organisation",country:"Pays",purpose:"Objet",verify:"Vérifier" }},
@@ -181,54 +176,55 @@
       i18next.changeLanguage(e.target.value,()=>$("body").localize());
     });
 
-    // 🔒 Secure role-based navigation
+    // 🔒 Auth & Role Management (Flashing Fixed)
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
+        console.warn("🚫 No user detected — redirecting");
         location.href = "index.html";
         return;
       }
 
+      console.log("✅ Authenticated:", user.email);
+      await new Promise(res => setTimeout(res, 400)); // wait a bit for Firestore
+
+      let role = "verifier"; // default
       try {
         const roleSnap = await getDoc(doc(db, "roles", user.email));
-        const role = roleSnap.exists() ? roleSnap.data().role : "verifier";
-        console.log("✅ User:", user.email, "| Role:", role);
-
-        const currentPage = window.location.pathname.split("/").pop();
-
-        if (role === "verifier") {
-          // Hide admin pages in navigation
-          const adminPages = [
-            "dashboard.html",
-            "users.html",
-            "analytics.html",
-            "add_licenses.html",
-            "verification_requests.html"
-          ];
-          adminPages.forEach(pg => {
-            const link = document.querySelector(`a[href='${pg}']`);
-            if (link) link.style.display = "none";
-          });
-
-          // Only allow verify.html to stay visible
-          if (currentPage !== "verify.html") {
-            console.log("🔒 Redirecting verifier to verify.html");
-            location.href = "verify.html";
-          }
-        } else if (role === "admin") {
-          console.log("👑 Admin full access granted");
-        }
+        if (roleSnap.exists()) role = roleSnap.data().role || "verifier";
+        console.log("🔎 Role:", role);
       } catch (err) {
-        console.error("❌ Role check failed:", err);
-        alert("Unable to verify your role. Please log in again.");
-        await signOut(auth);
-        location.href = "index.html";
+        console.warn("⚠️ Role check failed:", err.message);
+      }
+
+      const currentPage = window.location.pathname.split("/").pop();
+
+      if (role === "verifier") {
+        console.log("🧭 Verifier logged in — hide admin pages");
+
+        // Hide admin-only pages
+        const adminPages = [
+          "dashboard.html", "users.html", "analytics.html", 
+          "add_licenses.html", "verification_requests.html"
+        ];
+        adminPages.forEach(pg => {
+          const link = document.querySelector(`a[href='${pg}']`);
+          if (link) link.style.display = "none";
+        });
+
+        // Only redirect if not already on verify.html
+        if (currentPage !== "verify.html") {
+          console.log("➡️ Redirecting verifier to verify.html");
+          window.location.replace("verify.html");
+        }
+      } else if (role === "admin") {
+        console.log("👑 Admin — full access");
       }
     });
 
-    // 🔓 Sign out
+    // 🚪 Logout
     window.signOutUser = () => signOut(auth).then(()=>location.href="index.html");
 
-    // 🔍 Verify license
+    // 🔍 Verify License
     window.verifyLicense = async (e)=>{
       e.preventDefault();
       const licenseNumber=document.getElementById("verifyLicenseNumber").value.trim();
