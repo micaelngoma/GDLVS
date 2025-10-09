@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>GDLVS - Login</title>
+  <title>GDLVS - Login & Access Request</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <!-- Firebase -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -16,6 +16,14 @@
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    (function(){
+      emailjs.init("TfmaZEvxtz2MNUb70"); // ✅ Your EmailJS public key
+    })();
+  </script>
+
   <style>
     :root {
       --brand-dark:#2a3f54;
@@ -24,6 +32,8 @@
       --text:#333;
       --muted:#666;
       --shadow:0 2px 6px rgba(0,0,0,.1);
+      --success:#27ae60;
+      --danger:#e74c3c;
     }
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:Arial,sans-serif;background:#f6f8fb;color:var(--text);}
@@ -32,13 +42,15 @@
     .car-hero{font-size:72px;color:var(--brand-dark);}
     .welcome-section h1{color:var(--brand-dark);margin:10px 0;}
     .welcome-text{max-width:860px;margin:0 auto;font-size:1.05rem;}
-    .login-container{max-width:420px;margin:30px auto;padding:24px;background:#fff;border-radius:10px;box-shadow:var(--shadow);text-align:center;transition:all .3s ease;}
-    input,button,select{width:100%;padding:10px;margin:8px 0;border:1px solid #dcdcdc;border-radius:8px;font-size:.98rem;}
+    .login-container,.container{max-width:480px;margin:30px auto;padding:24px;background:#fff;border-radius:10px;box-shadow:var(--shadow);text-align:center;}
+    input,textarea,button,select{width:100%;padding:10px;margin:8px 0;border:1px solid #dcdcdc;border-radius:8px;font-size:.98rem;}
+    textarea{resize:vertical;min-height:100px;}
     button{background:var(--brand-dark);color:#fff;cursor:pointer;transition:.2s;}
     button:hover{background:var(--brand-dark-2);}
     a{color:var(--blue);font-weight:bold;text-decoration:none;}
     a:hover{text-decoration:underline;}
     .muted{color:var(--muted);font-size:.95rem;}
+    #msg{margin-top:10px;font-weight:bold;}
     footer{text-align:center;margin:20px 0 40px;}
     #languageSwitcher{width:auto;padding:6px 10px;border-radius:8px;}
   </style>
@@ -46,6 +58,8 @@
 
 <body>
   <div class="background-image"></div>
+
+  <!-- === Welcome Banner === -->
   <section class="welcome-section">
     <i class="fas fa-car car-hero"></i>
     <h1 data-i18n="welcomeTitle">Welcome</h1>
@@ -54,8 +68,8 @@
     </p>
   </section>
 
+  <!-- === Login Section (will toggle dynamically) === -->
   <div class="login-container" id="mainContainer">
-    <!-- Default Login Page -->
     <div id="loginPage">
       <h2><i class="fas fa-id-card"></i> <span data-i18n="login">Login</span></h2>
       <form id="loginForm" onsubmit="loginUser(event)">
@@ -83,6 +97,9 @@
     </select>
   </footer>
 
+  <!-- ==========================================================
+       SCRIPT SECTION
+       ========================================================== -->
   <script>
     /* === Firebase Init === */
     const firebaseConfig = {
@@ -100,12 +117,16 @@
     /* === Translations === */
     const i18nResources = {
       en:{translation:{
-        welcomeTitle:"Welcome",welcomeMessage:"Welcome to the Gabon Driver’s License Verification System (GDLVS) — a secure platform designed to verify the authenticity of Gabonese driver’s license IDs.",
+        welcomeTitle:"Welcome",
+        welcomeMessage:"Welcome to the Gabon Driver’s License Verification System (GDLVS) — a secure platform designed to verify the authenticity of Gabonese driver’s license IDs.",
         login:"Login",loginBtn:"Login",emailPlaceholder:"Email",passwordPlaceholder:"Password",
         forgotPassword:"Forgot Password?",noAccount:"Don’t have an account?",requestAccessHere:"Request access here",
-        verifyEmailFirst:"Please verify your email before logging in.",adminWelcome:"Welcome Admin!",loginSuccess:"Login successful!",
-        requestFormTitle:"Access Request",fullName:"Full Name",organization:"Organization",phone:"Phone",submitRequest:"Submit Request",
-        accessSubmitted:"✅ Your request has been submitted. You will receive confirmation within 72 hours.",
+        verifyEmailFirst:"Please verify your email before logging in.",
+        adminWelcome:"Welcome Admin!",loginSuccess:"Login successful!",
+        requestAccess:"Request Access",submitRequest:"Submit Request",
+        approvalNotice:"Your request will be reviewed by the administrator.",
+        fullNamePlaceholder:"Full Name",emailPlaceholder:"Email",organizationPlaceholder:"Organization / Agency",
+        phonePlaceholder:"Phone Number",purposePlaceholder:"Purpose of access...",
         backToLogin:"← Back to Login"
       }},
       fr:{translation:{
@@ -113,8 +134,10 @@
         login:"Connexion",loginBtn:"Connexion",emailPlaceholder:"Adresse e-mail",passwordPlaceholder:"Mot de passe",
         forgotPassword:"Mot de passe oublié ?",noAccount:"Pas de compte ?",requestAccessHere:"Demander un accès ici",
         verifyEmailFirst:"Veuillez d’abord vérifier votre e-mail.",adminWelcome:"Bienvenue Administrateur!",loginSuccess:"Connexion réussie!",
-        requestFormTitle:"Demande d’accès",fullName:"Nom complet",organization:"Organisation",phone:"Téléphone",submitRequest:"Soumettre la demande",
-        accessSubmitted:"✅ Votre demande a été soumise. Vous recevrez une confirmation sous 72 heures.",
+        requestAccess:"Demande d’accès",submitRequest:"Soumettre la demande",
+        approvalNotice:"Votre demande sera examinée par l’administrateur.",
+        fullNamePlaceholder:"Nom complet",organizationPlaceholder:"Organisation / Agence",
+        phonePlaceholder:"Numéro de téléphone",purposePlaceholder:"But de l'accès...",
         backToLogin:"← Retour à la connexion"
       }},
       ja:{translation:{
@@ -122,14 +145,17 @@
         login:"ログイン",loginBtn:"ログイン",emailPlaceholder:"メールアドレス",passwordPlaceholder:"パスワード",
         forgotPassword:"パスワードをお忘れですか？",noAccount:"アカウントをお持ちでない場合",requestAccessHere:"アクセスをリクエストする",
         verifyEmailFirst:"ログインする前にメールを確認してください。",adminWelcome:"管理者としてようこそ!",loginSuccess:"ログイン成功!",
-        requestFormTitle:"アクセス申請",fullName:"氏名",organization:"組織",phone:"電話番号",submitRequest:"送信",
-        accessSubmitted:"✅ リクエストが送信されました。72時間以内に確認メールが届きます。",
+        requestAccess:"アクセス申請",submitRequest:"申請を送信",
+        approvalNotice:"管理者が申請内容を確認します。",
+        fullNamePlaceholder:"氏名",organizationPlaceholder:"組織 / 機関",
+        phonePlaceholder:"電話番号",purposePlaceholder:"アクセス目的...",
         backToLogin:"← ログインに戻る"
       }}
     };
+
     i18next.use(i18nextBrowserLanguageDetector).init(
       {resources:i18nResources,fallbackLng:"en"},
-      ()=>{jqueryI18next.init(i18next,$,{useOptionsAttr:true});$("body").localize();auth.useDeviceLanguage();}
+      ()=>{jqueryI18next.init(i18next,$,{useOptionsAttr:true});$("body").localize();}
     );
     document.getElementById("languageSwitcher").addEventListener("change",function(){
       i18next.changeLanguage(this.value,()=>$("body").localize());
@@ -161,42 +187,72 @@
       catch(err){alert("Error: "+err.message);}
     }
 
-    /* === Request Access Page === */
+    /* ==========================================================
+       REQUEST ACCESS (Firestore + EmailJS)
+       ========================================================== */
     function showRequestAccess(){
-      const html=`
-        <div style='text-align:left'>
-          <h3><i class='fa-solid fa-user-plus'></i> ${i18next.t("requestFormTitle")}</h3>
-          <input id='reqName' placeholder='${i18next.t("fullName")}' required>
-          <input id='reqEmail' placeholder='Email' type='email' required>
-          <input id='reqOrg' placeholder='${i18next.t("organization")}' required>
-          <input id='reqPhone' placeholder='${i18next.t("phone")}' required>
-          <button onclick='submitAccessRequest()'>${i18next.t("submitRequest")}</button>
-          <p style='text-align:center;margin-top:10px;'>
-            <a href='#' onclick='showLoginPage()'>${i18next.t("backToLogin")}</a>
-          </p>
+      const html = `
+        <div class="container">
+          <h2><i class="fas fa-user-plus"></i> ${i18next.t("requestAccess")}</h2>
+          <form id="requestForm" onsubmit="submitAccessRequest(event)">
+            <input type="text" id="requestFullName" required placeholder="${i18next.t("fullNamePlaceholder")}" />
+            <input type="email" id="requestEmail" required placeholder="${i18next.t("emailPlaceholder")}" />
+            <input type="text" id="organization" required placeholder="${i18next.t("organizationPlaceholder")}" />
+            <input type="tel" id="phone" required placeholder="${i18next.t("phonePlaceholder")}" />
+            <textarea id="purpose" required rows="4" placeholder="${i18next.t("purposePlaceholder")}"></textarea>
+            <button type="submit"><i class="fas fa-paper-plane"></i> ${i18next.t("submitRequest")}</button>
+          </form>
+          <div id="msg"></div>
+          <p class="muted">${i18next.t("approvalNotice")}</p>
+          <p class="muted"><a href="#" onclick="showLoginPage()">${i18next.t("backToLogin")}</a></p>
         </div>`;
-      document.getElementById("mainContainer").innerHTML=html;
+      document.getElementById("mainContainer").innerHTML = html;
     }
 
-    function showLoginPage(){
-      location.reload(); // Simple reload restores login page and i18n
-    }
+    async function submitAccessRequest(event) {
+      event.preventDefault();
+      const fullName = document.getElementById("requestFullName").value.trim();
+      const email = document.getElementById("requestEmail").value.trim();
+      const organization = document.getElementById("organization").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const purpose = document.getElementById("purpose").value.trim();
+      const msgBox = document.getElementById("msg");
 
-    async function submitAccessRequest(){
-      const name=document.getElementById("reqName").value.trim();
-      const email=document.getElementById("reqEmail").value.trim();
-      const org=document.getElementById("reqOrg").value.trim();
-      const phone=document.getElementById("reqPhone").value.trim();
-      if(!name||!email||!org) return alert("⚠️ All fields required");
-      try{
-        await db.collection("requests").doc(email).set({
-          fullName:name,email,organization:org,phone,status:"pending",requestedAt:new Date()
+      msgBox.innerHTML = "⏳ Submitting your request...";
+      msgBox.style.color = "#004aad";
+
+      try {
+        await db.collection("requests").add({
+          fullName,
+          email,
+          organization,
+          phone,
+          purpose,
+          status: "pending",
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
-        alert(i18next.t("accessSubmitted"));
-        showLoginPage();
-      }catch(err){alert("❌ "+err.message);}
+
+        await emailjs.send("service_ddq3kka", "template_inl3jsv", {
+          name: fullName,
+          email: email,
+          organization: organization,
+          phone: phone,
+          purpose: purpose
+        });
+
+        msgBox.innerHTML = "✅ Your request has been submitted successfully! You'll receive a confirmation email within 72 hours.";
+        msgBox.style.color = "green";
+        document.getElementById("requestForm").reset();
+      } catch (error) {
+        console.error("❌ Error submitting request:", error);
+        msgBox.innerHTML = "⚠️ Failed to submit request. Please try again later.";
+        msgBox.style.color = "red";
+      }
     }
 
+    function showLoginPage(){location.reload();}
+
+    /* === Expose for HTML === */
     window.loginUser=loginUser;
     window.resetPassword=resetPassword;
     window.showRequestAccess=showRequestAccess;
