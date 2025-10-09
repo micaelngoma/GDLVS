@@ -1,258 +1,284 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>GDLVS - Verification Requests</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-    />
+<head>
+  <meta charset="UTF-8" />
+  <title data-i18n="title">GDLVS - Verification Records</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
+  <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
+  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
+  <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <style>
+    :root {
+      --dark:#2a3f54; --light:#f6f8fb; --info:#2980b9; --success:#27ae60; --danger:#e74c3c;
+    }
+    *{box-sizing:border-box;}
+    html,body{margin:0;height:100%;font-family:"Segoe UI",sans-serif;background:var(--light);color:#333;}
 
-    <!-- i18n + jQuery -->
-    <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
-    <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
-    <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
-    <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
+    /* Sticky Header & Nav */
+    header,nav{position:fixed;left:0;right:0;z-index:1000;}
+    header{top:0;background:var(--dark);color:#fff;padding:8px 14px;
+      display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
+    nav{top:46px;background:#fff;border-bottom:1px solid #eee;padding:10px 16px;
+      display:flex;flex-wrap:wrap;gap:14px;}
+    body{padding-top:100px;}
+    header h1{margin:0;font-size:1.1rem;display:flex;align-items:center;gap:6px;}
+    .controls{display:flex;align-items:center;gap:8px;}
+    .controls select,.controls button{padding:5px 9px;border:0;border-radius:6px;font-size:.85rem;cursor:pointer;}
+    .controls select{background:#1f2d3a;color:#fff;}
+    .controls button{background:#1f2d3a;color:#fff;}
+    .controls button:hover{background:#16222d;}
+    nav a{color:var(--dark);text-decoration:none;font-weight:600;}
+    nav a.active{border-bottom:2px solid var(--dark);padding-bottom:3px;}
 
-    <style>
-      :root {
-        --brand-dark: #004aad;
-        --brand-dark-2: #003780;
-        --success: #28a745;
-        --danger: #dc3545;
-        --bg: #f6f8fb;
-        --panel: #fff;
-        --shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      }
+    /* Main Container */
+    .container{max-width:1000px;margin:0 auto;background:#fff;border-radius:10px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.1);padding:20px;height:calc(100vh - 120px);
+      display:flex;flex-direction:column;}
 
-      body {
-        font-family: "Segoe UI", Arial, sans-serif;
-        background: var(--bg);
-        margin: 0;
-      }
+    /* Insights */
+    .insights{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:18px;}
+    .insight-card{flex:1 1 30%;min-width:200px;border-radius:10px;padding:18px;text-align:center;color:#fff;}
+    .insight-total{background:var(--info);}
+    .insight-success{background:var(--success);}
+    .insight-fail{background:var(--danger);}
+    .insight-card h3{margin:0;font-size:.95rem;font-weight:600;}
+    .insight-card h2{margin:6px 0 0;font-size:1.4rem;font-weight:700;}
+    .success-rate{font-size:.85rem;margin-top:4px;font-weight:500;color:#eafbe4;}
 
-      header {
-        background: var(--brand-dark);
-        color: #fff;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 18px;
-      }
+    /* Controls */
+    .table-controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:10px;}
+    input#searchRequests{max-width:260px;padding:8px;border:1px solid #ddd;border-radius:8px;}
+    .btn-export{background:var(--info);color:#fff;padding:8px 12px;border:0;border-radius:8px;cursor:pointer;}
+    .btn-export:hover{background:#1f6392;}
 
-      header h1 {
-        font-size: 1.2rem;
-        margin: 0;
-      }
+    /* Scrollable Table */
+    .table-wrapper{flex:1;overflow-y:auto;border-top:1px solid #eee;border-bottom:1px solid #eee;}
+    table{width:100%;border-collapse:collapse;}
+    th,td{padding:10px 12px;border:1px solid #eee;}
+    th{background:#f2f2f2;font-weight:600;position:sticky;top:0;z-index:10;}
+    .btn-action{border:0;border-radius:6px;padding:6px 10px;cursor:pointer;color:#fff;}
+    .btn-view{background:var(--info);} .btn-view:hover{background:#1f6392;}
+    .btn-delete{background:var(--danger);} .btn-delete:hover{background:#c0392b;}
 
-      header button,
-      header select {
-        background: #1f2d3a;
-        color: #fff;
-        border: none;
-        border-radius: 6px;
-        padding: 6px 10px;
-      }
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;
+      align-items:center;justify-content:center;z-index:9999;}
+    .modal{background:#fff;border-radius:10px;max-width:440px;width:90%;padding:22px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.25);animation:fadeIn .25s ease;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
+    .modal h3{margin-top:0;}
+    .modal p strong{display:inline-block;width:130px;}
+    .modal-buttons{margin-top:18px;display:flex;justify-content:space-between;}
+    .modal-buttons button{flex:1;margin:0 4px;padding:8px 10px;border-radius:6px;border:0;
+      color:#fff;font-weight:600;cursor:pointer;}
+    .btn-close{background:#555;} .btn-close:hover{background:#333;}
+  </style>
+</head>
 
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        background: var(--panel);
-        box-shadow: var(--shadow);
-        border-radius: 8px;
-        overflow: hidden;
-      }
+<body>
+  <header>
+    <h1 data-i18n="header.title"><i class="fas fa-clipboard-check"></i> Verification Records</h1>
+    <div class="controls">
+      <select id="languageSwitcher">
+        <option value="en">🇬🇧 EN</option>
+        <option value="fr">🇫🇷 FR</option>
+        <option value="ja">🇯🇵 JP</option>
+      </select>
+      <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> <span data-i18n="header.logout">Logout</span></button>
+    </div>
+  </header>
 
-      th,
-      td {
-        padding: 12px 10px;
-        border-bottom: 1px solid #e5e5e5;
-        text-align: left;
-        font-size: 0.95rem;
-      }
+  <nav>
+    <a href="dashboard.html" data-i18n="menu.dashboard"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="verify.html" data-i18n="menu.verify"><i class="fas fa-search"></i> Verification</a>
+    <a href="add_license.html" data-i18n="menu.add"><i class="fas fa-id-card"></i> Add License</a>
+    <a href="users.html" data-i18n="menu.users"><i class="fas fa-users-cog"></i> Users</a>
+    <a href="verification_requests.html" class="active" data-i18n="menu.records"><i class="fas fa-inbox"></i> Records</a>
+    <a href="analytics.html" data-i18n="menu.analytics"><i class="fas fa-chart-bar"></i> Analytics</a>
+  </nav>
 
-      th {
-        background: #f0f3f8;
-      }
-
-      .container {
-        max-width: 1100px;
-        margin: 30px auto;
-        padding: 10px;
-      }
-
-      button.action {
-        border: none;
-        border-radius: 6px;
-        color: #fff;
-        padding: 6px 10px;
-        cursor: pointer;
-      }
-
-      .approve {
-        background: var(--success);
-      }
-
-      .reject {
-        background: var(--danger);
-      }
-
-      .approve:hover {
-        background: #1e7e34;
-      }
-
-      .reject:hover {
-        background: #c82333;
-      }
-
-      .status {
-        font-weight: 600;
-      }
-
-      .status.pending {
-        color: #f0ad4e;
-      }
-      .status.approved {
-        color: var(--success);
-      }
-      .status.rejected {
-        color: var(--danger);
-      }
-
-      footer {
-        text-align: center;
-        margin-top: 25px;
-        color: #777;
-      }
-    </style>
-  </head>
-
-  <body>
-    <header>
-      <h1><i class="fas fa-inbox"></i> Verification Requests</h1>
-      <div>
-        <select id="languageSwitcher">
-          <option value="en">🇬🇧 EN</option>
-          <option value="fr">🇫🇷 FR</option>
-          <option value="ja">🇯🇵 JP</option>
-        </select>
-        <button id="logoutBtn">
-          <i class="fas fa-sign-out-alt"></i> Logout
-        </button>
+  <main class="container">
+    <section>
+      <h2 data-i18n="insights.title"><i class="fas fa-chart-line"></i> Verification Insights</h2>
+      <div class="insights">
+        <div class="insight-card insight-total">
+          <h3 data-i18n="insights.total"><i class="fas fa-search"></i> Total:</h3>
+          <h2 id="totalVerifications">0</h2>
+        </div>
+        <div class="insight-card insight-success">
+          <h3 data-i18n="insights.success"><i class="fas fa-check-circle"></i> Successful:</h3>
+          <h2 id="successfulVerifications">0</h2>
+          <div class="success-rate" id="successRate" data-i18n="insights.rate">Success Rate: 0%</div>
+        </div>
+        <div class="insight-card insight-fail">
+          <h3 data-i18n="insights.fail"><i class="fas fa-times-circle"></i> Unsuccessful:</h3>
+          <h2 id="unsuccessfulVerifications">0</h2>
+        </div>
       </div>
-    </header>
+    </section>
 
-    <div class="container">
-      <table id="requestsTable">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Organization</th>
-            <th>Phone</th>
-            <th>Country</th>
-            <th>Purpose</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody">
-          <tr><td colspan="7" style="text-align:center;">Loading requests...</td></tr>
-        </tbody>
-      </table>
+    <div class="table-controls">
+      <input type="text" id="searchRequests" data-i18n="[placeholder]controls.search" placeholder="Search verifications...">
+      <button class="btn-export" id="exportBtn" data-i18n="controls.export">📥 Export</button>
     </div>
 
-    <footer>— GDLVS Administration —</footer>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th data-i18n="table.license">License #</th>
+            <th data-i18n="table.org">Organization</th>
+            <th data-i18n="table.purpose">Purpose</th>
+            <th data-i18n="table.country">Country</th>
+            <th data-i18n="table.result">Result</th>
+            <th data-i18n="table.email">Email</th>
+            <th data-i18n="table.date">Date</th>
+            <th data-i18n="table.action">Action</th>
+          </tr>
+        </thead>
+        <tbody id="requestsTable"><tr><td colspan="8">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </main>
 
-    <script>
-      /* === Firebase Init === */
-      const firebaseConfig = {
-        apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
-        authDomain: "gdlvs-2348e.firebaseapp.com",
-        projectId: "gdlvs-2348e",
-      };
-      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-      const db = firebase.firestore();
-      const auth = firebase.auth();
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <h3><i class="fas fa-file-alt"></i> <span data-i18n="modal.title">Verification Details</span></h3>
+      <div id="modalBody"></div>
+      <div class="modal-buttons">
+        <button id="deleteBtn" class="btn-delete" data-i18n="modal.delete">Delete</button>
+        <button id="closeBtn" class="btn-close" data-i18n="modal.close">Close</button>
+      </div>
+    </div>
+  </div>
 
-      /* === i18n === */
-      const i18nResources = {
-        en: { translation: { logout: "Logout" } },
-        fr: { translation: { logout: "Déconnexion" } },
-        ja: { translation: { logout: "ログアウト" } },
-      };
-      i18next
-        .use(i18nextBrowserLanguageDetector)
-        .init(
-          { resources: i18nResources, fallbackLng: "en" },
-          () => jqueryI18next.init(i18next, $, { useOptionsAttr: true })
-        );
-      document
-        .getElementById("languageSwitcher")
-        .addEventListener("change", function () {
-          i18next.changeLanguage(this.value, () => $("body").localize());
-        });
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { getFirestore, collection, onSnapshot, doc, deleteDoc, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-      /* === Logout === */
-      document
-        .getElementById("logoutBtn")
-        .addEventListener("click", () =>
-          auth.signOut().then(() => (window.location.href = "index.html"))
-        );
+    const firebaseConfig = {
+      apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
+      authDomain: "gdlvs-2348e.firebaseapp.com",
+      projectId: "gdlvs-2348e",
+      storageBucket: "gdlvs-2348e.appspot.com",
+      messagingSenderId: "358715790318",
+      appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
+    };
 
-      /* === Auth State and Role Restriction === */
-      auth.onAuthStateChanged(async (user) => {
-        if (!user) {
-          window.location.href = "index.html";
-          return;
-        }
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        // Get role from Firestore roles collection
-        const roleDoc = await db.collection("roles").doc(user.email).get();
-        const role = roleDoc.exists ? roleDoc.data().role : "verifier";
+    /* 🌐 Translation setup */
+    const resources = {
+      en:{translation:{
+        title:"GDLVS - Verification Records",
+        header:{title:"Verification Records",logout:"Logout"},
+        menu:{dashboard:"Dashboard",verify:"Verification",add:"Add License",users:"Users",records:"Records",analytics:"Analytics"},
+        insights:{title:"Verification Insights",total:"Total",success:"Successful",fail:"Unsuccessful",rate:"Success Rate"},
+        controls:{search:"Search verifications...",export:"📥 Export"},
+        table:{license:"License #",org:"Organization",purpose:"Purpose",country:"Country",result:"Result",email:"Email",date:"Date",action:"Action"},
+        modal:{title:"Verification Details",delete:"Delete",close:"Close"}
+      }},
+      fr:{translation:{
+        title:"GDLVS - Enregistrements de Vérification",
+        header:{title:"Enregistrements de Vérification",logout:"Déconnexion"},
+        menu:{dashboard:"Tableau de Bord",verify:"Vérification",add:"Ajouter un Permis",users:"Utilisateurs",records:"Dossiers",analytics:"Analytique"},
+        insights:{title:"Aperçu des Vérifications",total:"Total",success:"Réussies",fail:"Échouées",rate:"Taux de Réussite"},
+        controls:{search:"Rechercher des vérifications...",export:"📥 Exporter"},
+        table:{license:"Numéro de Permis",org:"Organisation",purpose:"But",country:"Pays",result:"Résultat",email:"Email",date:"Date",action:"Action"},
+        modal:{title:"Détails de la Vérification",delete:"Supprimer",close:"Fermer"}
+      }},
+      ja:{translation:{
+        title:"GDLVS - 検証記録",
+        header:{title:"検証記録",logout:"ログアウト"},
+        menu:{dashboard:"ダッシュボード",verify:"検証",add:"免許を追加",users:"ユーザー",records:"記録",analytics:"分析"},
+        insights:{title:"検証の概要",total:"合計",success:"成功",fail:"失敗",rate:"成功率"},
+        controls:{search:"検証を検索...",export:"📥 エクスポート"},
+        table:{license:"免許番号",org:"組織",purpose:"目的",country:"国",result:"結果",email:"メール",date:"日付",action:"操作"},
+        modal:{title:"検証の詳細",delete:"削除",close:"閉じる"}
+      }}
+    };
 
-        if (role === "admin") {
-          loadRequests();
-        } else {
-          // Redirect verifiers safely without flashing loop
-          window.location.replace("verify.html");
-        }
+    const savedLang = localStorage.getItem("gdlvs_lang") || "en";
+    i18next.use(i18nextBrowserLanguageDetector).init({
+      resources,fallbackLng:"en",lng:savedLang
+    },()=>{
+      jqueryI18next.init(i18next,$,{useOptionsAttr:true});
+      $("body").localize();
+      document.getElementById("languageSwitcher").value=i18next.language;
+    });
+
+    document.getElementById("languageSwitcher").addEventListener("change",function(){
+      const lang=this.value;
+      localStorage.setItem("gdlvs_lang",lang);
+      i18next.changeLanguage(lang,()=>$("body").localize());
+    });
+
+    /* 🔥 Firestore logic */
+    const tbody=document.getElementById("requestsTable");
+    const searchInput=document.getElementById("searchRequests");
+    let allDocs=[];
+
+    const qVer=query(collection(db,"verifications"),orderBy("verifiedAt","desc"));
+    onSnapshot(qVer,snap=>{
+      allDocs=[];
+      snap.forEach(d=>allDocs.push({id:d.id,...d.data()}));
+      renderTable(allDocs);
+      renderInsights(allDocs);
+    });
+
+    function renderInsights(docs){
+      const total=docs.length;
+      let success=0,fail=0;
+      docs.forEach(d=>{
+        const res=(d.result||"").toLowerCase();
+        if(res.includes("not found")) fail++;
+        else if(res.includes("found")) success++;
       });
+      const rate=total>0?((success/total)*100).toFixed(1):0;
+      document.getElementById("totalVerifications").textContent=total;
+      document.getElementById("successfulVerifications").textContent=success;
+      document.getElementById("unsuccessfulVerifications").textContent=fail;
+      document.getElementById("successRate").textContent=`${i18next.t('insights.rate')}: ${rate}%`;
+    }
 
-      /* === Load Verification Requests === */
-      async function loadRequests() {
-        const tbody = document.getElementById("tableBody");
-        tbody.innerHTML = "";
-        const snapshot = await db
-          .collection("requests")
-          .orderBy("requestedAt", "desc")
-          .get();
-
-        if (snapshot.empty) {
-          tbody.innerHTML =
-            "<tr><td colspan='7' style='text-align:center;'>No requests found</td></tr>";
-          return;
-        }
-
-        snapshot.forEach((doc) => {
-          const d = doc.data();
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${d.fullName || ""}</td>
-            <td>${d.email || ""}</td>
-            <td>${d.organization || ""}</td>
-            <td>${d.phone || ""}</td>
-            <td>${d.country || ""}</td>
-            <td>${d.purpose || ""}</td>
-            <td class="status ${d.status || "pending"}">${d.status || "pending"}</td>
-          `;
-          tbody.appendChild(tr);
-        });
+    function renderTable(docs){
+      tbody.innerHTML="";
+      if(docs.length===0){
+        tbody.innerHTML=`<tr><td colspan="8">${i18next.t('controls.search')}</td></tr>`;
+        return;
       }
-    </script>
-  </body>
-</html>
+      docs.forEach(d=>{
+        const tr=document.createElement("tr");
+        tr.innerHTML=`
+          <td>${d.licenseNumber||""}</td>
+          <td>${d.requestingOrg||""}</td>
+          <td>${d.purpose||""}</td>
+          <td>${d.country||""}</td>
+          <td>${d.result||""}</td>
+          <td>${d.email||""}</td>
+          <td>${d.verifiedAt?.toDate?d.verifiedAt.toDate().toLocaleString():""}</td>
+          <td><button class="btn-action btn-view" data-id="${d.id}"><i class="fas fa-eye"></i></button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    /* 🔍 Search */
+    searchInput.addEventListener("input",e=>{
+      const kw=e.target.value.toLowerCase();
+      const filtered=allDocs.filter(d=>Object.values(d).some(v=>String(v).toLowerCase().includes(kw)));
+      renderTable(filtered);
+    });
+
+    /* 📥 Export */
+    document.getElementById("exportBtn").addEventListener("click",()=>{
+      if(allDocs.length===0) return alert("No data to export.");
+      const headers=["License #","Organization","Purpose","Country","Result","Email","Date"];
+      const rows=allDocs.map(d=>[d.licenseNumber||"",d.requestingOrg||"",d.purpose||"",d.country||"",d.result||"",d.email||"",d.verifiedAt?.toDate?d.verifiedAt.toDate().toLocaleString():""]);
+      const
