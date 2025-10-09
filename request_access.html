@@ -1,124 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>GDLVS - Request Access</title>
+<meta charset="UTF-8" />
+<title>GDLVS – Request Access</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-  <!-- Styles -->
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<!-- ===== Embedded Styles (from style.css) ===== -->
+<style>
+.background-image {
+  position: fixed;
+  inset: 0;
+  background: url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg')
+    no-repeat center center fixed;
+  background-size: cover;
+  z-index: -1;
+  filter: brightness(0.95);
+}
+:root {
+  --brand-dark:#2a3f54;--brand-dark-2:#1e2d3c;--text:#333;--muted:#666;
+  --panel-bg:#fff;--card-shadow:0 2px 6px rgba(0,0,0,0.1);
+  --success:#27ae60;--danger:#e74c3c;--warn:#f1c40f;--info:#2980b9;
+}
+*{box-sizing:border-box} html,body{height:100%}
+body{font-family:Arial,sans-serif;margin:0;color:var(--text);background:#f6f8fb}
+.container{
+  max-width:600px;margin:60px auto;padding:24px;background:var(--panel-bg);
+  border-radius:10px;box-shadow:var(--card-shadow);
+}
+h2{text-align:center;color:var(--brand-dark)}
+input,select,textarea,button{
+  width:100%;padding:10px;margin:8px 0;border:1px solid #dcdcdc;
+  border-radius:8px;font-size:.98rem;background:#fff;
+}
+textarea{resize:vertical;min-height:100px}
+button{background:var(--brand-dark);color:#fff;border:none;cursor:pointer;transition:background .2s}
+button:hover{background:var(--brand-dark-2)}
+footer{text-align:center;margin:20px 0}
+#languageSwitcher{width:auto;padding:6px 10px;border-radius:8px}
+.muted{color:var(--muted);font-size:.95rem}
+#msg{margin-top:12px;text-align:center;font-weight:bold}
+</style>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<!-- ===== Firebase SDKs ===== -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-  <!-- i18n + jQuery -->
-  <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
-  <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
-  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
-  <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
+<!-- ===== EmailJS SDK ===== -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
-  <!-- EmailJS SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-  <script>
-    (function(){
-      // ✅ Initialize EmailJS with your verified public key
-      emailjs.init("TfmaZEvxtz2MNUb70");
-    })();
-  </script>
-
-  <!-- Firebase Config -->
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
-      authDomain: "gdlvs-2348e.firebaseapp.com",
-      projectId: "gdlvs-2348e",
-      storageBucket: "gdlvs-2348e.appspot.com",
-      messagingSenderId: "358715790318",
-      appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
-    };
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  </script>
+<!-- ===== i18n + jQuery ===== -->
+<script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
+<script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
+<script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 </head>
 
 <body>
-  <div class="background-image"></div>
+<div class="background-image"></div>
 
-  <div class="container">
-    <h2><i class="fas fa-user-plus"></i> <span data-i18n="requestAccess">Request Access</span></h2>
+<div class="container">
+  <h2><i class="fas fa-user-plus"></i> <span data-i18n="requestAccess">Request Access</span></h2>
 
-    <form id="requestForm" onsubmit="submitAccessRequest(event)">
-      <input type="text" id="requestFullName" required placeholder="Full Name" />
-      <input type="email" id="requestEmail" required placeholder="Email" />
-      <input type="text" id="organization" required placeholder="Organization / Agency" />
-      <input type="tel" id="phone" required placeholder="Phone Number" />
-      <textarea id="purpose" required rows="4" placeholder="Purpose of access (e.g., license verification)"></textarea>
+  <form id="requestForm">
+    <input type="text" id="requestFullName" required placeholder="Full Name" data-i18n="[placeholder]fullName">
+    <input type="email" id="requestEmail" required placeholder="Email" data-i18n="[placeholder]email">
+    <input type="text" id="organization" required placeholder="Organization / Agency" data-i18n="[placeholder]organization">
+    <input type="tel" id="phone" required placeholder="Phone Number" data-i18n="[placeholder]phone">
+    <textarea id="purpose" required rows="4" placeholder="Purpose of access (e.g., license verification)" data-i18n="[placeholder]purpose"></textarea>
 
-      <button type="submit"><i class="fas fa-paper-plane"></i> Submit Request</button>
-    </form>
+    <button type="submit"><i class="fas fa-paper-plane"></i> <span data-i18n="submitRequest">Submit Request</span></button>
+  </form>
 
-    <div id="msg" style="margin-top:10px; font-weight:bold;"></div>
+  <div id="msg"></div>
+  <p class="muted" data-i18n="reviewMsg">Your request will be reviewed by the administrator.</p>
+  <p class="muted" data-i18n="alreadyHave">Already have an account? <a href="index.html" data-i18n="loginHere">Login here</a></p>
+</div>
 
-    <p class="muted">Your request will be reviewed by the administrator.</p>
-    <p class="muted">Already have an account? <a href="index.html">Login here</a></p>
-  </div>
+<footer>
+  <label for="languageSwitcher"><i class="fas fa-globe"></i></label>
+  <select id="languageSwitcher">
+    <option value="en">🇬🇧 English</option>
+    <option value="fr">🇫🇷 Français</option>
+    <option value="ja">🇯🇵 日本語</option>
+  </select>
+</footer>
 
-  <footer>
-    <label for="languageSwitcher"><i class="fas fa-globe"></i></label>
-    <select id="languageSwitcher">
-      <option value="en">🇬🇧 English</option>
-      <option value="fr">🇫🇷 Français</option>
-      <option value="ja">🇯🇵 日本語</option>
-    </select>
-  </footer>
+<!-- ===== Inline JavaScript (from script.js + logic) ===== -->
+<script>
+/* --- Firebase --- */
+const firebaseConfig={
+  apiKey:"AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
+  authDomain:"gdlvs-2348e.firebaseapp.com",
+  projectId:"gdlvs-2348e",
+  storageBucket:"gdlvs-2348e.appspot.com",
+  messagingSenderId:"358715790318",
+  appId:"1:358715790318:web:9d4c85e0f71222cf1b34ff"
+};
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore();
 
-  <!-- 🔹 Inline Script to Handle Access Request -->
-  <script>
-    async function submitAccessRequest(event) {
-      event.preventDefault();
+/* --- EmailJS --- */
+(function(){ emailjs.init("TfmaZEvxtz2MNUb70"); })();
 
-      const fullName = document.getElementById("requestFullName").value.trim();
-      const email = document.getElementById("requestEmail").value.trim();
-      const organization = document.getElementById("organization").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      const purpose = document.getElementById("purpose").value.trim();
-      const msgBox = document.getElementById("msg");
+/* --- Translations --- */
+const resources={
+  en:{translation:{
+    requestAccess:"Request Access", fullName:"Full Name", email:"Email",
+    organization:"Organization / Agency", phone:"Phone Number",
+    purpose:"Purpose of access (e.g., license verification)",
+    submitRequest:"Submit Request", reviewMsg:"Your request will be reviewed by the administrator.",
+    alreadyHave:"Already have an account?", loginHere:"Login here",
+    successMsg:"✅ Your request has been submitted successfully! You'll receive a confirmation email within 72 hours.",
+    errorMsg:"⚠️ Failed to submit request. Please try again later.",
+    submitting:"⏳ Submitting your request..."
+  }},
+  fr:{translation:{
+    requestAccess:"Demande d'accès", fullName:"Nom complet", email:"Courriel",
+    organization:"Organisation / Agence", phone:"Numéro de téléphone",
+    purpose:"Motif de la demande (ex : vérification de permis)",
+    submitRequest:"Envoyer la demande", reviewMsg:"Votre demande sera examinée par l'administrateur.",
+    alreadyHave:"Vous avez déjà un compte ?", loginHere:"Connectez-vous ici",
+    successMsg:"✅ Votre demande a été soumise avec succès ! Vous recevrez un e-mail de confirmation sous 72 heures.",
+    errorMsg:"⚠️ Échec de l'envoi de la demande. Veuillez réessayer plus tard.",
+    submitting:"⏳ Envoi de votre demande..."
+  }},
+  ja:{translation:{
+    requestAccess:"アクセス申請", fullName:"氏名", email:"メールアドレス",
+    organization:"組織 / 機関", phone:"電話番号",
+    purpose:"アクセス目的（例：免許証の照合）",
+    submitRequest:"申請を送信", reviewMsg:"申請は管理者によって審査されます。",
+    alreadyHave:"すでにアカウントをお持ちですか？", loginHere:"ログインはこちら",
+    successMsg:"✅ 申請が正常に送信されました！72時間以内に確認メールをお送りします。",
+    errorMsg:"⚠️ 申請の送信に失敗しました。後でもう一度お試しください。",
+    submitting:"⏳ 申請を送信中..."
+  }}
+};
+i18next.use(i18nextBrowserLanguageDetector).init({resources,fallbackLng:"en"},()=>{
+  if(typeof jqueryI18next!=="undefined"){jqueryI18next.init(i18next,$,{useOptionsAttr:true});$("body").localize();}
+});
+document.getElementById("languageSwitcher").addEventListener("change",function(){
+  i18next.changeLanguage(this.value,()=>$("body").localize());
+});
 
-      msgBox.innerHTML = "⏳ Submitting your request...";
-      msgBox.style.color = "#004aad";
+/* --- Submit Request --- */
+document.getElementById("requestForm").addEventListener("submit",async(e)=>{
+  e.preventDefault();
+  const fullName=document.getElementById("requestFullName").value.trim();
+  const email=document.getElementById("requestEmail").value.trim();
+  const organization=document.getElementById("organization").value.trim();
+  const phone=document.getElementById("phone").value.trim();
+  const purpose=document.getElementById("purpose").value.trim();
+  const msg=document.getElementById("msg");
 
-      try {
-        // ✅ 1. Save to Firestore
-        await firebase.firestore().collection("requests").add({
-          fullName,
-          email,
-          organization,
-          phone,
-          purpose,
-          status: "pending",
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        });
+  msg.textContent=i18next.t("submitting");
+  msg.style.color="#004aad";
 
-        // ✅ 2. Send email via EmailJS
-        await emailjs.send("service_ddq3kka", "template_inl3jsv", {
-          name: fullName,
-          email: email,
-          organization: organization,
-          phone: phone,
-          purpose: purpose
-        });
+  try{
+    await db.collection("requests").add({
+      fullName,email,organization,phone,purpose,status:"pending",
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
 
-        // ✅ 3. Success message
-        msgBox.innerHTML = "✅ Your request has been submitted successfully! You'll receive a confirmation email within 72 hours.";
-        msgBox.style.color = "green";
-        document.getElementById("requestForm").reset();
+    await emailjs.send("service_ddq3kka","template_inl3jsv",{name:fullName,email,organization,phone,purpose});
 
-      } catch (error) {
-        console.error("❌ Error submitting request:", error);
-        msgBox.innerHTML = "⚠️ Failed to submit request. Please try again later.";
-        msgBox.style.color = "red";
-      }
-    }
-  </script>
+    msg.textContent=i18next.t("successMsg");
+    msg.style.color="green";
+    document.getElementById("requestForm").reset();
+  }catch(err){
+    console.error("❌ Error submitting request:",err);
+    msg.textContent=i18next.t("errorMsg");
+    msg.style.color="red";
+  }
+});
+</script>
 </body>
 </html>
