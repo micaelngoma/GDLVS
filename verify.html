@@ -7,120 +7,49 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     :root {
-      --brand-dark: #2a3f54;
-      --brand-dark-2: #1e2d3c;
-      --text: #333;
-      --bg: #f6f8fb;
-      --panel-bg: #fff;
-      --success: #27ae60;
-      --danger: #e74c3c;
+      --brand-dark:#2a3f54;
+      --brand-dark-2:#1e2d3c;
+      --text:#333;
+      --bg:#f6f8fb;
+      --panel-bg:#fff;
+      --success:#27ae60;
+      --danger:#e74c3c;
     }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+    *{box-sizing:border-box}
+    body{margin:0;font-family:"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text);}
+    header{
+      background:var(--brand-dark);color:#fff;padding:8px 16px;
+      display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;
+      border-bottom:2px solid #1b2a38;
     }
-    header {
-      background: var(--brand-dark);
-      color: #fff;
-      padding: 8px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      border-bottom: 2px solid #1b2a38;
+    header h1{margin:0;font-size:1.1rem;display:flex;align-items:center;gap:6px;}
+    .header-actions{display:flex;align-items:center;gap:10px;}
+    header button{background:#1f2d3a;color:#fff;border:none;padding:5px 9px;border-radius:6px;font-size:.8rem;cursor:pointer;display:flex;align-items:center;gap:4px;}
+    header button:hover{background:#16222d;}
+    #languageSwitcher{padding:4px 6px;border-radius:5px;font-size:.8rem;background:#1f2d3a;color:#fff;border:none;cursor:pointer;}
+    nav{
+      display:none; /* Hide nav until role verified */
+      background:#fff;border-bottom:1px solid #eaeaea;padding:10px 20px;
+      flex-wrap:wrap;gap:15px;
     }
-    header h1 {
-      margin: 0;
-      font-size: 1.1rem;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+    nav a{color:var(--brand-dark);text-decoration:none;font-weight:600;transition:color .2s;}
+    nav a.active{border-bottom:2px solid var(--brand-dark);padding-bottom:4px;}
+    .container{
+      max-width:980px;margin:22px auto 40px;background:var(--panel-bg);
+      border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.1);padding:24px;
     }
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    label{font-weight:600;margin-top:8px;display:block;}
+    input,textarea,button,select{
+      width:100%;padding:10px;margin:8px 0;border:1px solid #dcdcdc;
+      border-radius:8px;font-size:.95rem;
     }
-    header button {
-      background: #1f2d3a;
-      color: #fff;
-      border: none;
-      padding: 5px 9px;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    header button:hover { background: #16222d; }
-    #languageSwitcher {
-      padding: 4px 6px;
-      border-radius: 5px;
-      font-size: 0.8rem;
-      background: #1f2d3a;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-    }
-    nav {
-      background: #fff;
-      border-bottom: 1px solid #eaeaea;
-      padding: 10px 20px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
-    nav a {
-      color: var(--brand-dark);
-      text-decoration: none;
-      font-weight: 600;
-      transition: color 0.2s;
-    }
-    nav a.active {
-      border-bottom: 2px solid var(--brand-dark);
-      padding-bottom: 4px;
-    }
-    .container {
-      max-width: 980px;
-      margin: 22px auto 40px;
-      background: var(--panel-bg);
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      padding: 24px;
-    }
-    label { font-weight: 600; margin-top: 8px; display: block; }
-    input, textarea, button, select {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border: 1px solid #dcdcdc;
-      border-radius: 8px;
-      font-size: 0.95rem;
-    }
-    textarea { min-height: 110px; resize: vertical; }
-    button {
-      background: var(--brand-dark);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    button:hover { background: var(--brand-dark-2); }
-    .panel {
-      margin-top: 20px;
-      padding: 18px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      background: #fff;
-    }
-    #verifyResult h3 { margin: 0 0 8px; }
-    #verifyResult .ok { color: var(--success); font-weight: 700; }
-    #verifyResult .bad { color: var(--danger); font-weight: 700; }
+    textarea{min-height:110px;resize:vertical;}
+    button{background:var(--brand-dark);color:#fff;border:none;border-radius:8px;cursor:pointer;transition:background .2s;}
+    button:hover{background:var(--brand-dark-2);}
+    .panel{margin-top:20px;padding:18px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.08);background:#fff;}
+    #verifyResult h3{margin:0 0 8px;}
+    #verifyResult .ok{color:var(--success);font-weight:700;}
+    #verifyResult .bad{color:var(--danger);font-weight:700;}
   </style>
 
   <!-- ===== i18n + jQuery ===== -->
@@ -148,7 +77,6 @@
       jqueryI18next.init(i18next,$,{useOptionsAttr:true});
       $("body").localize();
     });
-
     document.getElementById("languageSwitcher")?.addEventListener("change",e=>{
       i18next.changeLanguage(e.target.value,()=>$("body").localize());
     });
@@ -156,28 +84,28 @@
     // 🔒 Auth & Role Control
     onAuthStateChanged(auth, async (user)=>{
       if(!user) return location.href="index.html";
-      try {
-        const snap = await getDoc(doc(db,"roles",user.email));
-        const role = snap.exists()?snap.data().role:"verifier";
-        const navLinks = document.querySelectorAll("nav a");
-
-        if(role === "verifier"){
+      const nav=document.querySelector("nav");
+      try{
+        const snap=await getDoc(doc(db,"roles",user.email));
+        const role=snap.exists()?snap.data().role:"verifier";
+        const navLinks=document.querySelectorAll("nav a");
+        if(role==="verifier"){
           navLinks.forEach(link=>{
-            const href = link.getAttribute("href");
-            if(href !== "verify.html"){ link.remove(); }
+            if(link.getAttribute("href")!=="verify.html"){link.remove();}
           });
-        } else if(role === "admin"){
-          navLinks.forEach(link=>link.style.display="inline-block");
         }
-      } catch(err){
+        // Show nav after adjustment
+        nav.style.display="flex";
+      }catch(err){
         console.error("Role check failed:",err.message);
+        nav.style.display="flex";
       }
     });
 
-    window.signOutUser = ()=>signOut(auth).then(()=>location.href="index.html");
+    window.signOutUser=()=>signOut(auth).then(()=>location.href="index.html");
 
     // 🔍 Verify License
-    window.verifyLicense = async (e)=>{
+    window.verifyLicense=async(e)=>{
       e.preventDefault();
       const licenseNumber=document.getElementById("verifyLicenseNumber").value.trim();
       const org=document.getElementById("verifyOrg").value.trim();
@@ -185,21 +113,17 @@
       const purpose=document.getElementById("verifyPurpose").value.trim();
       const resultEl=document.getElementById("verifyResult");
       const nextContainer=document.getElementById("verifyNextContainer");
-
-      if(!licenseNumber){ alert("⚠️ License number required"); return; }
-
+      if(!licenseNumber){alert("⚠️ License number required");return;}
       try{
         const snap=await getDoc(doc(db,"licenses",licenseNumber));
         const exists=snap.exists();
         const d=exists?snap.data():{};
         const resultText=exists?"License found":"License not found";
-
         await addDoc(collection(db,"verifications"),{
           licenseNumber,requestingOrg:org||"",country:country||"",purpose:purpose||"",
           email:auth.currentUser?.email||"",result:resultText,
           verifiedAt:serverTimestamp(),verifiedBy:auth.currentUser?.uid||""
         });
-
         resultEl.style.display="block";
         resultEl.innerHTML=`
           <h3 class="${exists?'ok':'bad'}">${exists?'✅ License Found':'❌ License Not Found'}</h3>
@@ -208,40 +132,33 @@
             <p><strong>Class:</strong> ${d.class||""}</p>
             <p><strong>Issue:</strong> ${d.issueDate||""}</p>
             <p><strong>Expiry:</strong> ${d.expiryDate||""}</p>
-            <p><strong>Status:</strong> ${d.status||""}</p>
-          `:""}
+            <p><strong>Status:</strong> ${d.status||""}</p>`:""}
           <hr>
           <p><strong>Organization:</strong> ${org}</p>
           <p><strong>Country:</strong> ${country}</p>
-          <p><strong>Purpose:</strong> ${purpose}</p>
-        `;
+          <p><strong>Purpose:</strong> ${purpose}</p>`;
         nextContainer.style.display="block";
         document.getElementById("verifyNextBtn").onclick=()=>{
           document.getElementById("verifyForm").reset();
           resultEl.style.display="none";
           nextContainer.style.display="none";
         };
-      }catch(err){
-        console.error(err);
-        alert("❌ "+err.message);
-      }
+      }catch(err){console.error(err);alert("❌ "+err.message);}
     };
   </script>
 </head>
-
 <body>
   <header>
     <h1><i class="fas fa-search"></i> <span data-i18n="verificationPortal">Verification</span></h1>
     <div class="header-actions">
       <select id="languageSwitcher">
-        <option value="en">🇬🇧 EN</option>
-        <option value="fr">🇫🇷 FR</option>
-        <option value="ja">🇯🇵 JP</option>
+        <option value="en">🇬🇧 EN</option><option value="fr">🇫🇷 FR</option><option value="ja">🇯🇵 JP</option>
       </select>
       <button onclick="signOutUser()"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></button>
     </div>
   </header>
 
+  <!-- Hidden until role verified -->
   <nav>
     <a href="dashboard.html"><i class="fas fa-home"></i> <span data-i18n="dashboard">Dashboard</span></a>
     <a href="verify.html" class="active"><i class="fas fa-search"></i> <span data-i18n="verificationPortal">Verification</span></a>
@@ -259,13 +176,33 @@
         <label data-i18n="organization">Requesting Organization</label>
         <input type="text" id="verifyOrg" />
         <label data-i18n="country">Country</label>
-        <input type="text" id="verifyCountry" />
+        <select id="verifyCountry" required>
+          <option value="">-- Select Country --</option>
+          <option>Gabon</option><option>United States</option><option>Canada</option><option>France</option>
+          <option>Japan</option><option>Germany</option><option>Brazil</option><option>China</option>
+          <option>India</option><option>South Africa</option><option>United Kingdom</option><option>Australia</option>
+          <option>Mexico</option><option>Nigeria</option><option>Italy</option><option>Spain</option>
+          <option>Russia</option><option>South Korea</option><option>Argentina</option><option>Saudi Arabia</option>
+          <option>Singapore</option><option>Malaysia</option><option>Sweden</option><option>Switzerland</option>
+          <option>Portugal</option><option>Netherlands</option><option>Belgium</option><option>Kenya</option>
+          <option>Egypt</option><option>Morocco</option><option>Indonesia</option><option>Philippines</option>
+          <option>Thailand</option><option>Vietnam</option><option>Norway</option><option>Finland</option>
+          <option>Denmark</option><option>Poland</option><option>Turkey</option><option>United Arab Emirates</option>
+          <option>Qatar</option><option>Israel</option><option>Greece</option><option>Chile</option>
+          <option>Peru</option><option>Colombia</option><option>New Zealand</option><option>Ireland</option>
+          <option>Austria</option><option>Czech Republic</option><option>Romania</option><option>Ukraine</option>
+          <option>Ethiopia</option><option>Tanzania</option><option>Uganda</option><option>Ghana</option>
+          <option>Cameroon</option><option>Congo</option><option>Senegal</option><option>Ivory Coast</option>
+          <option>Sudan</option><option>Angola</option><option>Zambia</option><option>Zimbabwe</option>
+          <option>Mozambique</option><option>Madagascar</option><option>Rwanda</option><option>Burundi</option>
+          <option>Botswana</option><option>Namibia</option><option>Seychelles</option><option>Mauritius</option>
+        </select>
         <label data-i18n="purpose">Purpose of Verification</label>
         <textarea id="verifyPurpose"></textarea>
         <button type="submit"><i class="fas fa-search"></i> <span data-i18n="verify">Verify</span></button>
       </form>
       <div id="verifyResult" class="panel" style="display:none;"></div>
-      <div id="verifyNextContainer" style="display:none; margin-top:15px;">
+      <div id="verifyNextContainer" style="display:none;margin-top:15px;">
         <button type="button" id="verifyNextBtn" class="inline"><i class="fas fa-plus"></i> Verify Next Driver License</button>
       </div>
     </div>
