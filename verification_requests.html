@@ -2,14 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>GDLVS – Verification Requests</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GDLVS - Verification Requests</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
 
-    <!-- Firebase -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -19,9 +18,6 @@
     <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
     <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
-
-    <!-- EmailJS -->
-    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
     <style>
       :root {
@@ -54,14 +50,13 @@
         margin: 0;
       }
 
-      header select,
-      header button {
+      header button,
+      header select {
         background: #1f2d3a;
         color: #fff;
         border: none;
         border-radius: 6px;
         padding: 6px 10px;
-        margin-left: 8px;
       }
 
       table {
@@ -146,7 +141,9 @@
           <option value="fr">🇫🇷 FR</option>
           <option value="ja">🇯🇵 JP</option>
         </select>
-        <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        <button id="logoutBtn">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
       </div>
     </header>
 
@@ -161,10 +158,11 @@
             <th>Country</th>
             <th>Purpose</th>
             <th>Status</th>
-            <th>Action</th>
           </tr>
         </thead>
-        <tbody id="tableBody"></tbody>
+        <tbody id="tableBody">
+          <tr><td colspan="7" style="text-align:center;">Loading requests...</td></tr>
+        </tbody>
       </table>
     </div>
 
@@ -181,51 +179,66 @@
       const db = firebase.firestore();
       const auth = firebase.auth();
 
-      /* === EmailJS Init === */
-      emailjs.init("TfmaZEvxtz2MNUb70");
-      const ADMIN_EMAIL = "m.ngoma1988@gmail.com";
-
       /* === i18n === */
       const i18nResources = {
         en: { translation: { logout: "Logout" } },
         fr: { translation: { logout: "Déconnexion" } },
         ja: { translation: { logout: "ログアウト" } },
       };
-      i18next.use(i18nextBrowserLanguageDetector).init(
-        { resources: i18nResources, fallbackLng: "en" },
-        () => jqueryI18next.init(i18next, $, { useOptionsAttr: true })
-      );
+      i18next
+        .use(i18nextBrowserLanguageDetector)
+        .init(
+          { resources: i18nResources, fallbackLng: "en" },
+          () => jqueryI18next.init(i18next, $, { useOptionsAttr: true })
+        );
       document
         .getElementById("languageSwitcher")
         .addEventListener("change", function () {
           i18next.changeLanguage(this.value, () => $("body").localize());
         });
 
-      /* === Auth + Role Check === */
+      /* === Logout === */
+      document
+        .getElementById("logoutBtn")
+        .addEventListener("click", () =>
+          auth.signOut().then(() => (window.location.href = "index.html"))
+        );
+
+      /* === Auth State and Role Restriction === */
       auth.onAuthStateChanged(async (user) => {
         if (!user) {
           window.location.href = "index.html";
           return;
         }
+
+        // Get role from Firestore roles collection
         const roleDoc = await db.collection("roles").doc(user.email).get();
-        if (!roleDoc.exists || roleDoc.data().role !== "admin") {
-          alert("⛔ Access restricted to administrators only.");
-          window.location.href = "verify.html";
-          return;
+        const role = roleDoc.exists ? roleDoc.data().role : "verifier";
+
+        if (role === "admin") {
+          loadRequests();
+        } else {
+          // Redirect verifiers safely without flashing loop
+          window.location.replace("verify.html");
         }
-        loadRequests();
       });
 
-      document
-        .getElementById("logoutBtn")
-        .addEventListener("click", () => auth.signOut().then(() => (window.location.href = "index.html")));
-
-      /* === Load Requests === */
+      /* === Load Verification Requests === */
       async function loadRequests() {
         const tbody = document.getElementById("tableBody");
         tbody.innerHTML = "";
-        const snap = await db.collection("requests").orderBy("requestedAt", "desc").get();
-        snap.forEach((doc) => {
+        const snapshot = await db
+          .collection("requests")
+          .orderBy("requestedAt", "desc")
+          .get();
+
+        if (snapshot.empty) {
+          tbody.innerHTML =
+            "<tr><td colspan='7' style='text-align:center;'>No requests found</td></tr>";
+          return;
+        }
+
+        snapshot.forEach((doc) => {
           const d = doc.data();
           const tr = document.createElement("tr");
           tr.innerHTML = `
@@ -235,50 +248,11 @@
             <td>${d.phone || ""}</td>
             <td>${d.country || ""}</td>
             <td>${d.purpose || ""}</td>
-            <td class="status ${d.status}">${d.status}</td>
-            <td>
-              <button class="action approve" onclick="updateStatus('${doc.id}','approved','${d.email}','${d.fullName}')">Approve</button>
-              <button class="action reject" onclick="updateStatus('${doc.id}','rejected','${d.email}','${d.fullName}')">Reject</button>
-            </td>
+            <td class="status ${d.status || "pending"}">${d.status || "pending"}</td>
           `;
           tbody.appendChild(tr);
         });
       }
-
-      /* === Update Status + Email Notification === */
-      async function updateStatus(docId, status, email, name) {
-        try {
-          await db.collection("requests").doc(docId).update({ status });
-          await emailjs.send("service_ddq3kka", "template_inl3jsv", {
-            name,
-            email,
-            status,
-            organization: "",
-            phone: "",
-            purpose: "",
-            message:
-              status === "approved"
-                ? "✅ Your GDLVS access request has been approved. Your account will be created within 72 hours."
-                : "❌ Your GDLVS access request has been rejected. Please contact the administrator for details.",
-          });
-          await emailjs.send("service_ddq3kka", "template_inl3jsv", {
-            name: "Admin Copy – " + name,
-            email: ADMIN_EMAIL,
-            status,
-            organization: "",
-            phone: "",
-            purpose: "",
-            message: `Admin copy – Request for ${name} has been ${status}.`,
-          });
-          alert(`✅ Request ${status}! Notification sent.`);
-          loadRequests();
-        } catch (err) {
-          console.error(err);
-          alert("❌ Error: " + err.message);
-        }
-      }
-
-      window.updateStatus = updateStatus;
     </script>
   </body>
 </html>
