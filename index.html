@@ -31,26 +31,77 @@
       --blue:#007bff;
       --text:#333;
       --muted:#666;
-      --shadow:0 2px 6px rgba(0,0,0,.1);
+      --shadow:0 2px 6px rgba(0,0,0,.2);
       --success:#27ae60;
       --danger:#e74c3c;
     }
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:Arial,sans-serif;background:#f6f8fb;color:var(--text);}
-    .background-image{position:fixed;inset:0;background:url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') no-repeat center center fixed;background-size:cover;z-index:-1;filter:brightness(0.9);}
-    .welcome-section{max-width:960px;margin:50px auto 20px;background:rgba(255,255,255,.95);padding:24px 20px;text-align:center;border-radius:10px;box-shadow:var(--shadow);}
+    body{
+      font-family:Arial,sans-serif;
+      background:#f6f8fb;
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+    }
+
+    /* === Background Image === */
+    .background-image{
+      position:fixed;
+      inset:0;
+      background:url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') no-repeat center center fixed;
+      background-size:cover;
+      z-index:-1;
+      filter:brightness(0.9);
+    }
+
+    /* === Unified Box Styling === */
+    .welcome-section,
+    .login-container,
+    .container {
+      width:90%;
+      max-width:980px;
+      margin:40px auto 20px;
+      padding:30px 28px;
+      background:rgba(255,255,255,0.88); /* semi-transparent for background blend */
+      border-radius:12px;
+      box-shadow:var(--shadow);
+      text-align:center;
+      transition:all .3s ease;
+    }
+
+    /* === Welcome Section === */
     .car-hero{font-size:72px;color:var(--brand-dark);}
     .welcome-section h1{color:var(--brand-dark);margin:10px 0;}
     .welcome-text{max-width:860px;margin:0 auto;font-size:1.05rem;}
-    .login-container,.container{max-width:480px;margin:30px auto;padding:24px;background:#fff;border-radius:10px;box-shadow:var(--shadow);text-align:center;}
-    input,textarea,button,select{width:100%;padding:10px;margin:8px 0;border:1px solid #dcdcdc;border-radius:8px;font-size:.98rem;}
+
+    /* === Form Elements === */
+    input,textarea,button,select{
+      width:100%;
+      padding:10px;
+      margin:8px 0;
+      border:1px solid #dcdcdc;
+      border-radius:8px;
+      font-size:.98rem;
+      background:rgba(255,255,255,0.95);
+    }
     textarea{resize:vertical;min-height:100px;}
-    button{background:var(--brand-dark);color:#fff;cursor:pointer;transition:.2s;}
+    button{
+      background:var(--brand-dark);
+      color:#fff;
+      cursor:pointer;
+      transition:.2s;
+      font-weight:bold;
+    }
     button:hover{background:var(--brand-dark-2);}
     a{color:var(--blue);font-weight:bold;text-decoration:none;}
     a:hover{text-decoration:underline;}
     .muted{color:var(--muted);font-size:.95rem;}
     #msg{margin-top:10px;font-weight:bold;}
+
+    /* === Footer === */
     footer{text-align:center;margin:20px 0 40px;}
     #languageSwitcher{width:auto;padding:6px 10px;border-radius:8px;}
   </style>
@@ -68,7 +119,7 @@
     </p>
   </section>
 
-  <!-- === Login Section (will toggle dynamically) === -->
+  <!-- === Login Section (Dynamic) === -->
   <div class="login-container" id="mainContainer">
     <div id="loginPage">
       <h2><i class="fas fa-id-card"></i> <span data-i18n="login">Login</span></h2>
@@ -97,9 +148,7 @@
     </select>
   </footer>
 
-  <!-- ==========================================================
-       SCRIPT SECTION
-       ========================================================== -->
+  <!-- === Script Section === -->
   <script>
     /* === Firebase Init === */
     const firebaseConfig = {
@@ -187,9 +236,7 @@
       catch(err){alert("Error: "+err.message);}
     }
 
-    /* ==========================================================
-       REQUEST ACCESS (Firestore + EmailJS)
-       ========================================================== */
+    /* === Request Access (Firestore + EmailJS) === */
     function showRequestAccess(){
       const html = `
         <div class="container">
