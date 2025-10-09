@@ -3,28 +3,51 @@
 <head>
   <meta charset="UTF-8" />
   <title>GDLVS - Login</title>
-  <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <!-- Firebase v8 -->
+
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-functions.js"></script>
+
   <!-- i18n + jQuery -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
-  <script defer src="script.js"></script>
+
+  <style>
+    :root {
+      --brand-dark:#2a3f54;--brand-dark-2:#1e2d3c;--success:#27ae60;--danger:#e74c3c;
+      --text:#333;--muted:#666;--shadow:0 2px 6px rgba(0,0,0,.1);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Arial,sans-serif;background:#f6f8fb;color:var(--text);}
+    .background-image{position:fixed;inset:0;background:url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') no-repeat center center fixed;background-size:cover;z-index:-1;filter:brightness(0.9);}
+    .welcome-section{max-width:960px;margin:50px auto 20px;background:rgba(255,255,255,.95);padding:24px 20px;text-align:center;border-radius:10px;box-shadow:var(--shadow);}
+    .car-hero{font-size:72px;color:var(--brand-dark);}
+    .welcome-section h1{color:var(--brand-dark);margin:10px 0;}
+    .welcome-text{max-width:860px;margin:0 auto;font-size:1.05rem;}
+    .login-container{max-width:420px;margin:30px auto;padding:24px;background:#fff;border-radius:10px;box-shadow:var(--shadow);text-align:center;}
+    input,button,select{width:100%;padding:10px;margin:8px 0;border:1px solid #dcdcdc;border-radius:8px;font-size:.98rem;}
+    button{background:var(--brand-dark);color:#fff;cursor:pointer;transition:.2s;}
+    button:hover{background:var(--brand-dark-2);}
+    a{color:var(--brand-dark);text-decoration:none;}
+    a:hover{text-decoration:underline;}
+    .muted{color:var(--muted);font-size:.95rem;}
+    footer{text-align:center;margin:20px 0 40px;}
+    #languageSwitcher{width:auto;padding:6px 10px;border-radius:8px;}
+  </style>
 </head>
+
 <body>
   <div class="background-image"></div>
-
   <section class="welcome-section">
-    <i class="fas fa-car car-hero" aria-hidden="true"></i>
+    <i class="fas fa-car car-hero"></i>
     <h1 data-i18n="welcomeTitle">Welcome</h1>
     <p class="welcome-text" data-i18n="welcomeMessage">
-      Welcome to the <strong>Gabon Driver’s License Verification System (GDLVS)</strong> — a secure platform designed to
-      verify the authenticity of Gabonese driver’s license IDs.
+      Welcome to the <strong>Gabon Driver’s License Verification System (GDLVS)</strong> — a secure platform designed to verify the authenticity of Gabonese driver’s license IDs.
     </p>
   </section>
 
@@ -33,7 +56,7 @@
     <form id="loginForm" onsubmit="loginUser(event)">
       <input type="email" id="email" required data-i18n="[placeholder]emailPlaceholder" placeholder="Email" />
       <input type="password" id="password" required data-i18n="[placeholder]passwordPlaceholder" placeholder="Password" />
-      <button type="submit"><i class="fas fa-sign-in-alt"></i> <span data-i18n="login">Login</span></button>
+      <button type="submit"><i class="fas fa-sign-in-alt"></i> <span data-i18n="loginBtn">Login</span></button>
     </form>
     <div class="links-row">
       <a href="#" onclick="resetPassword()" data-i18n="forgotPassword">Forgot Password?</a>
@@ -41,7 +64,7 @@
     <div id="msg" class="muted"></div>
     <p class="muted">
       <span data-i18n="noAccount">Don’t have an account?</span>
-      <a href="request_access.html" data-i18n="requestAccessHere">Request access here</a>
+      <a href="#" onclick="requestAccessForm()" data-i18n="requestAccessHere">Request access here</a>
     </p>
   </div>
 
@@ -53,5 +76,116 @@
       <option value="ja">🇯🇵 日本語</option>
     </select>
   </footer>
+
+  <script>
+    /* === Firebase Init === */
+    const firebaseConfig = {
+      apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
+      authDomain: "gdlvs-2348e.firebaseapp.com",
+      projectId: "gdlvs-2348e",
+      storageBucket: "gdlvs-2348e.appspot.com",
+      messagingSenderId: "358715790318",
+      appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const functions = firebase.functions();
+
+    /* === Translations === */
+    const i18nResources = {
+      en:{translation:{
+        welcomeTitle:"Welcome",welcomeMessage:"Welcome to the Gabon Driver’s License Verification System (GDLVS) — a secure platform designed to verify the authenticity of Gabonese driver’s license IDs.",
+        login:"Login",loginBtn:"Login",emailPlaceholder:"Email",passwordPlaceholder:"Password",
+        forgotPassword:"Forgot Password?",noAccount:"Don’t have an account?",requestAccessHere:"Request access here",
+        verifyEmailFirst:"Please verify your email before logging in.",adminWelcome:"Welcome Admin!",loginSuccess:"Login successful!",
+        requestFormTitle:"Access Request",fullName:"Full Name",organization:"Organization",phone:"Phone",submitRequest:"Submit Request",
+        accessSubmitted:"✅ Your request has been submitted. You will receive confirmation within 72 hours."
+      }},
+      fr:{translation:{
+        welcomeTitle:"Bienvenue",welcomeMessage:"Bienvenue sur le Système Gabonais de Vérification des Permis de Conduire (GDLVS).",
+        login:"Connexion",loginBtn:"Connexion",emailPlaceholder:"Adresse e-mail",passwordPlaceholder:"Mot de passe",
+        forgotPassword:"Mot de passe oublié ?",noAccount:"Pas de compte ?",requestAccessHere:"Demander un accès ici",
+        verifyEmailFirst:"Veuillez d’abord vérifier votre e-mail.",adminWelcome:"Bienvenue Administrateur!",loginSuccess:"Connexion réussie!",
+        requestFormTitle:"Demande d’accès",fullName:"Nom complet",organization:"Organisation",phone:"Téléphone",submitRequest:"Soumettre la demande",
+        accessSubmitted:"✅ Votre demande a été soumise. Vous recevrez une confirmation sous 72 heures."
+      }},
+      ja:{translation:{
+        welcomeTitle:"ようこそ",welcomeMessage:"ガボン運転免許証認証システム (GDLVS) へようこそ。ガボンの運転免許証の真正性を確認する安全なプラットフォームです。",
+        login:"ログイン",loginBtn:"ログイン",emailPlaceholder:"メールアドレス",passwordPlaceholder:"パスワード",
+        forgotPassword:"パスワードをお忘れですか？",noAccount:"アカウントをお持ちでない場合",requestAccessHere:"アクセスをリクエストする",
+        verifyEmailFirst:"ログインする前にメールを確認してください。",adminWelcome:"管理者としてようこそ!",loginSuccess:"ログイン成功!",
+        requestFormTitle:"アクセス申請",fullName:"氏名",organization:"組織",phone:"電話番号",submitRequest:"送信",
+        accessSubmitted:"✅ リクエストが送信されました。72時間以内に確認メールが届きます。"
+      }}
+    };
+    i18next.use(i18nextBrowserLanguageDetector).init(
+      {resources:i18nResources,fallbackLng:"en"},
+      ()=>{jqueryI18next.init(i18next,$,{useOptionsAttr:true});$("body").localize();auth.useDeviceLanguage();}
+    );
+    document.getElementById("languageSwitcher").addEventListener("change",function(){
+      i18next.changeLanguage(this.value,()=>$("body").localize());
+    });
+
+    /* === Helpers === */
+    function showMsg(t,ok=false){const m=document.getElementById("msg");m.textContent=t;m.style.color=ok?"green":"red";}
+
+    /* === Login === */
+    async function loginUser(e){
+      e.preventDefault();
+      const email=document.getElementById("email").value.trim();
+      const password=document.getElementById("password").value;
+      try{
+        const cred=await auth.signInWithEmailAndPassword(email,password);
+        if(!cred.user.emailVerified){await cred.user.sendEmailVerification();showMsg(i18next.t("verifyEmailFirst"));await auth.signOut();return;}
+        const roleDoc=await db.collection("roles").doc(email).get();
+        const role=roleDoc.exists?roleDoc.data().role:"verifier";
+        showMsg(i18next.t(role==="admin"?"adminWelcome":"loginSuccess"),true);
+        setTimeout(()=>window.location.href=role==="admin"?"dashboard.html":"verify.html",700);
+      }catch(err){showMsg("❌ "+err.message);}
+    }
+
+    /* === Password Reset === */
+    async function resetPassword(){
+      const email=document.getElementById("email")?.value.trim()||prompt("Enter your email:");
+      if(!email) return;
+      try{await auth.sendPasswordResetEmail(email);alert("Password reset email sent!");}
+      catch(err){alert("Error: "+err.message);}
+    }
+
+    /* === Access Request === */
+    function requestAccessForm(){
+      const formHTML=`
+        <div style='text-align:left'>
+          <h3><i class='fa-solid fa-user-plus'></i> ${i18next.t("requestFormTitle")}</h3>
+          <input id='reqName' placeholder='${i18next.t("fullName")}' required>
+          <input id='reqEmail' placeholder='Email' type='email' required>
+          <input id='reqOrg' placeholder='${i18next.t("organization")}' required>
+          <input id='reqPhone' placeholder='${i18next.t("phone")}' required>
+          <button onclick='submitAccessRequest()'>${i18next.t("submitRequest")}</button>
+        </div>`;
+      document.querySelector(".login-container").innerHTML=formHTML;
+    }
+
+    async function submitAccessRequest(){
+      const name=document.getElementById("reqName").value.trim();
+      const email=document.getElementById("reqEmail").value.trim();
+      const org=document.getElementById("reqOrg").value.trim();
+      const phone=document.getElementById("reqPhone").value.trim();
+      if(!name||!email||!org) return showMsg("⚠️ All fields required");
+      try{
+        await db.collection("requests").doc(email).set({
+          fullName:name,email,organization:org,phone,status:"pending",requestedAt:new Date()
+        });
+        showMsg(i18next.t("accessSubmitted"),true);
+        alert("✅ Request submitted. The admin (m.ngoma1988@gmail.com) has been notified.");
+      }catch(err){showMsg("❌ "+err.message);}
+    }
+
+    window.loginUser=loginUser;
+    window.resetPassword=resetPassword;
+    window.requestAccessForm=requestAccessForm;
+    window.submitAccessRequest=submitAccessRequest;
+  </script>
 </body>
 </html>
