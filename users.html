@@ -31,7 +31,7 @@
     .table th{background:#f2f2f2}
     .btn-export{background:var(--info);color:#fff;border:0;border-radius:8px;padding:8px 12px;cursor:pointer}
     .inline{padding:6px 12px;border-radius:8px;border:0;color:#fff;cursor:pointer}
-    .btn-edit{background:var(--success)}
+    .btn-update{background:var(--success)}
     .btn-delete{background:var(--danger)}
     input,select{padding:10px;border:1px solid #dcdcdc;border-radius:8px}
   </style>
@@ -72,7 +72,7 @@
           <option value="verifier">verifier</option>
           <option value="admin">admin</option>
         </select>
-        <button type="submit" class="inline btn-edit"><i class="fas fa-user-plus"></i> <span data-i18n="addUser">Add User</span></button>
+        <button type="submit" class="inline btn-update"><i class="fas fa-user-plus"></i> <span data-i18n="addUser">Add User</span></button>
       </form>
 
       <button class="btn-export" id="exportUsers">📥 <span data-i18n="exportUsers">Export Users</span></button>
@@ -99,7 +99,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
@@ -113,130 +113,98 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // 🌐 Translations
     const i18nResources = {
-      en:{translation:{
-        dashboard:"Dashboard", verificationPortal:"Verification", addLicense:"Add License", userManagement:"User Management", verificationRequests:"Verification Requests", analytics:"Analytics", logout:"Logout",
-        userTip:"Admins can add, edit, or remove users directly from here.",
-        searchUsers:"Search users by name or email...", fullName:"Full Name", email:"Email", role:"Role", status:"Status", action:"Action",
-        addUser:"Add User", exportUsers:"Export Users", loading:"Loading...", emailPlaceholder:"Email"
-      }},
-      fr:{translation:{
-        dashboard:"Tableau de bord", verificationPortal:"Vérification", addLicense:"Ajouter un permis", userManagement:"Gestion des utilisateurs", verificationRequests:"Demandes de vérification", analytics:"Analytique", logout:"Déconnexion",
-        userTip:"Les administrateurs peuvent ajouter, modifier ou supprimer des utilisateurs ici.",
-        searchUsers:"Rechercher des utilisateurs par nom ou e-mail…", fullName:"Nom complet", email:"Email", role:"Rôle", status:"Statut", action:"Action",
-        addUser:"Ajouter l’utilisateur", exportUsers:"Exporter les utilisateurs", loading:"Chargement...", emailPlaceholder:"Email"
-      }},
-      ja:{translation:{
-        dashboard:"ダッシュボード", verificationPortal:"照合", addLicense:"免許を追加", userManagement:"ユーザー管理", verificationRequests:"照合リクエスト", analytics:"分析", logout:"ログアウト",
-        userTip:"管理者はここでユーザーを追加・編集・削除できます。",
-        searchUsers:"氏名またはメールで検索…", fullName:"氏名", email:"メール", role:"役割", status:"ステータス", action:"操作",
-        addUser:"ユーザーを追加", exportUsers:"ユーザーをエクスポート", loading:"読み込み中…", emailPlaceholder:"メール"
-      }}
+      en:{translation:{dashboard:"Dashboard", verificationPortal:"Verification", addLicense:"Add License", userManagement:"User Management", verificationRequests:"Verification Requests", analytics:"Analytics", logout:"Logout", userTip:"Admins can add, edit, or remove users directly from here.", searchUsers:"Search users by name or email...", fullName:"Full Name", email:"Email", role:"Role", status:"Status", action:"Action", addUser:"Add User", exportUsers:"Export Users", updateUser:"Update", delete:"Delete", loading:"Loading...", emailPlaceholder:"Email"}},
+      fr:{translation:{dashboard:"Tableau de bord", verificationPortal:"Vérification", addLicense:"Ajouter un permis", userManagement:"Gestion des utilisateurs", verificationRequests:"Demandes de vérification", analytics:"Analytique", logout:"Déconnexion", userTip:"Les administrateurs peuvent ajouter, modifier ou supprimer des utilisateurs ici.", searchUsers:"Rechercher des utilisateurs par nom ou e-mail…", fullName:"Nom complet", email:"Email", role:"Rôle", status:"Statut", action:"Action", addUser:"Ajouter un utilisateur", exportUsers:"Exporter les utilisateurs", updateUser:"Mettre à jour", delete:"Supprimer", loading:"Chargement...", emailPlaceholder:"Email"}},
+      ja:{translation:{dashboard:"ダッシュボード", verificationPortal:"照合", addLicense:"免許を追加", userManagement:"ユーザー管理", verificationRequests:"照合リクエスト", analytics:"分析", logout:"ログアウト", userTip:"管理者はここでユーザーを追加・編集・削除できます。", searchUsers:"氏名またはメールで検索…", fullName:"氏名", email:"メール", role:"役割", status:"ステータス", action:"操作", addUser:"ユーザーを追加", exportUsers:"ユーザーをエクスポート", updateUser:"更新", delete:"削除", loading:"読み込み中…", emailPlaceholder:"メール"}}
     };
-    i18next.use(i18nextBrowserLanguageDetector).init({resources:i18nResources,fallbackLng:"en"},()=>{ jqueryI18next.init(i18next,$,{useOptionsAttr:true}); $("body").localize(); });
-    document.getElementById("languageSwitcher").addEventListener("change", function(){ i18next.changeLanguage(this.value, ()=>$("body").localize()); });
+    i18next.use(i18nextBrowserLanguageDetector).init({resources:i18nResources,fallbackLng:"en"},()=>{jqueryI18next.init(i18next,$,{useOptionsAttr:true});$("body").localize();});
+    document.getElementById("languageSwitcher").addEventListener("change",function(){i18next.changeLanguage(this.value,()=>$("body").localize());});
 
-    onAuthStateChanged(auth, async (user)=>{
-      if(!user){ location.href="index.html"; return; }
-      const roleSnap = await getDoc(doc(db,"roles",user.email));
-      const adminOnly = document.getElementById("navVerificationRequests");
-      adminOnly.style.display = (roleSnap.exists() && roleSnap.data().role==="admin") ? "block":"none";
+    // 🔒 Auth check
+    onAuthStateChanged(auth,async(user)=>{
+      if(!user){location.href="index.html";return;}
+      const roleSnap=await getDoc(doc(db,"roles",user.email));
+      document.getElementById("navVerificationRequests").style.display=(roleSnap.exists()&&roleSnap.data().role==="admin")?"block":"none";
     });
-    document.getElementById("logoutBtn").addEventListener("click", ()=>signOut(auth).then(()=>location.href="index.html"));
+    document.getElementById("logoutBtn").addEventListener("click",()=>signOut(auth).then(()=>location.href="index.html"));
 
-    // Realtime users + roles
-    const usersTbody = document.getElementById("usersTable");
-    onSnapshot(collection(db,"users"), async (snap)=>{
-      // Preload roles
-      const rolesMap = {};
-      const rolesSnap = await onSnapshot(collection(db,"roles"), ()=>{}); // dummy to ensure cache
-      // Fallback single fetch of roles
-      const rolesColl = await (await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js")).getDocs(collection(db,"roles"));
-      rolesColl.forEach(r=>rolesMap[r.id]=(r.data().role||"verifier"));
-
-      usersTbody.innerHTML="";
-      if(snap.empty){ usersTbody.innerHTML = `<tr><td colspan="5">${i18next.t("loading")}</td></tr>`; return; }
+    // 👥 Realtime user list
+    const tbody=document.getElementById("usersTable");
+    onSnapshot(collection(db,"users"),async(snap)=>{
+      const rolesSnap=await getDocs(collection(db,"roles"));
+      const rolesMap={};rolesSnap.forEach(r=>rolesMap[r.id]=r.data().role||"verifier");
+      tbody.innerHTML="";
+      if(snap.empty){tbody.innerHTML=`<tr><td colspan="5">${i18next.t("loading")}</td></tr>`;return;}
       snap.forEach(uDoc=>{
-        const u=uDoc.data(); const role=rolesMap[u.email]||u.role||"verifier";
+        const u=uDoc.data();const role=rolesMap[u.email]||"verifier";
         const tr=document.createElement("tr");
         tr.innerHTML=`
           <td contenteditable data-field="fullName">${u.fullName||""}</td>
           <td>${u.email}</td>
-          <td>
-            <select data-field="role">
-              <option ${role==="verifier"?"selected":""}>verifier</option>
-              <option ${role==="admin"?"selected":""}>admin</option>
-            </select>
-          </td>
-          <td>
-            <select data-field="status">
-              <option ${u.status==="approved"?"selected":""}>approved</option>
-              <option ${u.status==="pending"?"selected":""}>pending</option>
-              <option ${u.status==="disabled"?"selected":""}>disabled</option>
-            </select>
-          </td>
-          <td>
-            <button class="inline btn-edit" data-email="${u.email}">${i18next.t("addUser")}</button>
-            <button class="inline btn-delete" data-email="${u.email}">Delete</button>
-          </td>`;
-        usersTbody.appendChild(tr);
+          <td><select data-field="role"><option ${role==="verifier"?"selected":""}>verifier</option><option ${role==="admin"?"selected":""}>admin</option></select></td>
+          <td><select data-field="status"><option ${u.status==="approved"?"selected":""}>approved</option><option ${u.status==="pending"?"selected":""}>pending</option><option ${u.status==="disabled"?"selected":""}>disabled</option></select></td>
+          <td><button class="inline btn-update" data-email="${u.email}">${i18next.t("updateUser")}</button>
+              <button class="inline btn-delete" data-email="${u.email}">${i18next.t("delete")}</button></td>`;
+        tbody.appendChild(tr);
       });
     });
 
-    // Add user
-    document.getElementById("addUserForm").addEventListener("submit", async (e)=>{
+    // ➕ Add user
+    document.getElementById("addUserForm").addEventListener("submit",async(e)=>{
       e.preventDefault();
-      const name = document.getElementById("newUserName").value.trim();
-      const email = document.getElementById("newUserEmail").value.trim();
-      const role = document.getElementById("newUserRole").value;
-      if(!name||!email) return alert("Name & Email required");
+      const name=document.getElementById("newUserName").value.trim();
+      const email=document.getElementById("newUserEmail").value.trim();
+      const role=document.getElementById("newUserRole").value;
+      if(!name||!email)return alert("Name & Email required");
       await setDoc(doc(db,"users",email),{fullName:name,email,status:"approved",approved:true},{merge:true});
       await setDoc(doc(db,"roles",email),{role},{merge:true});
-      e.target.reset();
+      e.target.reset();alert("✅ User added successfully");
     });
 
-    // Row actions (update/delete)
-    usersTbody.addEventListener("click", async (e)=>{
-      const t = e.target;
-      if(t.closest(".btn-edit")){
-        const email = t.dataset.email;
-        const tr = t.closest("tr");
-        const updates = {};
+    // ✏️ Update / Delete user
+    tbody.addEventListener("click",async(e)=>{
+      const t=e.target;
+      if(t.closest(".btn-update")){
+        const email=t.dataset.email;
+        const tr=t.closest("tr");
+        const updates={};
         tr.querySelectorAll("[data-field]").forEach(el=>{
-          const key = el.dataset.field;
-          updates[key] = (el.tagName==="TD") ? el.textContent.trim() : el.value;
+          const key=el.dataset.field;
+          updates[key]=(el.tagName==="TD")?el.textContent.trim():el.value;
         });
         await setDoc(doc(db,"users",email),{fullName:updates.fullName,status:updates.status,approved:(updates.status==="approved")},{merge:true});
         await setDoc(doc(db,"roles",email),{role:updates.role},{merge:true});
-        alert("User updated");
+        alert("✅ User updated");
       }
       if(t.closest(".btn-delete")){
-        const email = t.dataset.email;
-        if(!confirm(`Delete ${email}?`)) return;
+        const email=t.dataset.email;
+        if(!confirm(`Delete ${email}?`))return;
         await deleteDoc(doc(db,"users",email));
         await deleteDoc(doc(db,"roles",email));
+        alert("🗑️ User deleted");
       }
     });
 
-    // Search
+    // 🔍 Search filter
     document.getElementById("userSearch").addEventListener("keyup",(e)=>{
-      const term = e.target.value.toLowerCase();
+      const term=e.target.value.toLowerCase();
       document.querySelectorAll("#usersTable tr").forEach(row=>{
-        row.style.display = row.textContent.toLowerCase().includes(term) ? "" : "none";
+        row.style.display=row.textContent.toLowerCase().includes(term)?"":"none";
       });
     });
 
-    // Export
-    document.getElementById("exportUsers").addEventListener("click", ()=>{
-      const rows = document.querySelectorAll(".table tr");
-      const csv = [];
+    // 📤 Export
+    document.getElementById("exportUsers").addEventListener("click",()=>{
+      const rows=document.querySelectorAll(".table tr");
+      const csv=[];
       rows.forEach(r=>{
-        const cols = r.querySelectorAll("th,td");
+        const cols=r.querySelectorAll("th,td");
         csv.push(Array.from(cols).map(c=>`"${c.innerText.replace(/"/g,'""')}"`).join(","));
       });
-      const blob = new Blob([csv.join("\n")],{type:"text/csv"});
-      const a = document.createElement("a");
-      a.href=URL.createObjectURL(blob); a.download="users_export.csv"; a.click();
+      const blob=new Blob([csv.join("\n")],{type:"text/csv"});
+      const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="users_export.csv";a.click();
     });
   </script>
 </body>
