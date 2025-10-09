@@ -2,21 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GDLVS - Request Access</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- FontAwesome -->
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <!-- Firebase SDK v8 -->
+  <!-- Firebase SDK (v8 syntax - keep this version!) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-  <!-- EmailJS -->
+  <!-- EmailJS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
-  <!-- Optional i18n (future multilingual support) -->
+  <!-- Optional i18n + jQuery (future multilingual support) -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
@@ -63,7 +62,7 @@
       color: var(--brand-dark);
     }
 
-    input, textarea, button, select {
+    input, textarea, button {
       width: 100%;
       padding: 10px;
       margin: 8px 0;
@@ -134,10 +133,16 @@
   </footer>
 
   <script>
-    /* === EmailJS Init === */
-    (function() { emailjs.init("TfmaZEvxtz2MNUb70"); })();
+    /* ==============================
+       🔹 EmailJS Initialization
+    ============================== */
+    (function() {
+      emailjs.init("TfmaZEvxtz2MNUb70"); // ✅ your verified public key
+    })();
 
-    /* === Firebase Init === */
+    /* ==============================
+       🔹 Firebase Initialization
+    ============================== */
     const firebaseConfig = {
       apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
       authDomain: "gdlvs-2348e.firebaseapp.com",
@@ -149,7 +154,9 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    /* === Submit Request === */
+    /* ==============================
+       🔹 Submit Access Request
+    ============================== */
     async function submitAccessRequest(e) {
       e.preventDefault();
       const msgBox = document.getElementById("msg");
@@ -164,7 +171,7 @@
       msgBox.style.color = "#004aad";
 
       try {
-        // 1️⃣ Save request to Firestore
+        // 1️⃣ Write request to Firestore (public access)
         await db.collection("requests").add({
           fullName,
           email,
@@ -175,7 +182,7 @@
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        // 2️⃣ Send Email notification via EmailJS
+        // 2️⃣ Send email notification (admin + user)
         await emailjs.send("service_ddq3kka", "template_inl3jsv", {
           name: fullName,
           email,
@@ -184,16 +191,14 @@
           purpose
         });
 
-        // 3️⃣ Success feedback
-        msgBox.textContent =
-          "✅ Your request has been submitted successfully! You will receive a confirmation email within 72 hours.";
+        // 3️⃣ Feedback
+        msgBox.textContent = "✅ Request submitted successfully! A confirmation email will be sent within 72 hours.";
         msgBox.style.color = "green";
         document.getElementById("requestForm").reset();
 
       } catch (err) {
-        console.error("❌ Error submitting request:", err);
-        msgBox.textContent =
-          "⚠️ Submission failed. Please try again later. (" + err.message + ")";
+        console.error("❌ Firestore/EmailJS error:", err);
+        msgBox.textContent = "⚠️ Failed to submit request: " + err.message;
         msgBox.style.color = "red";
       }
     }
