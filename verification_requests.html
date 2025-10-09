@@ -2,19 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>GDLVS - Verification Requests</title>
+  <title>GDLVS - Verification Records</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <style>
     :root {
-      --brand-dark:#2a3f54; --brand-dark-2:#1e2d3c;
-      --panel-bg:#fff; --text:#333; --bg:#f6f8fb;
-      --success:#27ae60; --danger:#e74c3c; --info:#2980b9;
+      --dark:#2a3f54; --light:#f6f8fb; --panel:#fff;
+      --info:#2980b9; --success:#27ae60; --danger:#e74c3c;
     }
     *{box-sizing:border-box;}
-    body{margin:0;font-family:"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text);}
-    header{background:var(--brand-dark);color:#fff;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
+    body{margin:0;font-family:"Segoe UI",sans-serif;background:var(--light);color:#333;}
+    header{background:var(--dark);color:#fff;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
     header h1{margin:0;font-size:1.1rem;display:flex;align-items:center;gap:6px;}
     .controls{display:flex;align-items:center;gap:8px;}
     .controls select,.controls button{padding:5px 9px;border:0;border-radius:6px;font-size:.85rem;cursor:pointer;}
@@ -22,38 +21,34 @@
     .controls button{background:#1f2d3a;color:#fff;}
     .controls button:hover{background:#16222d;}
     nav{background:#fff;border-bottom:1px solid #eee;padding:10px 16px;display:flex;flex-wrap:wrap;gap:14px;}
-    nav a{color:var(--brand-dark);text-decoration:none;font-weight:600;}
-    nav a.active{border-bottom:2px solid var(--brand-dark);padding-bottom:3px;}
-    .container{max-width:950px;margin:20px auto 40px;background:#fff;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.1);padding:20px;}
+    nav a{color:var(--dark);text-decoration:none;font-weight:600;}
+    nav a.active{border-bottom:2px solid var(--dark);padding-bottom:3px;}
+    .container{max-width:1000px;margin:20px auto;background:#fff;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.1);padding:20px;}
     .table-controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
     input#searchRequests{max-width:260px;padding:8px;border:1px solid #ddd;border-radius:8px;}
     .btn-export{background:var(--info);color:#fff;padding:8px 12px;border:0;border-radius:8px;cursor:pointer;}
     .btn-export:hover{background:#1f6392;}
-    table{width:100%;border-collapse:separate;border-spacing:0 6px;}
-    th,td{padding:10px 12px;border:1px solid #eee;background:#fff;}
+    table{width:100%;border-collapse:collapse;}
+    th,td{padding:10px 12px;border:1px solid #eee;}
     th{background:#f2f2f2;font-weight:600;}
-    .btn-view{background:var(--brand-dark);color:#fff;border:0;padding:6px 10px;border-radius:6px;cursor:pointer;}
-    .btn-view:hover{background:var(--brand-dark-2);}
-    /* ==== Modal ==== */
+    .btn-action{border:0;border-radius:6px;padding:6px 10px;cursor:pointer;color:#fff;}
+    .btn-view{background:var(--info);} .btn-view:hover{background:#1f6392;}
+    .btn-delete{background:var(--danger);} .btn-delete:hover{background:#c0392b;}
+    .btn-archive{background:var(--success);} .btn-archive:hover{background:#219150;}
+    /* Modal */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:999;}
-    .modal{background:#fff;border-radius:10px;max-width:420px;width:90%;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.25);animation:fadeIn .25s ease;}
+    .modal{background:#fff;border-radius:10px;max-width:440px;width:90%;padding:22px;box-shadow:0 4px 12px rgba(0,0,0,0.25);animation:fadeIn .25s ease;}
     @keyframes fadeIn{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
     .modal h3{margin-top:0;}
-    .modal p strong{display:inline-block;width:110px;}
+    .modal p strong{display:inline-block;width:130px;}
     .modal-buttons{margin-top:18px;display:flex;justify-content:space-between;}
     .modal-buttons button{flex:1;margin:0 4px;padding:8px 10px;border-radius:6px;border:0;color:#fff;font-weight:600;cursor:pointer;}
-    .btn-approve{background:var(--success);}
-    .btn-reject{background:var(--danger);}
-    .btn-cancel{background:#555;}
-    .btn-approve:hover{background:#219150;}
-    .btn-reject:hover{background:#c0392b;}
-    .btn-cancel:hover{background:#333;}
-    @media(max-width:900px){header{flex-direction:column;gap:6px;}}
+    .btn-close{background:#555;} .btn-close:hover{background:#333;}
   </style>
 </head>
 <body>
   <header>
-    <h1><i class="fas fa-inbox"></i> <span data-i18n="verificationRequests">Verification Requests</span></h1>
+    <h1><i class="fas fa-clipboard-check"></i> <span data-i18n="verificationRecords">Verification Records</span></h1>
     <div class="controls">
       <select id="languageSwitcher">
         <option value="en">🇬🇧 EN</option>
@@ -65,157 +60,162 @@
   </header>
 
   <nav>
-    <a href="dashboard.html"><i class="fas fa-home"></i> <span data-i18n="dashboard">Dashboard</span></a>
-    <a href="verify.html"><i class="fas fa-search"></i> <span data-i18n="verificationPortal">Verification</span></a>
-    <a href="add_licenses.html"><i class="fas fa-id-card"></i> <span data-i18n="addLicense">Add License</span></a>
-    <a href="users.html"><i class="fas fa-users-cog"></i> <span data-i18n="userManagement">User Management</span></a>
-    <a href="verification_requests.html" class="active"><i class="fas fa-inbox"></i> <span data-i18n="verificationRequests">Requests</span></a>
-    <a href="analytics.html"><i class="fas fa-chart-bar"></i> <span data-i18n="analytics">Analytics</span></a>
+    <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="verify.html"><i class="fas fa-search"></i> Verification</a>
+    <a href="add_licenses.html"><i class="fas fa-id-card"></i> Add License</a>
+    <a href="users.html"><i class="fas fa-users-cog"></i> Users</a>
+    <a href="verification_requests.html" class="active"><i class="fas fa-inbox"></i> Records</a>
+    <a href="analytics.html"><i class="fas fa-chart-bar"></i> Analytics</a>
   </nav>
 
   <main class="container">
     <section>
-      <h2><i class="fas fa-clipboard-list"></i> <span data-i18n="accessRequests">Access Requests</span></h2>
+      <h2><i class="fas fa-database"></i> <span data-i18n="verificationsList">Verifications List</span></h2>
       <div class="table-controls">
-        <input type="text" id="searchRequests" data-i18n="[placeholder]searchRequests" placeholder="Search requests...">
-        <button class="btn-export" id="exportBtn">📥 <span data-i18n="export">Export</span></button>
+        <input type="text" id="searchRequests" data-i18n="[placeholder]searchVerifications" placeholder="Search verifications...">
+        <button class="btn-export" id="exportBtn">📥 Export</button>
       </div>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th data-i18n="fullName">Full Name</th>
-              <th data-i18n="email">Email</th>
-              <th data-i18n="organization">Organization</th>
-              <th data-i18n="purpose">Purpose</th>
-              <th data-i18n="status">Status</th>
-              <th data-i18n="action">Action</th>
-            </tr>
-          </thead>
-          <tbody id="requestsTable"><tr><td colspan="6" data-i18n="loading">Loading...</td></tr></tbody>
-        </table>
-      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>License #</th>
+            <th>Requesting Org</th>
+            <th>Purpose</th>
+            <th>Country</th>
+            <th>Result</th>
+            <th>Email</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="requestsTable"><tr><td colspan="8">Loading...</td></tr></tbody>
+      </table>
     </section>
   </main>
 
   <div class="modal-overlay" id="modalOverlay">
-    <div class="modal" id="requestModal">
-      <h3><i class="fas fa-user"></i> <span data-i18n="requestDetails">Request Details</span></h3>
+    <div class="modal">
+      <h3><i class="fas fa-file-alt"></i> Verification Details</h3>
       <div id="modalBody"></div>
       <div class="modal-buttons">
-        <button class="btn-approve" id="approveBtn">Approve</button>
-        <button class="btn-reject" id="rejectBtn">Reject</button>
-        <button class="btn-cancel" id="cancelBtn">Cancel</button>
+        <button id="archiveBtn" class="btn-archive">Mark Reviewed</button>
+        <button id="deleteBtn" class="btn-delete">Delete</button>
+        <button id="closeBtn" class="btn-close">Close</button>
       </div>
     </div>
   </div>
 
-  <footer style="text-align:center;margin:22px 0 40px;"><small>GDLVS</small></footer>
+  <footer style="text-align:center;margin:22px 0 40px;">GDLVS</footer>
 
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { getFirestore, collection, onSnapshot, doc, updateDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     const firebaseConfig = {
-      apiKey:"AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
-      authDomain:"gdlvs-2348e.firebaseapp.com",
-      projectId:"gdlvs-2348e",
-      storageBucket:"gdlvs-2348e.appspot.com",
-      messagingSenderId:"358715790318",
-      appId:"1:358715790318:web:9d4c85e0f71222cf1b34ff"
+      apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
+      authDomain: "gdlvs-2348e.firebaseapp.com",
+      projectId: "gdlvs-2348e",
+      storageBucket: "gdlvs-2348e.appspot.com",
+      messagingSenderId: "358715790318",
+      appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
     };
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    emailjs.init("TfmaZEvxtz2MNUb70");
-    const EMAILJS_SERVICE_ID = "service_ddq3kka";
-    const EMAILJS_TEMPLATE_ID = "template_inl3jsv";
 
     /* === i18n === */
     const i18nResources = {
-      en:{translation:{verificationRequests:"Verification Requests",dashboard:"Dashboard",verificationPortal:"Verification",addLicense:"Add License",userManagement:"User Management",analytics:"Analytics",logout:"Logout",fullName:"Full Name",email:"Email",organization:"Organization",purpose:"Purpose",status:"Status",action:"Action",loading:"Loading...",export:"Export",accessRequests:"Access Requests",searchRequests:"Search requests...",requestDetails:"Request Details"}},
-      fr:{translation:{verificationRequests:"Demandes de vérification",dashboard:"Tableau de bord",verificationPortal:"Vérification",addLicense:"Ajouter un permis",userManagement:"Gestion des utilisateurs",analytics:"Analytique",logout:"Déconnexion",fullName:"Nom complet",email:"Email",organization:"Organisation",purpose:"Objet",status:"Statut",action:"Action",loading:"Chargement...",export:"Exporter",accessRequests:"Demandes d’accès",searchRequests:"Rechercher des demandes…",requestDetails:"Détails de la demande"}},
-      ja:{translation:{verificationRequests:"照会リクエスト",dashboard:"ダッシュボード",verificationPortal:"照会",addLicense:"免許を追加",userManagement:"ユーザー管理",analytics:"分析",logout:"ログアウト",fullName:"氏名",email:"メール",organization:"機関",purpose:"目的",status:"ステータス",action:"操作",loading:"読み込み中…",export:"エクスポート",accessRequests:"アクセスリクエスト",searchRequests:"リクエストを検索…",requestDetails:"リクエスト詳細"}}
+      en:{translation:{verificationRecords:"Verification Records",verificationsList:"Verifications List",logout:"Logout",searchVerifications:"Search verifications..."}},
+      fr:{translation:{verificationRecords:"Registres de vérification",verificationsList:"Liste des vérifications",logout:"Déconnexion",searchVerifications:"Rechercher des vérifications..."}},
+      ja:{translation:{verificationRecords:"照会記録",verificationsList:"照会リスト",logout:"ログアウト",searchVerifications:"照会を検索…"}}
     };
     i18next.use(i18nextBrowserLanguageDetector).init({resources:i18nResources,fallbackLng:"en"},()=>{jqueryI18next.init(i18next,$,{useOptionsAttr:true});$("body").localize();});
     document.getElementById("languageSwitcher").addEventListener("change",e=>{i18next.changeLanguage(e.target.value,()=>{$("body").localize();});});
     document.getElementById("logoutBtn").addEventListener("click",()=>signOut(auth).then(()=>location.href="index.html"));
 
     /* === Auth Gate === */
-    onAuthStateChanged(auth,async(user)=>{
-      if(!user){location.href="index.html";return;}
-      const roleSnap=await getDoc(doc(db,"roles",user.email));
-      const role=roleSnap.exists()?roleSnap.data().role:"verifier";
-      if(role!=="admin"){alert("Admins only");location.href="verify.html";}
-    });
+    onAuthStateChanged(auth,user=>{if(!user)location.href="index.html";});
 
-    /* === Realtime Requests === */
+    /* === Realtime Verifications === */
     const tbody=document.getElementById("requestsTable");
-    const qReq=query(collection(db,"requests"),orderBy("submittedAt"));
-    onSnapshot(qReq,snap=>{
+    const qVer=query(collection(db,"verifications"),orderBy("verifiedAt","desc"));
+    onSnapshot(qVer,snap=>{
       tbody.innerHTML="";
-      if(snap.empty){tbody.innerHTML=`<tr><td colspan="6">${i18next.t("loading")}</td></tr>`;return;}
+      if(snap.empty){tbody.innerHTML="<tr><td colspan='8'>No verifications yet</td></tr>";return;}
       snap.forEach(docSnap=>{
         const d=docSnap.data();
         const tr=document.createElement("tr");
-        tr.innerHTML=`<td>${d.fullName||""}</td><td>${d.email||""}</td><td>${d.organization||""}</td><td>${d.purpose||""}</td><td>${d.status||"Pending"}</td><td><button class="btn-view" data-id="${docSnap.id}">${i18next.t("action")}</button></td>`;
+        tr.innerHTML=`
+          <td>${d.licenseNumber||""}</td>
+          <td>${d.requestingOrg||""}</td>
+          <td>${d.purpose||""}</td>
+          <td>${d.country||""}</td>
+          <td>${d.result||""}</td>
+          <td>${d.email||""}</td>
+          <td>${d.verifiedAt?.toDate?d.verifiedAt.toDate().toLocaleString():""}</td>
+          <td><button class="btn-action btn-view" data-id="${docSnap.id}">View</button></td>`;
         tbody.appendChild(tr);
       });
     });
 
-    /* === Modal Logic === */
-    const modalOverlay=document.getElementById("modalOverlay");
+    /* === Modal === */
+    const modal=document.getElementById("modalOverlay");
     const modalBody=document.getElementById("modalBody");
-    let currentId=null,currentEmail=null;
-
+    let currentId=null;
     tbody.addEventListener("click",async(e)=>{
-      if(!e.target.closest(".btn-view"))return;
-      const id=e.target.dataset.id;
-      const snap=await getDoc(doc(db,"requests",id));
-      if(!snap.exists())return;
-      const d=snap.data();
-      currentId=id;currentEmail=d.email;
+      if(!e.target.classList.contains("btn-view"))return;
+      const id=e.target.dataset.id; currentId=id;
+      const snap=(await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js")).getDoc;
+      const {getDoc,doc}=await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
+      const s=await getDoc(doc(db,"verifications",id));
+      if(!s.exists())return;
+      const d=s.data();
       modalBody.innerHTML=`
-        <p><strong>${i18next.t("fullName")}:</strong> ${d.fullName||""}</p>
-        <p><strong>${i18next.t("email")}:</strong> ${d.email||""}</p>
-        <p><strong>${i18next.t("organization")}:</strong> ${d.organization||""}</p>
-        <p><strong>${i18next.t("purpose")}:</strong> ${d.purpose||""}</p>`;
-      modalOverlay.style.display="flex";
+        <p><strong>License #:</strong> ${d.licenseNumber||""}</p>
+        <p><strong>Organization:</strong> ${d.requestingOrg||""}</p>
+        <p><strong>Country:</strong> ${d.country||""}</p>
+        <p><strong>Purpose:</strong> ${d.purpose||""}</p>
+        <p><strong>Result:</strong> ${d.result||""}</p>
+        <p><strong>Email:</strong> ${d.email||""}</p>
+        <p><strong>Verified At:</strong> ${d.verifiedAt?.toDate?d.verifiedAt.toDate().toLocaleString():""}</p>
+        <p><strong>Verified By:</strong> ${d.verifiedBy||""}</p>`;
+      modal.style.display="flex";
     });
+    document.getElementById("closeBtn").onclick=()=>modal.style.display="none";
+    modal.onclick=e=>{if(e.target===modal)modal.style.display="none";};
 
-    document.getElementById("cancelBtn").addEventListener("click",()=>modalOverlay.style.display="none");
-    modalOverlay.addEventListener("click",(e)=>{if(e.target===modalOverlay)modalOverlay.style.display="none";});
-
-    document.getElementById("approveBtn").addEventListener("click",async()=>{
+    /* === Archive / Delete === */
+    document.getElementById("archiveBtn").onclick=async()=>{
       if(!currentId)return;
-      await updateDoc(doc(db,"requests",currentId),{status:"Approved"});
-      await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{to_email:currentEmail,subject:"GDLVS Access Request Approved",message:"Your access request has been approved."});
-      modalOverlay.style.display="none";
-    });
-
-    document.getElementById("rejectBtn").addEventListener("click",async()=>{
+      await updateDoc(doc(db,"verifications",currentId),{archived:true});
+      modal.style.display="none";
+      alert("✅ Marked as reviewed!");
+    };
+    document.getElementById("deleteBtn").onclick=async()=>{
       if(!currentId)return;
-      await updateDoc(doc(db,"requests",currentId),{status:"Rejected"});
-      await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{to_email:currentEmail,subject:"GDLVS Access Request Rejected",message:"Your access request has been rejected."});
-      modalOverlay.style.display="none";
-    });
+      if(!confirm("Delete this verification?"))return;
+      await deleteDoc(doc(db,"verifications",currentId));
+      modal.style.display="none";
+      alert("🗑️ Deleted!");
+    };
 
-    /* === Search + Export === */
+    /* === Search === */
     document.getElementById("searchRequests").addEventListener("keyup",e=>{
       const term=e.target.value.toLowerCase();
       document.querySelectorAll("#requestsTable tr").forEach(r=>r.style.display=r.textContent.toLowerCase().includes(term)?"":"none");
     });
+    /* === Export === */
     document.getElementById("exportBtn").addEventListener("click",()=>{
       const rows=document.querySelectorAll("table tr");const csv=[];
       rows.forEach(r=>{const cols=r.querySelectorAll("th,td");csv.push(Array.from(cols).map(c=>`"${c.innerText.replace(/"/g,'""')}"`).join(","));});
-      const blob=new Blob([csv.join("\n")],{type:"text/csv"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="verification_requests.csv";a.click();
+      const blob=new Blob([csv.join("\n")],{type:"text/csv"});const a=document.createElement("a");
+      a.href=URL.createObjectURL(blob);a.download="verifications.csv";a.click();
     });
   </script>
 </body>
