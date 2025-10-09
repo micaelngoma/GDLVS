@@ -12,13 +12,16 @@
       --info:#2980b9; --success:#27ae60; --danger:#e74c3c;
     }
     *{box-sizing:border-box;}
-    body{margin:0;font-family:"Segoe UI",sans-serif;background:var(--light);color:#333;}
+    html, body {height:100%;margin:0;font-family:"Segoe UI",sans-serif;background:var(--light);color:#333;}
+    
+    /* === Fixed Header & Nav === */
     header, nav{position:fixed;left:0;right:0;z-index:1000;}
     header{top:0;background:var(--dark);color:#fff;padding:8px 14px;
       display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
     nav{top:46px;background:#fff;border-bottom:1px solid #eee;padding:10px 16px;
       display:flex;flex-wrap:wrap;gap:14px;}
     body{padding-top:100px;}
+
     header h1{margin:0;font-size:1.1rem;display:flex;align-items:center;gap:6px;}
     .controls{display:flex;align-items:center;gap:8px;}
     .controls select,.controls button{padding:5px 9px;border:0;border-radius:6px;font-size:.85rem;cursor:pointer;}
@@ -28,28 +31,43 @@
     nav a{color:var(--dark);text-decoration:none;font-weight:600;}
     nav a.active{border-bottom:2px solid var(--dark);padding-bottom:3px;}
 
-    .container{max-width:1000px;margin:20px auto;background:#fff;border-radius:10px;
-      box-shadow:0 2px 6px rgba(0,0,0,0.1);padding:20px;}
+    /* === Layout === */
+    .container{max-width:1000px;margin:0 auto;background:#fff;border-radius:10px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.1);padding:20px;height:calc(100vh - 120px);
+      display:flex;flex-direction:column;}
+    
+    /* === Insights === */
     .insights{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:18px;}
     .insight-card{flex:1 1 30%;min-width:200px;border-radius:10px;padding:18px;text-align:center;color:#fff;}
     .insight-total{background:var(--info);}
-    .insight-success{background:var(--success);position:relative;}
+    .insight-success{background:var(--success);}
     .insight-fail{background:var(--danger);}
     .insight-card h3{margin:0;font-size:.95rem;font-weight:600;}
     .insight-card h2{margin:6px 0 0;font-size:1.4rem;font-weight:700;}
     .success-rate{font-size:.85rem;margin-top:4px;font-weight:500;color:#eafbe4;}
 
+    /* === Controls === */
     .table-controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:10px;}
     input#searchRequests{max-width:260px;padding:8px;border:1px solid #ddd;border-radius:8px;}
     .btn-export,.btn-toggle{background:var(--info);color:#fff;padding:8px 12px;border:0;border-radius:8px;cursor:pointer;}
     .btn-export:hover,.btn-toggle:hover{background:#1f6392;}
+
+    /* === Scrollable Table === */
+    .table-wrapper {
+      flex:1;
+      overflow-y:auto;
+      border-top:1px solid #eee;
+      border-bottom:1px solid #eee;
+    }
     table{width:100%;border-collapse:collapse;}
     th,td{padding:10px 12px;border:1px solid #eee;}
-    th{background:#f2f2f2;font-weight:600;}
+    th{background:#f2f2f2;font-weight:600;position:sticky;top:0;background:#f2f2f2;z-index:10;}
     .btn-action{border:0;border-radius:6px;padding:6px 10px;cursor:pointer;color:#fff;}
     .btn-view{background:var(--info);} .btn-view:hover{background:#1f6392;}
     .btn-delete{background:var(--danger);} .btn-delete:hover{background:#c0392b;}
     .btn-archive{background:var(--success);} .btn-archive:hover{background:#219150;}
+
+    /* === Modal === */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;
       align-items:center;justify-content:center;z-index:9999;}
     .modal{background:#fff;border-radius:10px;max-width:440px;width:90%;padding:22px;
@@ -63,16 +81,17 @@
     .btn-close{background:#555;} .btn-close:hover{background:#333;}
   </style>
 </head>
+
 <body>
   <header>
-    <h1><i class="fas fa-clipboard-check"></i> <span data-i18n="verificationRecords">Verification Records</span></h1>
+    <h1><i class="fas fa-clipboard-check"></i> <span>Verification Records</span></h1>
     <div class="controls">
       <select id="languageSwitcher">
         <option value="en">🇬🇧 EN</option>
         <option value="fr">🇫🇷 FR</option>
         <option value="ja">🇯🇵 JP</option>
       </select>
-      <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></button>
+      <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </div>
   </header>
 
@@ -86,7 +105,7 @@
   </nav>
 
   <main class="container">
-    <!-- Insights Section -->
+    <!-- Insights -->
     <section>
       <h2><i class="fas fa-chart-line"></i> Verification Insights</h2>
       <div class="insights">
@@ -106,13 +125,15 @@
       </div>
     </section>
 
-    <section>
-      <div class="table-controls">
-        <button class="btn-toggle" id="toggleReviewed">Show Reviewed Verifications</button>
-        <input type="text" id="searchRequests" placeholder="Search verifications...">
-        <button class="btn-export" id="exportBtn">📥 Export</button>
-      </div>
+    <!-- Table Controls -->
+    <div class="table-controls">
+      <button class="btn-toggle" id="toggleReviewed">Show Reviewed Verifications</button>
+      <input type="text" id="searchRequests" placeholder="Search verifications...">
+      <button class="btn-export" id="exportBtn">📥 Export</button>
+    </div>
 
+    <!-- Scrollable Table -->
+    <div class="table-wrapper">
       <table>
         <thead>
           <tr>
@@ -128,7 +149,7 @@
         </thead>
         <tbody id="requestsTable"><tr><td colspan="8">Loading...</td></tr></tbody>
       </table>
-    </section>
+    </div>
   </main>
 
   <!-- Modal -->
@@ -239,7 +260,6 @@
         <p><strong>Result:</strong> ${d.result || ""}</p>
         <p><strong>Email:</strong> ${d.email || ""}</p>
         <p><strong>Verified At:</strong> ${d.verifiedAt?.toDate ? d.verifiedAt.toDate().toLocaleString() : ""}</p>
-        <p><strong>Verified By:</strong> ${d.verifiedBy || ""}</p>
         <p><strong>Status:</strong> ${d.archived ? "Reviewed ✅" : "Pending 🔄"}</p>`;
       modal.style.display = "flex";
     });
