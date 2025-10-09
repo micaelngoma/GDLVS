@@ -11,44 +11,32 @@
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
   <style>
     :root {
-      --brand:#2a3f54; --brand2:#1e2d3c;
-      --success:#27ae60; --danger:#e74c3c; --info:#2980b9;
+      --brand:#2a3f54; --brand2:#1e2d3c; --success:#27ae60; --danger:#e74c3c; --info:#2980b9;
       --shadow:0 2px 6px rgba(0,0,0,.1);
     }
-    body {margin:0; font-family:Arial, sans-serif; background:#f6f8fb; color:#333;}
-    header {
-      background:var(--brand); color:#fff;
-      display:flex; justify-content:space-between; align-items:center;
-      padding:10px 14px;
-    }
-    header h1 {margin:0; font-size:18px; display:flex; align-items:center; gap:8px;}
-    .header-controls {display:flex; gap:8px;}
-    .mini-btn {background:var(--brand2); color:#fff; border:0; border-radius:8px; padding:6px 10px; cursor:pointer;}
-    .mini-select {border:1px solid #ccc; border-radius:8px; padding:6px 8px; font-size:12px; background:#fff;}
-    nav {
-      background:#fff; border-bottom:1px solid #eaeaea;
-      padding:10px 14px; display:flex; gap:14px; flex-wrap:wrap;
-    }
-    nav a {color:var(--brand); text-decoration:none; font-weight:700;}
-    nav a.active {border-bottom:2px solid var(--brand); padding-bottom:4px;}
-    .container {max-width:1200px; margin:20px auto; padding:0 14px;}
-    .dashboard-cards {display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin:10px 0 20px;}
-    .card {
-      flex:1 1 200px; max-width:220px; min-width:160px;
-      border-radius:12px; color:#fff; text-align:center; padding:14px;
-      box-shadow:var(--shadow);
-    }
-    .card i {display:block; margin-bottom:6px;}
-    .card.total {background:var(--info);}
-    .card.active {background:var(--success);}
-    .card.pending {background:#f39c12;}
-    .card.danger {background:var(--danger);}
-    section.panel {background:#fff; border-radius:10px; box-shadow:var(--shadow); padding:20px; margin-top:20px;}
-    h2,h3 {color:var(--brand);}
-    table {width:100%; border-collapse:separate; border-spacing:0 6px; margin-top:10px;}
-    th,td {background:#fff; border:1px solid #eee; padding:10px 12px;}
-    th {background:#f2f2f2;}
-    canvas {max-width:100%; margin:20px auto; display:block;}
+    body{margin:0;font-family:Arial, sans-serif;background:#f6f8fb;color:#333;}
+    header{background:var(--brand);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:10px 14px;}
+    header h1{margin:0;font-size:18px;display:flex;align-items:center;gap:8px;}
+    .header-controls{display:flex;gap:8px;}
+    .mini-btn{background:var(--brand2);color:#fff;border:0;border-radius:8px;padding:6px 10px;cursor:pointer;}
+    .mini-select{border:1px solid #ccc;border-radius:8px;padding:6px 8px;font-size:12px;background:#fff;}
+    nav{background:#fff;border-bottom:1px solid #eaeaea;padding:10px 14px;display:flex;gap:14px;flex-wrap:wrap;}
+    nav a{color:var(--brand);text-decoration:none;font-weight:700;}
+    nav a.active{border-bottom:2px solid var(--brand);padding-bottom:4px;}
+    .container{max-width:1200px;margin:20px auto;padding:0 14px;}
+    .dashboard-cards{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:10px 0 20px;}
+    .card{flex:1 1 200px;max-width:220px;min-width:160px;border-radius:12px;color:#fff;text-align:center;padding:14px;box-shadow:var(--shadow);}
+    .card i{display:block;margin-bottom:6px;}
+    .card.total{background:var(--info);}
+    .card.active{background:var(--success);}
+    .card.pending{background:#f39c12;}
+    .card.danger{background:var(--danger);}
+    section.panel{background:#fff;border-radius:10px;box-shadow:var(--shadow);padding:20px;margin-top:20px;}
+    h2,h3{color:var(--brand);}
+    table{width:100%;border-collapse:separate;border-spacing:0 6px;margin-top:10px;}
+    th,td{background:#fff;border:1px solid #eee;padding:10px 12px;}
+    th{background:#f2f2f2;}
+    canvas{max-width:100%;margin:20px auto;display:block;}
   </style>
 </head>
 <body>
@@ -107,112 +95,77 @@
   <script type="module">
     import { auth, db } from './firebase-config.js';
     import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
-    import { collection, onSnapshot, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
+    import { collection, getDocs, onSnapshot, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
 
-    // --- i18n Setup ---
-    const resources = {
-      en:{translation:{
-        analyticsTitle:"GDLVS Analytics", signOut:"Sign Out",
-        dashboard:"Dashboard", verification:"Verification", addLicense:"Add License", users:"Users",
-        requests:"Access Requests", analytics:"Analytics",
-        systemOverview:"System Overview", licenses:"Licenses", verifications:"Verifications",
-        pendingUsers:"Pending Users", pendingRequests:"Pending Requests", countries:"Countries",
-        verificationPerformance:"Verification Performance", topCountries:"Top Countries",
-        recentVerifications:"Recent Verifications", loading:"Loading..."
-      }},
-      fr:{translation:{
-        analyticsTitle:"Analyse GDLVS", signOut:"Déconnexion",
-        dashboard:"Tableau de bord", verification:"Vérification", addLicense:"Ajouter un permis", users:"Utilisateurs",
-        requests:"Demandes d’accès", analytics:"Analytique",
-        systemOverview:"Aperçu du système", licenses:"Permis", verifications:"Vérifications",
-        pendingUsers:"Utilisateurs en attente", pendingRequests:"Demandes en attente", countries:"Pays",
-        verificationPerformance:"Performance de vérification", topCountries:"Meilleurs pays",
-        recentVerifications:"Vérifications récentes", loading:"Chargement..."
-      }},
-      ja:{translation:{
-        analyticsTitle:"GDLVS 分析", signOut:"ログアウト",
-        dashboard:"ダッシュボード", verification:"照会", addLicense:"免許を追加", users:"ユーザー",
-        requests:"アクセスリクエスト", analytics:"分析",
-        systemOverview:"システム概要", licenses:"免許", verifications:"照会件数",
-        pendingUsers:"保留中のユーザー", pendingRequests:"保留中のリクエスト", countries:"国",
-        verificationPerformance:"照会パフォーマンス", topCountries:"上位の国",
-        recentVerifications:"最近の照会", loading:"読み込み中..."
-      }}
+    // --- Translations ---
+    const i18nData = {
+      en:{translation:{analyticsTitle:"GDLVS Analytics",signOut:"Sign Out",dashboard:"Dashboard",verification:"Verification",addLicense:"Add License",users:"Users",requests:"Access Requests",analytics:"Analytics",systemOverview:"System Overview",licenses:"Licenses",verifications:"Verifications",pendingUsers:"Pending Users",pendingRequests:"Pending Requests",countries:"Countries",verificationPerformance:"Verification Performance",topCountries:"Top Countries",recentVerifications:"Recent Verifications",loading:"Loading..."}},
+      fr:{translation:{analyticsTitle:"Analyse GDLVS",signOut:"Déconnexion",dashboard:"Tableau de bord",verification:"Vérification",addLicense:"Ajouter un permis",users:"Utilisateurs",requests:"Demandes d’accès",analytics:"Analytique",systemOverview:"Aperçu du système",licenses:"Permis",verifications:"Vérifications",pendingUsers:"Utilisateurs en attente",pendingRequests:"Demandes en attente",countries:"Pays",verificationPerformance:"Performance de vérification",topCountries:"Meilleurs pays",recentVerifications:"Vérifications récentes",loading:"Chargement..."}},
+      ja:{translation:{analyticsTitle:"GDLVS 分析",signOut:"ログアウト",dashboard:"ダッシュボード",verification:"照会",addLicense:"免許を追加",users:"ユーザー",requests:"アクセスリクエスト",analytics:"分析",systemOverview:"システム概要",licenses:"免許",verifications:"照会件数",pendingUsers:"保留中のユーザー",pendingRequests:"保留中のリクエスト",countries:"国",verificationPerformance:"照会パフォーマンス",topCountries:"上位の国",recentVerifications:"最近の照会",loading:"読み込み中..."}}
     };
-    i18next.use(i18nextBrowserLanguageDetector).init({resources,fallbackLng:"en"},()=>{jqueryI18next.init(i18next,$,{useOptionsAttr:true});$("body").localize();});
+    i18next.use(i18nextBrowserLanguageDetector).init({resources:i18nData,fallbackLng:"en"},()=>{jqueryI18next.init(i18next,$,{useOptionsAttr:true});$("body").localize();});
     $("#languageSwitcher").on("change",function(){i18next.changeLanguage(this.value,()=>$("body").localize());});
 
-    // --- Auth check ---
+    // --- Authentication ---
     onAuthStateChanged(auth,u=>{if(!u) location.href='index.html';});
     document.getElementById('logoutBtn').onclick=()=>signOut(auth).then(()=>location.href='index.html');
 
-    // --- Firestore listeners ---
+    // --- Dashboard Data ---
     const totalLicenses=document.getElementById('totalLicenses');
     const totalVerifications=document.getElementById('totalVerifications');
     const pendingUsers=document.getElementById('pendingUsers');
     const pendingRequests=document.getElementById('pendingRequests');
     const countriesCount=document.getElementById('countriesCount');
     const logsBody=document.getElementById('verificationLogs');
-
-    const licensesQ=collection(db,'licenses');
-    const usersQ=collection(db,'users');
-    const requestsQ=collection(db,'requests');
-    const verificationsQ=query(collection(db,'verifications'),orderBy('verifiedAt','desc'));
-
     let resultChart,countryChart;
 
-    // Licenses
-    onSnapshot(licensesQ,snap=>{totalLicenses.textContent=snap.size;});
+    async function loadAnalytics(){
+      try{
+        // Licenses
+        const licensesSnap=await getDocs(collection(db,'licenses'));
+        totalLicenses.textContent=licensesSnap.size;
 
-    // Users
-    onSnapshot(usersQ,snap=>{
-      let pending=0;
-      snap.forEach(u=>{if(u.data().status==="pending") pending++;});
-      pendingUsers.textContent=pending;
-    });
+        // Users
+        const usersSnap=await getDocs(collection(db,'users'));
+        let pendingU=0; usersSnap.forEach(d=>{if((d.data().status||'').toLowerCase()==='pending') pendingU++;});
+        pendingUsers.textContent=pendingU;
 
-    // Requests
-    onSnapshot(requestsQ,snap=>{pendingRequests.textContent=snap.size;});
+        // Requests
+        const reqSnap=await getDocs(collection(db,'requests'));
+        pendingRequests.textContent=reqSnap.size;
 
-    // Verifications
-    onSnapshot(verificationsQ,snap=>{
-      let ok=0,fail=0,total=0;
-      const countries={};
-      logsBody.innerHTML='';
-      if(snap.empty){logsBody.innerHTML=`<tr><td colspan="5">${i18next.t("loading")}</td></tr>`;return;}
-      snap.forEach(doc=>{
-        const v=doc.data(); total++;
-        const result=(v.result||"").toLowerCase();
-        if(result.includes("not")||result.includes("fail")) fail++; else ok++;
-        const c=(v.country||"Unknown").trim();
-        countries[c]=(countries[c]||0)+1;
-        const date=v.verifiedAt?.toDate?.()?v.verifiedAt.toDate().toLocaleString():v.verifiedAt||'';
-        const tr=document.createElement('tr');
-        tr.innerHTML=`<td>${v.licenseNumber||''}</td><td>${v.requestingOrg||''}</td><td>${c}</td><td>${v.result||''}</td><td>${date}</td>`;
-        logsBody.appendChild(tr);
-      });
-      totalVerifications.textContent=total;
-      countriesCount.textContent=Object.keys(countries).length;
+        // Verifications
+        const verSnap=await getDocs(query(collection(db,'verifications'),orderBy('verifiedAt','desc')));
+        let total=0,ok=0,fail=0;
+        const countries={};
+        logsBody.innerHTML='';
+        verSnap.forEach(doc=>{
+          const v=doc.data(); total++;
+          const res=(v.result||'').toLowerCase();
+          if(res.includes('not')||res.includes('fail')) fail++; else ok++;
+          const c=(v.country||'Unknown').trim();
+          countries[c]=(countries[c]||0)+1;
+          const date=v.verifiedAt?.toDate?.()?v.verifiedAt.toDate().toLocaleString():v.verifiedAt||'';
+          logsBody.innerHTML+=`<tr><td>${v.licenseNumber||''}</td><td>${v.requestingOrg||''}</td><td>${c}</td><td>${v.result||''}</td><td>${date}</td></tr>`;
+        });
+        totalVerifications.textContent=total;
+        countriesCount.textContent=Object.keys(countries).length;
 
-      // Pie Chart
-      const ctx=document.getElementById('resultChart');
-      if(resultChart) resultChart.destroy();
-      resultChart=new Chart(ctx,{
-        type:'pie',
-        data:{labels:['Successful','Failed'],datasets:[{data:[ok,fail],backgroundColor:['#27ae60','#e74c3c']}]},
-        options:{plugins:{legend:{position:'bottom'}}}
-      });
+        // Charts
+        const ctx=document.getElementById('resultChart');
+        if(resultChart) resultChart.destroy();
+        resultChart=new Chart(ctx,{type:'pie',data:{labels:['Successful','Failed'],datasets:[{data:[ok,fail],backgroundColor:['#27ae60','#e74c3c']}]},options:{plugins:{legend:{position:'bottom'}}}});
 
-      // Country Chart
-      const top5=Object.entries(countries).sort((a,b)=>b[1]-a[1]).slice(0,5);
-      const ctx2=document.getElementById('countryChart');
-      if(countryChart) countryChart.destroy();
-      countryChart=new Chart(ctx2,{
-        type:'bar',
-        data:{labels:top5.map(e=>e[0]),datasets:[{label:'Verifications',data:top5.map(e=>e[1]),backgroundColor:'#2980b9'}]},
-        options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
-      });
-    });
+        const top5=Object.entries(countries).sort((a,b)=>b[1]-a[1]).slice(0,5);
+        const ctx2=document.getElementById('countryChart');
+        if(countryChart) countryChart.destroy();
+        countryChart=new Chart(ctx2,{type:'bar',data:{labels:top5.map(e=>e[0]),datasets:[{label:'Verifications',data:top5.map(e=>e[1]),backgroundColor:'#2980b9'}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+      }catch(err){console.error("Firestore read error:",err);}
+    }
+
+    loadAnalytics();
+    // Optional: refresh live every 60s
+    setInterval(loadAnalytics,60000);
   </script>
 </body>
 </html>
