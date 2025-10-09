@@ -33,10 +33,11 @@
     .insights{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:18px;}
     .insight-card{flex:1 1 30%;min-width:200px;border-radius:10px;padding:18px;text-align:center;color:#fff;}
     .insight-total{background:var(--info);}
-    .insight-success{background:var(--success);}
+    .insight-success{background:var(--success);position:relative;}
     .insight-fail{background:var(--danger);}
     .insight-card h3{margin:0;font-size:.95rem;font-weight:600;}
     .insight-card h2{margin:6px 0 0;font-size:1.4rem;font-weight:700;}
+    .success-rate{font-size:.85rem;margin-top:4px;font-weight:500;color:#eafbe4;}
 
     .table-controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:10px;}
     input#searchRequests{max-width:260px;padding:8px;border:1px solid #ddd;border-radius:8px;}
@@ -96,6 +97,7 @@
         <div class="insight-card insight-success">
           <h3><i class="fas fa-check-circle"></i> Successful:</h3>
           <h2 id="successfulVerifications">0</h2>
+          <div class="success-rate" id="successRate">Success Rate: 0%</div>
         </div>
         <div class="insight-card insight-fail">
           <h3><i class="fas fa-times-circle"></i> Unsuccessful:</h3>
@@ -142,15 +144,10 @@
     </div>
   </div>
 
-  <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
-  <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
-  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
-  <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
@@ -160,6 +157,7 @@
       messagingSenderId: "358715790318",
       appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
     };
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
@@ -188,9 +186,12 @@
         else if (res.includes("found")) success++;
       });
 
+      const rate = total > 0 ? ((success / total) * 100).toFixed(1) : 0;
+
       document.getElementById("totalVerifications").textContent = total;
       document.getElementById("successfulVerifications").textContent = success;
       document.getElementById("unsuccessfulVerifications").textContent = fail;
+      document.getElementById("successRate").textContent = `Success Rate: ${rate}%`;
     }
 
     function renderTable(docs) {
@@ -220,7 +221,6 @@
       toggleBtn.textContent = showReviewed ? "Hide Reviewed Verifications" : "Show Reviewed Verifications";
     });
 
-    // Modal logic
     const modal = document.getElementById("modalOverlay");
     const modalBody = document.getElementById("modalBody");
     let currentId = null;
@@ -228,7 +228,6 @@
     tbody.addEventListener("click", async (e) => {
       if (!e.target.classList.contains("btn-view")) return;
       currentId = e.target.dataset.id;
-      const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
       const s = await getDoc(doc(db, "verifications", currentId));
       if (!s.exists()) return;
       const d = s.data();
