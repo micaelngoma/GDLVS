@@ -12,28 +12,44 @@
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
   <style>
-    .background-image{position:fixed;inset:0;background:url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') no-repeat center center fixed;background-size:cover;z-index:-1;filter:brightness(0.95)}
-    :root{--brand-dark:#2a3f54;--brand-dark-2:#1e2d3c;--text:#333;--panel-bg:#fff;--card-shadow:0 2px 6px rgba(0,0,0,.1);--success:#27ae60;--danger:#e74c3c;--info:#2980b9}
-    body{margin:0;font-family:Arial,sans-serif;background:#f6f8fb;color:#333}
-    header{background:var(--brand-dark);color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
-    header h1{margin:0;font-size:1.1rem;display:flex;gap:8px;align-items:center}
-    .controls{display:flex;gap:8px}
-    .controls select,.controls button{padding:6px 10px;border-radius:8px;border:0}
-    .controls select{background:#fff}
-    .controls button{background:var(--brand-dark-2);color:#fff}
-    nav{background:#fff;border-bottom:1px solid #eaeaea;padding:10px 14px;display:flex;gap:15px;flex-wrap:wrap}
-    nav a{color:var(--brand-dark);font-weight:bold;text-decoration:none}
-    nav a.active{border-bottom:2px solid var(--brand-dark);padding-bottom:3px}
-    .container{max-width:1000px;margin:20px auto 40px;background:#fff;border-radius:10px;box-shadow:var(--card-shadow);padding:20px}
-    .muted{color:#666}
-    .table{width:100%;border-collapse:separate;border-spacing:0 6px;margin-top:12px}
-    .table th,.table td{border:1px solid #eee;padding:10px 14px;background:#fff}
-    .table th{background:#f2f2f2}
-    .btn-export{background:var(--info);color:#fff;border:0;border-radius:8px;padding:8px 12px;cursor:pointer}
-    .inline{padding:6px 12px;border-radius:8px;border:0;color:#fff;cursor:pointer}
-    .btn-update{background:var(--success)}
-    .btn-delete{background:var(--danger)}
-    input,select{padding:10px;border:1px solid #dcdcdc;border-radius:8px}
+    .background-image {
+      position: fixed;
+      inset: 0;
+      background: url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') no-repeat center center fixed;
+      background-size: cover;
+      z-index: -1;
+      filter: brightness(0.95);
+    }
+    :root {
+      --brand-dark: #2a3f54;
+      --brand-dark-2: #1e2d3c;
+      --text: #333;
+      --panel-bg: #fff;
+      --card-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      --success: #27ae60;
+      --danger: #e74c3c;
+      --info: #2980b9;
+    }
+    body { margin: 0; font-family: Arial, sans-serif; background: #f6f8fb; color: #333; }
+    header { background: var(--brand-dark); color: #fff; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { margin: 0; font-size: 1.1rem; display: flex; gap: 8px; align-items: center; }
+    .controls { display: flex; gap: 8px; }
+    .controls select, .controls button { padding: 6px 10px; border-radius: 8px; border: 0; }
+    .controls select { background: #fff; }
+    .controls button { background: var(--brand-dark-2); color: #fff; }
+    nav { background: #fff; border-bottom: 1px solid #eaeaea; padding: 10px 14px; display: flex; gap: 15px; flex-wrap: wrap; position: sticky; top: 0; z-index: 100; }
+    nav a { color: var(--brand-dark); font-weight: bold; text-decoration: none; }
+    nav a.active { border-bottom: 2px solid var(--brand-dark); padding-bottom: 3px; }
+    .container { max-width: 1000px; margin: 20px auto 40px; background: #fff; border-radius: 10px; box-shadow: var(--card-shadow); padding: 20px; }
+    .muted { color: #666; }
+    .table { width: 100%; border-collapse: separate; border-spacing: 0 6px; margin-top: 12px; }
+    .table th, .table td { border: 1px solid #eee; padding: 10px 14px; background: #fff; }
+    .table th { background: #f2f2f2; }
+    .btn-export { background: var(--info); color: #fff; border: 0; border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+    .inline { padding: 6px 12px; border-radius: 8px; border: 0; color: #fff; cursor: pointer; }
+    .btn-update { background: var(--success); }
+    .btn-delete { background: var(--danger); }
+    input, select { padding: 10px; border: 1px solid #dcdcdc; border-radius: 8px; }
   </style>
 </head>
 <body>
@@ -99,7 +115,9 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { 
+      getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, getDocs, getDoc 
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
@@ -109,36 +127,45 @@
       messagingSenderId: "358715790318",
       appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
     };
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
     // 🌐 Translations
     const i18nResources = {
-      en:{translation:{dashboard:"Dashboard", verificationPortal:"Verification", addLicense:"Add License", userManagement:"User Management", verificationRequests:"Verification Requests", analytics:"Analytics", logout:"Logout", userTip:"Admins can add, edit, or remove users directly from here.", searchUsers:"Search users by name or email...", fullName:"Full Name", email:"Email", role:"Role", status:"Status", action:"Action", addUser:"Add User", exportUsers:"Export Users", updateUser:"Update", delete:"Delete", loading:"Loading...", emailPlaceholder:"Email"}},
-      fr:{translation:{dashboard:"Tableau de bord", verificationPortal:"Vérification", addLicense:"Ajouter un permis", userManagement:"Gestion des utilisateurs", verificationRequests:"Demandes de vérification", analytics:"Analytique", logout:"Déconnexion", userTip:"Les administrateurs peuvent ajouter, modifier ou supprimer des utilisateurs ici.", searchUsers:"Rechercher des utilisateurs par nom ou e-mail…", fullName:"Nom complet", email:"Email", role:"Rôle", status:"Statut", action:"Action", addUser:"Ajouter un utilisateur", exportUsers:"Exporter les utilisateurs", updateUser:"Mettre à jour", delete:"Supprimer", loading:"Chargement...", emailPlaceholder:"Email"}},
-      ja:{translation:{dashboard:"ダッシュボード", verificationPortal:"照合", addLicense:"免許を追加", userManagement:"ユーザー管理", verificationRequests:"照合リクエスト", analytics:"分析", logout:"ログアウト", userTip:"管理者はここでユーザーを追加・編集・削除できます。", searchUsers:"氏名またはメールで検索…", fullName:"氏名", email:"メール", role:"役割", status:"ステータス", action:"操作", addUser:"ユーザーを追加", exportUsers:"ユーザーをエクスポート", updateUser:"更新", delete:"削除", loading:"読み込み中…", emailPlaceholder:"メール"}}
+      en:{translation:{dashboard:"Dashboard",verificationPortal:"Verification",addLicense:"Add License",userManagement:"User Management",verificationRequests:"Verification Requests",analytics:"Analytics",logout:"Logout",userTip:"Admins can add, edit, or remove users directly from here.",searchUsers:"Search users by name or email...",fullName:"Full Name",email:"Email",role:"Role",status:"Status",action:"Action",addUser:"Add User",exportUsers:"Export Users",updateUser:"Update",delete:"Delete",loading:"Loading...",emailPlaceholder:"Email"}},
+      fr:{translation:{dashboard:"Tableau de bord",verificationPortal:"Vérification",addLicense:"Ajouter un permis",userManagement:"Gestion des utilisateurs",verificationRequests:"Demandes de vérification",analytics:"Analytique",logout:"Déconnexion",userTip:"Les administrateurs peuvent ajouter, modifier ou supprimer des utilisateurs ici.",searchUsers:"Rechercher des utilisateurs par nom ou e-mail…",fullName:"Nom complet",email:"Email",role:"Rôle",status:"Statut",action:"Action",addUser:"Ajouter un utilisateur",exportUsers:"Exporter les utilisateurs",updateUser:"Mettre à jour",delete:"Supprimer",loading:"Chargement...",emailPlaceholder:"Email"}},
+      ja:{translation:{dashboard:"ダッシュボード",verificationPortal:"照合",addLicense:"免許を追加",userManagement:"ユーザー管理",verificationRequests:"照合リクエスト",analytics:"分析",logout:"ログアウト",userTip:"管理者はここでユーザーを追加・編集・削除できます。",searchUsers:"氏名またはメールで検索…",fullName:"氏名",email:"メール",role:"役割",status:"ステータス",action:"操作",addUser:"ユーザーを追加",exportUsers:"ユーザーをエクスポート",updateUser:"更新",delete:"削除",loading:"読み込み中…",emailPlaceholder:"メール"}}
     };
+
     i18next.use(i18nextBrowserLanguageDetector).init({resources:i18nResources,fallbackLng:"en"},()=>{jqueryI18next.init(i18next,$,{useOptionsAttr:true});$("body").localize();});
     document.getElementById("languageSwitcher").addEventListener("change",function(){i18next.changeLanguage(this.value,()=>$("body").localize());});
 
     // 🔒 Auth check
-    onAuthStateChanged(auth,async(user)=>{
+    onAuthStateChanged(auth, async(user)=>{
       if(!user){location.href="index.html";return;}
       const roleSnap=await getDoc(doc(db,"roles",user.email));
       document.getElementById("navVerificationRequests").style.display=(roleSnap.exists()&&roleSnap.data().role==="admin")?"block":"none";
     });
+
     document.getElementById("logoutBtn").addEventListener("click",()=>signOut(auth).then(()=>location.href="index.html"));
 
-    // 👥 Realtime user list
+    // 👥 Realtime user + roles sync
     const tbody=document.getElementById("usersTable");
+    const rolesCache={};
+
+    // Listen for both users and roles
+    onSnapshot(collection(db,"roles"),(roleSnap)=>{
+      roleSnap.forEach(r=>rolesCache[r.id]=r.data().role||"verifier");
+    });
+
     onSnapshot(collection(db,"users"),async(snap)=>{
-      const rolesSnap=await getDocs(collection(db,"roles"));
-      const rolesMap={};rolesSnap.forEach(r=>rolesMap[r.id]=r.data().role||"verifier");
       tbody.innerHTML="";
       if(snap.empty){tbody.innerHTML=`<tr><td colspan="5">${i18next.t("loading")}</td></tr>`;return;}
       snap.forEach(uDoc=>{
-        const u=uDoc.data();const role=rolesMap[u.email]||"verifier";
+        const u=uDoc.data();
+        const role=rolesCache[u.email]||u.role||"verifier";
         const tr=document.createElement("tr");
         tr.innerHTML=`
           <td contenteditable data-field="fullName">${u.fullName||""}</td>
@@ -158,7 +185,7 @@
       const email=document.getElementById("newUserEmail").value.trim();
       const role=document.getElementById("newUserRole").value;
       if(!name||!email)return alert("Name & Email required");
-      await setDoc(doc(db,"users",email),{fullName:name,email,status:"approved",approved:true},{merge:true});
+      await setDoc(doc(db,"users",email),{fullName:name,email,role,status:"approved",approved:true},{merge:true});
       await setDoc(doc(db,"roles",email),{role},{merge:true});
       e.target.reset();alert("✅ User added successfully");
     });
@@ -174,9 +201,11 @@
           const key=el.dataset.field;
           updates[key]=(el.tagName==="TD")?el.textContent.trim():el.value;
         });
-        await setDoc(doc(db,"users",email),{fullName:updates.fullName,status:updates.status,approved:(updates.status==="approved")},{merge:true});
-        await setDoc(doc(db,"roles",email),{role:updates.role},{merge:true});
-        alert("✅ User updated");
+        try{
+          await setDoc(doc(db,"users",email),{fullName:updates.fullName,role:updates.role,status:updates.status,approved:(updates.status==="approved")},{merge:true});
+          await setDoc(doc(db,"roles",email),{role:updates.role},{merge:true});
+          alert("✅ User updated successfully (role + status synced)");
+        }catch(err){console.error(err);alert("❌ Failed to update user.");}
       }
       if(t.closest(".btn-delete")){
         const email=t.dataset.email;
@@ -187,7 +216,7 @@
       }
     });
 
-    // 🔍 Search filter
+    // 🔍 Search
     document.getElementById("userSearch").addEventListener("keyup",(e)=>{
       const term=e.target.value.toLowerCase();
       document.querySelectorAll("#usersTable tr").forEach(row=>{
@@ -195,7 +224,7 @@
       });
     });
 
-    // 📤 Export
+    // 📤 Export CSV
     document.getElementById("exportUsers").addEventListener("click",()=>{
       const rows=document.querySelectorAll(".table tr");
       const csv=[];
