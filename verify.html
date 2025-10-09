@@ -5,7 +5,6 @@
   <title>GDLVS - Verification</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <!-- ===== Professional CSS ===== -->
   <style>
     :root {
       --brand-dark: #2a3f54;
@@ -23,7 +22,6 @@
       background: var(--bg);
       color: var(--text);
     }
-    /* === HEADER === */
     header {
       background: var(--brand-dark);
       color: #fff;
@@ -68,7 +66,6 @@
       border: none;
       cursor: pointer;
     }
-    /* === NAV === */
     nav {
       background: #fff;
       border-bottom: 1px solid #eaeaea;
@@ -87,7 +84,6 @@
       border-bottom: 2px solid var(--brand-dark);
       padding-bottom: 4px;
     }
-    /* === CONTAINER === */
     .container {
       max-width: 980px;
       margin: 22px auto 40px;
@@ -96,11 +92,7 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
       padding: 24px;
     }
-    label {
-      font-weight: 600;
-      margin-top: 8px;
-      display: block;
-    }
+    label { font-weight: 600; margin-top: 8px; display: block; }
     input, textarea, button, select {
       width: 100%;
       padding: 10px;
@@ -109,10 +101,7 @@
       border-radius: 8px;
       font-size: 0.95rem;
     }
-    textarea {
-      min-height: 110px;
-      resize: vertical;
-    }
+    textarea { min-height: 110px; resize: vertical; }
     button {
       background: var(--brand-dark);
       color: #fff;
@@ -130,23 +119,8 @@
       background: #fff;
     }
     #verifyResult h3 { margin: 0 0 8px; }
-    #verifyResult .ok {
-      color: var(--success);
-      font-weight: 700;
-    }
-    #verifyResult .bad {
-      color: var(--danger);
-      font-weight: 700;
-    }
-    footer {
-      text-align: center;
-      margin: 24px 0 40px;
-    }
-    @media(max-width: 900px) {
-      header { flex-direction: column; gap: 8px; }
-      .container { width: 95%; }
-      .header-actions { flex-direction: column; gap: 5px; }
-    }
+    #verifyResult .ok { color: var(--success); font-weight: 700; }
+    #verifyResult .bad { color: var(--danger); font-weight: 700; }
   </style>
 
   <!-- ===== i18n + jQuery ===== -->
@@ -155,81 +129,54 @@
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
-  <!-- ===== EmailJS ===== -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-  <script>
-    (function(){ emailjs.init("TfmaZEvxtz2MNUb70"); })();
-    window.EMAILJS_SERVICE_ID = "service_ddq3kka";
-    window.EMAILJS_TEMPLATE_ID = "template_inl3jsv";
-    window.ADMIN_EMAIL = "m.ngoma1988@gmail.com";
-  </script>
-
-  <!-- ===== Firebase Modular ===== -->
+  <!-- ===== Firebase Modular SDK ===== -->
   <script type="module">
-    import { auth, db } from './firebase-config.js';
-    import { doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { auth, db } from "./firebase-config.js";
+    import { doc, getDoc, collection, addDoc, serverTimestamp } 
+      from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    import { onAuthStateChanged, signOut } 
+      from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-    // ===== i18n translations =====
+    // 🌐 Translations
     const resources = {
-      en: { translation: { verificationPortal:"Verification",logout:"Logout",dashboard:"Dashboard",addLicense:"Add License",userManagement:"User Management",verificationRequests:"Verification Requests",analytics:"Analytics",licenseNumber:"License Number",organization:"Requesting Organization",country:"Country",purpose:"Purpose of Verification",verify:"Verify",placeholders:{licenseNumber:"Enter license number",organization:"Enter requesting organization",country:"Enter country",purpose:"Describe the purpose"} } },
-      fr: { translation: { verificationPortal:"Vérification",logout:"Déconnexion",dashboard:"Tableau de bord",addLicense:"Ajouter un permis",userManagement:"Gestion des utilisateurs",verificationRequests:"Demandes de vérification",analytics:"Analytique",licenseNumber:"Numéro du permis",organization:"Organisme demandeur",country:"Pays",purpose:"Objet de la vérification",verify:"Vérifier",placeholders:{licenseNumber:"Saisir le numéro du permis",organization:"Saisir l’organisme",country:"Saisir le pays",purpose:"Décrivez l’objet"} } },
-      ja: { translation: { verificationPortal:"照会",logout:"ログアウト",dashboard:"ダッシュボード",addLicense:"免許を追加",userManagement:"ユーザー管理",verificationRequests:"照会リクエスト",analytics:"分析",licenseNumber:"免許番号",organization:"照会機関",country:"国",purpose:"照会の目的",verify:"照会する",placeholders:{licenseNumber:"免許番号を入力",organization:"機関名を入力",country:"国名を入力",purpose:"目的を入力"} } }
+      en:{translation:{verificationPortal:"Verification",logout:"Logout",dashboard:"Dashboard",addLicense:"Add License",userManagement:"User Management",verificationRequests:"Verification Requests",analytics:"Analytics",licenseNumber:"License Number",organization:"Requesting Organization",country:"Country",purpose:"Purpose of Verification",verify:"Verify"}},
+      fr:{translation:{verificationPortal:"Vérification",logout:"Déconnexion",dashboard:"Tableau de bord",addLicense:"Ajouter un permis",userManagement:"Gestion des utilisateurs",verificationRequests:"Demandes de vérification",analytics:"Analytique",licenseNumber:"Numéro du permis",organization:"Organisme demandeur",country:"Pays",purpose:"Objet de la vérification",verify:"Vérifier"}},
+      ja:{translation:{verificationPortal:"照会",logout:"ログアウト",dashboard:"ダッシュボード",addLicense:"免許を追加",userManagement:"ユーザー管理",verificationRequests:"照会リクエスト",analytics:"分析",licenseNumber:"免許番号",organization:"照会機関",country:"国",purpose:"照会の目的",verify:"照会する"}}
     };
-    i18next.use(i18nextBrowserLanguageDetector).init({ resources, fallbackLng: "en" }, () => {
-      if (typeof jqueryI18next !== "undefined") {
-        jqueryI18next.init(i18next, $, { useOptionsAttr: true });
-        $("body").localize();
-        applyPlaceholders();
-      }
+
+    i18next.use(i18nextBrowserLanguageDetector).init({resources,fallbackLng:"en"},()=>{
+      jqueryI18next.init(i18next,$,{useOptionsAttr:true});
+      $("body").localize();
     });
 
-    function applyPlaceholders(){
-      const p = i18next.t("placeholders", { returnObjects: true });
-      const ids = {
-        verifyLicenseNumber: p.licenseNumber,
-        verifyOrg: p.organization,
-        verifyCountry: p.country,
-        verifyPurpose: p.purpose
-      };
-      Object.keys(ids).forEach(id=>{
-        const el=document.getElementById(id);
-        if(el) el.placeholder=ids[id];
-      });
-    }
-    document.getElementById("languageSwitcher")?.addEventListener("change", (e)=>{
-      i18next.changeLanguage(e.target.value, ()=>{
-        $("body").localize();
-        applyPlaceholders();
-      });
+    document.getElementById("languageSwitcher")?.addEventListener("change",e=>{
+      i18next.changeLanguage(e.target.value,()=>$("body").localize());
     });
 
-    // ===== Auth and Role Management =====
+    // 🔒 Auth & Role Control
     onAuthStateChanged(auth, async (user)=>{
-      if(!user) return window.location.href="index.html";
-
+      if(!user) return location.href="index.html";
       try {
-        const snap = await getDoc(doc(db, "roles", user.email));
-        const role = snap.exists() ? snap.data().role : "verifier";
+        const snap = await getDoc(doc(db,"roles",user.email));
+        const role = snap.exists()?snap.data().role:"verifier";
         const navLinks = document.querySelectorAll("nav a");
 
-        // Hide or show links based on role
         if(role === "verifier"){
           navLinks.forEach(link=>{
             const href = link.getAttribute("href");
-            if(href !== "verify.html"){ link.style.display = "none"; }
+            if(href !== "verify.html"){ link.remove(); }
           });
         } else if(role === "admin"){
-          navLinks.forEach(link=>link.style.display = "inline-block");
+          navLinks.forEach(link=>link.style.display="inline-block");
         }
       } catch(err){
-        console.error("Role fetch error:", err.message);
+        console.error("Role check failed:",err.message);
       }
     });
 
-    window.signOutUser = ()=> signOut(auth).then(()=>window.location.href="index.html");
+    window.signOutUser = ()=>signOut(auth).then(()=>location.href="index.html");
 
-    // ===== Verify License =====
+    // 🔍 Verify License
     window.verifyLicense = async (e)=>{
       e.preventDefault();
       const licenseNumber=document.getElementById("verifyLicenseNumber").value.trim();
@@ -238,6 +185,7 @@
       const purpose=document.getElementById("verifyPurpose").value.trim();
       const resultEl=document.getElementById("verifyResult");
       const nextContainer=document.getElementById("verifyNextContainer");
+
       if(!licenseNumber){ alert("⚠️ License number required"); return; }
 
       try{
@@ -253,19 +201,20 @@
         });
 
         resultEl.style.display="block";
-        resultEl.innerHTML=
-          `<h3 class="${exists?'ok':'bad'}">${exists?'✅ License Found':'❌ License Not Found'}</h3>
+        resultEl.innerHTML=`
+          <h3 class="${exists?'ok':'bad'}">${exists?'✅ License Found':'❌ License Not Found'}</h3>
           ${exists?`
             <p><strong>Full Name:</strong> ${d.fullName||""}</p>
             <p><strong>Class:</strong> ${d.class||""}</p>
             <p><strong>Issue:</strong> ${d.issueDate||""}</p>
             <p><strong>Expiry:</strong> ${d.expiryDate||""}</p>
-            <p><strong>Status:</strong> ${d.status||""}</p>`:""}
+            <p><strong>Status:</strong> ${d.status||""}</p>
+          `:""}
           <hr>
           <p><strong>Organization:</strong> ${org}</p>
           <p><strong>Country:</strong> ${country}</p>
-          <p><strong>Purpose:</strong> ${purpose}</p>`;
-
+          <p><strong>Purpose:</strong> ${purpose}</p>
+        `;
         nextContainer.style.display="block";
         document.getElementById("verifyNextBtn").onclick=()=>{
           document.getElementById("verifyForm").reset();
