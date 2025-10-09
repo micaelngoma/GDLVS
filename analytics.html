@@ -3,12 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <title>GDLVS - Analytics Dashboard</title>
+
+  <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- 🔧 Load order for i18n (VERY IMPORTANT) -->
+  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
+  <script>window.$ = window.jQuery = window.$ || window.jQuery;</script>
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
-  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
+
   <style>
     :root {
       --brand:#2a3f54; --brand2:#1e2d3c; --success:#27ae60; --danger:#e74c3c; --info:#2980b9;
@@ -43,7 +51,7 @@
   <header>
     <h1><i class="fa-solid fa-chart-line"></i> <span data-i18n="analyticsTitle">GDLVS Analytics</span></h1>
     <div class="header-controls">
-      <select id="languageSwitcher" class="mini-select">
+      <select id="languageSwitcher" class="mini-select" aria-label="Language">
         <option value="en">🇬🇧 English</option>
         <option value="fr">🇫🇷 Français</option>
         <option value="ja">🇯🇵 日本語</option>
@@ -85,7 +93,9 @@
       <h3><i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="recentVerifications">Recent Verifications</span></h3>
       <table>
         <thead>
-          <tr><th>License #</th><th>Organization</th><th>Country</th><th>Result</th><th>Date</th></tr>
+          <tr>
+            <th>License #</th><th>Organization</th><th>Country</th><th>Result</th><th>Date</th>
+          </tr>
         </thead>
         <tbody id="verificationLogs"><tr><td colspan="5" data-i18n="loading">Loading...</td></tr></tbody>
       </table>
@@ -93,80 +103,159 @@
   </main>
 
   <script type="module">
-    import { auth, db } from "./firebase-config.js";
-    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    /* ========= Firebase (inline, no external file needed) ========= */
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import {
+      getFirestore, collection, getDocs, query, orderBy
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    // === Debug Firestore connection ===
-    import { getDocs as debugGetDocs, collection as debugCollection } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-    console.log("🔍 Testing Firestore connection...");
-    debugGetDocs(debugCollection(db, "users"))
-      .then(snap => console.log("✅ USERS COLLECTION FOUND:", snap.size, "documents"))
-      .catch(err => console.error("❌ FIRESTORE ERROR:", err));
+    const firebaseConfig = {
+      apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
+      authDomain: "gdlvs-2348e.firebaseapp.com",
+      projectId: "gdlvs-2348e",
+      storageBucket: "gdlvs-2348e.appspot.com",
+      messagingSenderId: "358715790318",
+      appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    // === Translations ===
+    /* ========= i18n ========= */
     const i18nData = {
       en:{translation:{analyticsTitle:"GDLVS Analytics",signOut:"Sign Out",dashboard:"Dashboard",verification:"Verification",addLicense:"Add License",users:"Users",requests:"Access Requests",analytics:"Analytics",systemOverview:"System Overview",licenses:"Licenses",verifications:"Verifications",pendingUsers:"Pending Users",pendingRequests:"Pending Requests",countries:"Countries",verificationPerformance:"Verification Performance",topCountries:"Top Countries",recentVerifications:"Recent Verifications",loading:"Loading..."}},
       fr:{translation:{analyticsTitle:"Analyse GDLVS",signOut:"Déconnexion",dashboard:"Tableau de bord",verification:"Vérification",addLicense:"Ajouter un permis",users:"Utilisateurs",requests:"Demandes d’accès",analytics:"Analytique",systemOverview:"Aperçu du système",licenses:"Permis",verifications:"Vérifications",pendingUsers:"Utilisateurs en attente",pendingRequests:"Demandes en attente",countries:"Pays",verificationPerformance:"Performance de vérification",topCountries:"Meilleurs pays",recentVerifications:"Vérifications récentes",loading:"Chargement..."}},
       ja:{translation:{analyticsTitle:"GDLVS 分析",signOut:"ログアウト",dashboard:"ダッシュボード",verification:"照会",addLicense:"免許を追加",users:"ユーザー",requests:"アクセスリクエスト",analytics:"分析",systemOverview:"システム概要",licenses:"免許",verifications:"照会件数",pendingUsers:"保留中のユーザー",pendingRequests:"保留中のリクエスト",countries:"国",verificationPerformance:"照会パフォーマンス",topCountries:"上位の国",recentVerifications:"最近の照会",loading:"読み込み中..."}}
     };
-    i18next.use(i18nextBrowserLanguageDetector).init({resources:i18nData,fallbackLng:"en"},()=>{jqueryI18next.init(i18next,$,{useOptionsAttr:true});$("body").localize();});
-    $("#languageSwitcher").on("change",function(){i18next.changeLanguage(this.value,()=>$("body").localize());});
 
-    // === Authentication ===
-    onAuthStateChanged(auth,u=>{if(!u) location.href='index.html';});
-    document.getElementById("logoutBtn").onclick=()=>signOut(auth).then(()=>location.href='index.html');
+    function applyI18n(){
+      if (window.jqueryI18next && typeof $("body").localize === "function") $("body").localize();
+      document.title = i18next.t("analyticsTitle");
+      const short = (i18next.language||"en").split("-")[0];
+      const sel = document.getElementById("languageSwitcher");
+      if (sel && sel.value !== short) sel.value = short;
+      document.documentElement.setAttribute("lang", short);
+    }
 
-    // === Dashboard Logic ===
-    const totalLicenses=document.getElementById("totalLicenses");
-    const totalVerifications=document.getElementById("totalVerifications");
-    const pendingUsers=document.getElementById("pendingUsers");
-    const pendingRequests=document.getElementById("pendingRequests");
-    const countriesCount=document.getElementById("countriesCount");
-    const logsBody=document.getElementById("verificationLogs");
-    let resultChart,countryChart;
+    i18next.use(i18nextBrowserLanguageDetector).init(
+      { resources:i18nData, fallbackLng:"en" },
+      () => { jqueryI18next.init(i18next,$,{useOptionsAttr:true}); applyI18n(); }
+    );
+    i18next.on("languageChanged", applyI18n);
+    document.getElementById("languageSwitcher").addEventListener("change", function(){
+      i18next.changeLanguage(this.value);
+    });
+
+    /* ========= Auth ========= */
+    onAuthStateChanged(auth,u=>{ if(!u) location.href='index.html'; });
+    document.getElementById("logoutBtn").onclick = () => signOut(auth).then(()=>location.href='index.html');
+
+    /* ========= Dashboard Logic ========= */
+    const el = (id)=>document.getElementById(id);
+    const totalLicensesEl     = el("totalLicenses");
+    const totalVerificationsEl= el("totalVerifications");
+    const pendingUsersEl      = el("pendingUsers");
+    const pendingRequestsEl   = el("pendingRequests");
+    const countriesCountEl    = el("countriesCount");
+    const logsBody            = el("verificationLogs");
+    let resultChart, countryChart;
+
+    function formatDate(ts){
+      try{
+        if (ts?.toDate) return ts.toDate().toLocaleString();
+        return ts ? new Date(ts).toLocaleString() : "";
+      }catch{ return ""; }
+    }
 
     async function loadAnalytics(){
       try{
-        const licensesSnap=await getDocs(collection(db,"licenses"));
-        totalLicenses.textContent=licensesSnap.size;
+        // Licenses count
+        const licensesSnap = await getDocs(collection(db,"licenses"));
+        totalLicensesEl.textContent = licensesSnap.size;
 
-        const usersSnap=await getDocs(collection(db,"users"));
-        let pendingU=0; usersSnap.forEach(d=>{if((d.data().status||"").toLowerCase()==="pending") pendingU++;});
-        pendingUsers.textContent=pendingU;
-
-        const reqSnap=await getDocs(collection(db,"requests"));
-        pendingRequests.textContent=reqSnap.size;
-
-        const verSnap=await getDocs(query(collection(db,"verifications"),orderBy("verifiedAt","desc")));
-        let total=0,ok=0,fail=0;
-        const countries={};
-        logsBody.innerHTML="";
-        verSnap.forEach(doc=>{
-          const v=doc.data(); total++;
-          const res=(v.result||"").toLowerCase();
-          if(res.includes("not")||res.includes("fail")) fail++; else ok++;
-          const c=(v.country||"Unknown").trim();
-          countries[c]=(countries[c]||0)+1;
-          const date=v.verifiedAt?.toDate?.()?v.verifiedAt.toDate().toLocaleString():v.verifiedAt||"";
-          logsBody.innerHTML+=`<tr><td>${v.licenseNumber||v.license||""}</td><td>${v.requestingOrg||v.organization||""}</td><td>${c}</td><td>${v.result||""}</td><td>${date}</td></tr>`;
+        // Pending users
+        const usersSnap = await getDocs(collection(db,"users"));
+        let pendingU = 0;
+        usersSnap.forEach(d=>{
+          const s = (d.data().status||"").toLowerCase();
+          if (s === "pending") pendingU++;
         });
-        totalVerifications.textContent=total;
-        countriesCount.textContent=Object.keys(countries).length;
+        pendingUsersEl.textContent = pendingU;
 
-        const ctx=document.getElementById("resultChart");
-        if(resultChart) resultChart.destroy();
-        resultChart=new Chart(ctx,{type:"pie",data:{labels:["Successful","Failed"],datasets:[{data:[ok,fail],backgroundColor:["#27ae60","#e74c3c"]}]},options:{plugins:{legend:{position:"bottom"}}}});
+        // Pending access requests
+        const reqSnap = await getDocs(collection(db,"requests"));
+        let pendingReq = 0;
+        reqSnap.forEach(d=>{
+          const s = (d.data().status||"").toLowerCase();
+          if (!s || s === "pending") pendingReq++;
+        });
+        pendingRequestsEl.textContent = pendingReq;
 
-        const top5=Object.entries(countries).sort((a,b)=>b[1]-a[1]).slice(0,5);
-        const ctx2=document.getElementById("countryChart");
-        if(countryChart) countryChart.destroy();
-        countryChart=new Chart(ctx2,{type:"bar",data:{labels:top5.map(e=>e[0]),datasets:[{label:"Verifications",data:top5.map(e=>e[1]),backgroundColor:"#2980b9"}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
-      }catch(err){console.error("❌ Firestore read error:",err);}
+        // Verifications with charts + table
+        const verSnap = await getDocs(query(collection(db,"verifications"), orderBy("verifiedAt","desc")));
+        let total = 0, ok = 0, fail = 0;
+        const countries = {};
+        logsBody.innerHTML = "";
+
+        verSnap.forEach(doc=>{
+          const v = doc.data(); total++;
+          const res = (v.result||"").toLowerCase();
+          if (res.includes("not") || res.includes("fail")) fail++; else ok++;
+
+          const c = (v.country || "Unknown").trim();
+          countries[c] = (countries[c]||0) + 1;
+
+          const row = document.createElement("tr");
+          row.innerHTML =
+            `<td>${v.licenseNumber || v.license || ""}</td>
+             <td>${v.requestingOrg || v.organization || ""}</td>
+             <td>${c}</td>
+             <td>${v.result || ""}</td>
+             <td>${formatDate(v.verifiedAt)}</td>`;
+          logsBody.appendChild(row);
+        });
+
+        totalVerificationsEl.textContent = total;
+        countriesCountEl.textContent = Object.keys(countries).length;
+
+        // Result chart
+        const ctx = document.getElementById("resultChart");
+        if (resultChart) resultChart.destroy();
+        resultChart = new Chart(ctx, {
+          type: "pie",
+          data: {
+            labels: ["Successful","Failed"],
+            datasets: [{ data:[ok,fail] }]
+          },
+          options: { plugins:{ legend:{ position:"bottom" } } }
+        });
+
+        // Top countries chart
+        const top5 = Object.entries(countries).sort((a,b)=>b[1]-a[1]).slice(0,5);
+        const ctx2 = document.getElementById("countryChart");
+        if (countryChart) countryChart.destroy();
+        countryChart = new Chart(ctx2, {
+          type: "bar",
+          data: {
+            labels: top5.map(e=>e[0]),
+            datasets: [{ label: "Verifications", data: top5.map(e=>e[1]) }]
+          },
+          options: { plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } }
+        });
+
+        // If no logs, show a friendly line
+        if (!logsBody.children.length){
+          logsBody.innerHTML = `<tr><td colspan="5">${i18next.t("loading")}</td></tr>`;
+        }
+      }catch(err){
+        console.error("❌ Firestore read error:", err);
+      }
     }
 
-    loadAnalytics();
-    setInterval(loadAnalytics,60000);
+    // Initial load + refresh every 60s
+    await loadAnalytics();
+    setInterval(loadAnalytics, 60000);
   </script>
 </body>
 </html>
