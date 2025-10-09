@@ -93,11 +93,18 @@
   </main>
 
   <script type="module">
-    import { auth, db } from './firebase-config.js';
-    import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
-    import { collection, getDocs, onSnapshot, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
+    import { auth, db } from "./firebase-config.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    // --- Translations ---
+    // === Debug Firestore connection ===
+    import { getDocs as debugGetDocs, collection as debugCollection } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    console.log("🔍 Testing Firestore connection...");
+    debugGetDocs(debugCollection(db, "users"))
+      .then(snap => console.log("✅ USERS COLLECTION FOUND:", snap.size, "documents"))
+      .catch(err => console.error("❌ FIRESTORE ERROR:", err));
+
+    // === Translations ===
     const i18nData = {
       en:{translation:{analyticsTitle:"GDLVS Analytics",signOut:"Sign Out",dashboard:"Dashboard",verification:"Verification",addLicense:"Add License",users:"Users",requests:"Access Requests",analytics:"Analytics",systemOverview:"System Overview",licenses:"Licenses",verifications:"Verifications",pendingUsers:"Pending Users",pendingRequests:"Pending Requests",countries:"Countries",verificationPerformance:"Verification Performance",topCountries:"Top Countries",recentVerifications:"Recent Verifications",loading:"Loading..."}},
       fr:{translation:{analyticsTitle:"Analyse GDLVS",signOut:"Déconnexion",dashboard:"Tableau de bord",verification:"Vérification",addLicense:"Ajouter un permis",users:"Utilisateurs",requests:"Demandes d’accès",analytics:"Analytique",systemOverview:"Aperçu du système",licenses:"Permis",verifications:"Vérifications",pendingUsers:"Utilisateurs en attente",pendingRequests:"Demandes en attente",countries:"Pays",verificationPerformance:"Performance de vérification",topCountries:"Meilleurs pays",recentVerifications:"Vérifications récentes",loading:"Chargement..."}},
@@ -106,65 +113,59 @@
     i18next.use(i18nextBrowserLanguageDetector).init({resources:i18nData,fallbackLng:"en"},()=>{jqueryI18next.init(i18next,$,{useOptionsAttr:true});$("body").localize();});
     $("#languageSwitcher").on("change",function(){i18next.changeLanguage(this.value,()=>$("body").localize());});
 
-    // --- Authentication ---
+    // === Authentication ===
     onAuthStateChanged(auth,u=>{if(!u) location.href='index.html';});
-    document.getElementById('logoutBtn').onclick=()=>signOut(auth).then(()=>location.href='index.html');
+    document.getElementById("logoutBtn").onclick=()=>signOut(auth).then(()=>location.href='index.html');
 
-    // --- Dashboard Data ---
-    const totalLicenses=document.getElementById('totalLicenses');
-    const totalVerifications=document.getElementById('totalVerifications');
-    const pendingUsers=document.getElementById('pendingUsers');
-    const pendingRequests=document.getElementById('pendingRequests');
-    const countriesCount=document.getElementById('countriesCount');
-    const logsBody=document.getElementById('verificationLogs');
+    // === Dashboard Logic ===
+    const totalLicenses=document.getElementById("totalLicenses");
+    const totalVerifications=document.getElementById("totalVerifications");
+    const pendingUsers=document.getElementById("pendingUsers");
+    const pendingRequests=document.getElementById("pendingRequests");
+    const countriesCount=document.getElementById("countriesCount");
+    const logsBody=document.getElementById("verificationLogs");
     let resultChart,countryChart;
 
     async function loadAnalytics(){
       try{
-        // Licenses
-        const licensesSnap=await getDocs(collection(db,'licenses'));
+        const licensesSnap=await getDocs(collection(db,"licenses"));
         totalLicenses.textContent=licensesSnap.size;
 
-        // Users
-        const usersSnap=await getDocs(collection(db,'users'));
-        let pendingU=0; usersSnap.forEach(d=>{if((d.data().status||'').toLowerCase()==='pending') pendingU++;});
+        const usersSnap=await getDocs(collection(db,"users"));
+        let pendingU=0; usersSnap.forEach(d=>{if((d.data().status||"").toLowerCase()==="pending") pendingU++;});
         pendingUsers.textContent=pendingU;
 
-        // Requests
-        const reqSnap=await getDocs(collection(db,'requests'));
+        const reqSnap=await getDocs(collection(db,"requests"));
         pendingRequests.textContent=reqSnap.size;
 
-        // Verifications
-        const verSnap=await getDocs(query(collection(db,'verifications'),orderBy('verifiedAt','desc')));
+        const verSnap=await getDocs(query(collection(db,"verifications"),orderBy("verifiedAt","desc")));
         let total=0,ok=0,fail=0;
         const countries={};
-        logsBody.innerHTML='';
+        logsBody.innerHTML="";
         verSnap.forEach(doc=>{
           const v=doc.data(); total++;
-          const res=(v.result||'').toLowerCase();
-          if(res.includes('not')||res.includes('fail')) fail++; else ok++;
-          const c=(v.country||'Unknown').trim();
+          const res=(v.result||"").toLowerCase();
+          if(res.includes("not")||res.includes("fail")) fail++; else ok++;
+          const c=(v.country||"Unknown").trim();
           countries[c]=(countries[c]||0)+1;
-          const date=v.verifiedAt?.toDate?.()?v.verifiedAt.toDate().toLocaleString():v.verifiedAt||'';
-          logsBody.innerHTML+=`<tr><td>${v.licenseNumber||''}</td><td>${v.requestingOrg||''}</td><td>${c}</td><td>${v.result||''}</td><td>${date}</td></tr>`;
+          const date=v.verifiedAt?.toDate?.()?v.verifiedAt.toDate().toLocaleString():v.verifiedAt||"";
+          logsBody.innerHTML+=`<tr><td>${v.licenseNumber||v.license||""}</td><td>${v.requestingOrg||v.organization||""}</td><td>${c}</td><td>${v.result||""}</td><td>${date}</td></tr>`;
         });
         totalVerifications.textContent=total;
         countriesCount.textContent=Object.keys(countries).length;
 
-        // Charts
-        const ctx=document.getElementById('resultChart');
+        const ctx=document.getElementById("resultChart");
         if(resultChart) resultChart.destroy();
-        resultChart=new Chart(ctx,{type:'pie',data:{labels:['Successful','Failed'],datasets:[{data:[ok,fail],backgroundColor:['#27ae60','#e74c3c']}]},options:{plugins:{legend:{position:'bottom'}}}});
+        resultChart=new Chart(ctx,{type:"pie",data:{labels:["Successful","Failed"],datasets:[{data:[ok,fail],backgroundColor:["#27ae60","#e74c3c"]}]},options:{plugins:{legend:{position:"bottom"}}}});
 
         const top5=Object.entries(countries).sort((a,b)=>b[1]-a[1]).slice(0,5);
-        const ctx2=document.getElementById('countryChart');
+        const ctx2=document.getElementById("countryChart");
         if(countryChart) countryChart.destroy();
-        countryChart=new Chart(ctx2,{type:'bar',data:{labels:top5.map(e=>e[0]),datasets:[{label:'Verifications',data:top5.map(e=>e[1]),backgroundColor:'#2980b9'}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
-      }catch(err){console.error("Firestore read error:",err);}
+        countryChart=new Chart(ctx2,{type:"bar",data:{labels:top5.map(e=>e[0]),datasets:[{label:"Verifications",data:top5.map(e=>e[1]),backgroundColor:"#2980b9"}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+      }catch(err){console.error("❌ Firestore read error:",err);}
     }
 
     loadAnalytics();
-    // Optional: refresh live every 60s
     setInterval(loadAnalytics,60000);
   </script>
 </body>
