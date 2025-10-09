@@ -8,17 +8,12 @@
   <!-- FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <!-- Firebase SDK (v8 syntax - keep this version!) -->
+  <!-- Firebase v8 SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
   <!-- EmailJS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-
-  <!-- Optional i18n + jQuery (future multilingual support) -->
-  <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
-  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
-  <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
   <style>
     :root {
@@ -31,6 +26,7 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: Arial, sans-serif;
       background: #f6f8fb;
@@ -40,7 +36,7 @@
     .background-image {
       position: fixed;
       inset: 0;
-      background: url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg')
+      background: url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') 
                   no-repeat center center fixed;
       background-size: cover;
       z-index: -1;
@@ -48,18 +44,18 @@
     }
 
     .container {
-      max-width: 420px;
+      max-width: 440px;
       margin: 80px auto;
-      background: rgba(255,255,255,0.95);
-      padding: 24px 26px;
-      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 28px;
+      border-radius: 12px;
       box-shadow: var(--shadow);
       text-align: center;
     }
 
     h2 {
-      margin-bottom: 16px;
       color: var(--brand-dark);
+      margin-bottom: 18px;
     }
 
     input, textarea, button {
@@ -68,20 +64,26 @@
       margin: 8px 0;
       border: 1px solid #dcdcdc;
       border-radius: 8px;
-      font-size: .98rem;
+      font-size: 0.98rem;
     }
 
-    textarea { resize: vertical; min-height: 90px; }
+    textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
 
     button {
       background: var(--brand-dark);
       color: #fff;
       cursor: pointer;
       border: none;
-      transition: .2s;
+      transition: background 0.2s;
+      font-weight: bold;
     }
 
-    button:hover { background: var(--brand-dark-2); }
+    button:hover {
+      background: var(--brand-dark-2);
+    }
 
     a {
       color: var(--blue);
@@ -91,12 +93,27 @@
 
     a:hover { text-decoration: underline; }
 
-    .muted { color: var(--muted); font-size: .95rem; }
+    .muted { color: var(--muted); font-size: 0.95rem; }
 
-    footer { text-align: center; margin: 20px 0 40px; }
-    #languageSwitcher { width: auto; padding: 6px 10px; border-radius: 8px; }
+    footer {
+      text-align: center;
+      margin: 20px 0 40px;
+    }
 
-    #msg { font-weight: bold; margin-top: 10px; }
+    #languageSwitcher {
+      width: auto;
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+
+    #msg {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .success { color: green; }
+    .error { color: red; }
+    .loading { color: #004aad; }
   </style>
 </head>
 
@@ -118,7 +135,7 @@
 
     <div id="msg"></div>
 
-    <p class="muted" style="margin-top:10px;">
+    <p class="muted" style="margin-top:12px;">
       Already have an account? <a href="index.html">← Back to Login</a>
     </p>
   </div>
@@ -133,16 +150,16 @@
   </footer>
 
   <script>
-    /* ==============================
-       🔹 EmailJS Initialization
-    ============================== */
+    /* ===================================================
+       🔹 Initialize EmailJS
+    =================================================== */
     (function() {
-      emailjs.init("TfmaZEvxtz2MNUb70"); // ✅ your verified public key
+      emailjs.init("TfmaZEvxtz2MNUb70"); // ✅ Your verified public key
     })();
 
-    /* ==============================
-       🔹 Firebase Initialization
-    ============================== */
+    /* ===================================================
+       🔹 Initialize Firebase (v8)
+    =================================================== */
     const firebaseConfig = {
       apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
       authDomain: "gdlvs-2348e.firebaseapp.com",
@@ -154,12 +171,14 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    /* ==============================
-       🔹 Submit Access Request
-    ============================== */
-    async function submitAccessRequest(e) {
-      e.preventDefault();
+    /* ===================================================
+       🔹 Submit Access Request Function
+    =================================================== */
+    async function submitAccessRequest(event) {
+      event.preventDefault();
       const msgBox = document.getElementById("msg");
+      msgBox.textContent = "⏳ Submitting your request...";
+      msgBox.className = "loading";
 
       const fullName = document.getElementById("requestFullName").value.trim();
       const email = document.getElementById("requestEmail").value.trim();
@@ -167,11 +186,8 @@
       const phone = document.getElementById("phone").value.trim();
       const purpose = document.getElementById("purpose").value.trim();
 
-      msgBox.textContent = "⏳ Submitting your request...";
-      msgBox.style.color = "#004aad";
-
       try {
-        // 1️⃣ Write request to Firestore (public access)
+        // ✅ Step 1: Add record to Firestore
         await db.collection("requests").add({
           fullName,
           email,
@@ -182,7 +198,7 @@
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        // 2️⃣ Send email notification (admin + user)
+        // ✅ Step 2: Send Email notification
         await emailjs.send("service_ddq3kka", "template_inl3jsv", {
           name: fullName,
           email,
@@ -191,15 +207,15 @@
           purpose
         });
 
-        // 3️⃣ Feedback
-        msgBox.textContent = "✅ Request submitted successfully! A confirmation email will be sent within 72 hours.";
-        msgBox.style.color = "green";
+        // ✅ Step 3: Success feedback
+        msgBox.textContent = "✅ Request submitted successfully! You’ll receive confirmation within 72 hours.";
+        msgBox.className = "success";
         document.getElementById("requestForm").reset();
 
       } catch (err) {
         console.error("❌ Firestore/EmailJS error:", err);
-        msgBox.textContent = "⚠️ Failed to submit request: " + err.message;
-        msgBox.style.color = "red";
+        msgBox.textContent = "⚠️ Submission failed: " + err.message;
+        msgBox.className = "error";
       }
     }
   </script>
