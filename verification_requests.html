@@ -1,41 +1,277 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>GDLVS - Verification Requests</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
   <style>
-    :root{--brand:#2a3f54;--brand2:#1e2d3c;--info:#2980b9;--shadow:0 2px 6px rgba(0,0,0,.1)}
-    body{margin:0;font-family:Arial;background:#f6f8fb;color:#333}
-    header{background:#2a3f54;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:10px 14px}
-    header h1{margin:0;font-size:18px;display:flex;gap:8px;align-items:center}
-    .header-controls{display:flex;gap:8px}
-    .mini-btn{background:#1e2d3c;color:#fff;border:0;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer}
-    .mini-select{border:1px solid #dcdcdc;border-radius:8px;padding:6px 8px;font-size:12px;background:#fff}
-    nav{background:#fff;border-bottom:1px solid #eaeaea;padding:10px 14px;display:flex;gap:14px}
-    nav a{color:#2a3f54;text-decoration:none;font-weight:700}
-    nav a.active{border-bottom:2px solid #2a3f54;padding-bottom:4px}
-    .container{max-width:1100px;margin:20px auto;padding:0 14px}
-    .panel{background:#fff;border-radius:10px;box-shadow:var(--shadow);padding:20px}
-    .table-controls{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap}
-    .table-controls input{max-width:320px;border:1px solid #dcdcdc;border-radius:8px;padding:8px 10px}
-    .btn-export{background:#2980b9;color:#fff;border:0;border-radius:8px;padding:8px 12px}
-    table{width:100%;border-collapse:separate;border-spacing:0 6px;margin-top:10px}
-    th,td{background:#fff;border:1px solid #eee;padding:10px 12px}
-    th{background:#f2f2f2}
+    /* ===== Background ===== */
+    .background-image {
+      position: fixed; inset: 0;
+      background: url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') no-repeat center center fixed;
+      background-size: cover; filter: brightness(0.95); z-index: -1;
+    }
+
+    /* ===== Core Styles ===== */
+    :root {
+      --brand-dark:#2a3f54; --brand-dark-2:#1e2d3c; --text:#333;
+      --panel-bg:#fff; --success:#27ae60; --danger:#e74c3c;
+      --card-shadow:0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    body { font-family: Arial, sans-serif; margin: 0; background:#f6f8fb; color: var(--text); }
+    * { box-sizing: border-box; }
+
+    /* Header */
+    header {
+      background: var(--brand-dark); color:#fff; padding:10px 16px;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    header h1 { margin:0; font-size:1.1rem; }
+    .controls { display:flex; gap:8px; align-items:center; }
+    .controls select, .controls button {
+      height:28px; border-radius:8px; border:1px solid #ccc;
+      font-size:0.8rem; padding:0 8px;
+    }
+    .controls button {
+      background: var(--brand-dark-2); color:#fff; border:none; cursor:pointer;
+    }
+    .controls button:hover { background:#16222d; }
+
+    /* Nav */
+    nav {
+      background:#fff; border-bottom:1px solid #eaeaea;
+      padding:10px 16px; display:flex; flex-wrap:wrap; gap:15px;
+    }
+    nav a { color:var(--brand-dark); text-decoration:none; font-weight:bold; }
+    nav a.active { border-bottom:2px solid var(--brand-dark); padding-bottom:4px; }
+
+    /* Panel */
+    main { padding:20px; }
+    .panel {
+      background:#fff; border-radius:10px; box-shadow:var(--card-shadow);
+      padding:18px; max-width:1100px; margin:auto;
+    }
+
+    /* Table */
+    table { width:100%; border-collapse:collapse; font-size:0.9rem; }
+    th, td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
+    th { background:#f0f2f5; color:#333; }
+    tr:hover { background:#fafafa; }
+
+    .btn-approve {
+      background: var(--success); color: #fff; border: none; border-radius: 6px;
+      padding: 6px 10px; cursor:pointer;
+    }
+    .btn-reject {
+      background: var(--danger); color: #fff; border: none; border-radius: 6px;
+      padding: 6px 10px; cursor:pointer;
+    }
+    .btn-approve:hover { background:#219150; }
+    .btn-reject:hover { background:#c0392b; }
+
+    input#requestSearch {
+      width:250px; padding:6px 8px; border:1px solid #ccc;
+      border-radius:8px; margin-bottom:10px;
+    }
+    .btn-export {
+      background:#2980b9; color:#fff; border:none; border-radius:8px;
+      padding:6px 10px; cursor:pointer;
+    }
+    .btn-export:hover { background:#1f6392; }
+
+    footer {
+      text-align:center; padding:10px; font-size:0.85rem; color:#666;
+    }
   </style>
 </head>
+
 <body>
+  <div class="background-image"></div>
+
   <header>
-    <h1><i class="fa-solid fa-inbox"></i> <span data-i18n="verificationRequests">Verification Requests</span></h1>
-    <div class="header-controls">
-      <select id="languageSwitcher" class="mini-select"><option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option><option value="ja">🇯🇵 日本語</option></select>
-      <button id="logoutBtn" class="mini-btn"><i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="logout">Logout</span></button>
+    <h1><i class="fas fa-inbox"></i> <span data-i18n="title">Verification Requests</span></h1>
+    <div class="controls">
+      <select id="languageSwitcher">
+        <option value="en">🇬🇧 English</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="ja">🇯🇵 日本語</option>
+      </select>
+      <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i></button>
     </div>
   </header>
 
   <nav>
-    <a href="dashboard.html"><i class="fa-solid fa-house"></i> <span data-i18n="dashboard">Dashboard</span></a>
-    <a href="verify.html"><i class="fa-solid fa-search"></i> <span data-i18n="verificationPortal">Verification</span></a>
-    <a href="add_licenses.html"><i class="fa-solid fa-id-card"></i> <span data-i18n="addLicense">Add License</span></a>
-    <a href="users.html
+    <a href="dashboard.html"><i class="fas fa-home"></i> <span data-i18n="dashboard">Dashboard</span></a>
+    <a href="verify.html"><i class="fas fa-search"></i> <span data-i18n="verify">Verification</span></a>
+    <a href="add_licenses.html"><i class="fas fa-id-card"></i> <span data-i18n="addLicense">Add License</span></a>
+    <a href="users.html"><i class="fas fa-users-cog"></i> <span data-i18n="users">Users</span></a>
+    <a href="verification_requests.html" class="active"><i class="fas fa-inbox"></i> <span data-i18n="requests">Requests</span></a>
+    <a href="analytics.html"><i class="fas fa-chart-bar"></i> <span data-i18n="analytics">Analytics</span></a>
+  </nav>
+
+  <main>
+    <section class="panel">
+      <h2><i class="fas fa-clipboard-list"></i> <span data-i18n="accessRequests">Access Requests</span></h2>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <input type="text" id="requestSearch" placeholder="Search requests..." data-i18n="[placeholder]searchPlaceholder">
+        <button class="btn-export" id="exportBtn">📥 <span data-i18n="export">Export</span></button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th data-i18n="fullName">Full Name</th>
+            <th data-i18n="email">Email</th>
+            <th data-i18n="organization">Organization</th>
+            <th data-i18n="phone">Phone</th>
+            <th data-i18n="purpose">Purpose</th>
+            <th data-i18n="status">Status</th>
+            <th data-i18n="action">Action</th>
+          </tr>
+        </thead>
+        <tbody id="requestsTable">
+          <tr><td colspan="7" data-i18n="loading">Loading...</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 Gabon Driver’s License Verification System</p>
+  </footer>
+
+  <!-- ========== Firebase & Logic ========== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getFirestore, collection, onSnapshot, updateDoc, doc, orderBy, query } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
+      authDomain: "gdlvs-2348e.firebaseapp.com",
+      projectId: "gdlvs-2348e",
+      storageBucket: "gdlvs-2348e.appspot.com",
+      messagingSenderId: "358715790318",
+      appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // 🔹 Load Requests
+    const q = query(collection(db, "requests"), orderBy("submittedAt", "desc"));
+    const tbody = document.getElementById("requestsTable");
+
+    onSnapshot(q, (snapshot) => {
+      tbody.innerHTML = "";
+      if (snapshot.empty) {
+        tbody.innerHTML = `<tr><td colspan="7" data-i18n="noRequests">No access requests found.</td></tr>`;
+        return;
+      }
+
+      snapshot.forEach((docSnap) => {
+        const r = docSnap.data();
+        const date = r.submittedAt?.toDate ? r.submittedAt.toDate().toLocaleString() : "";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${r.fullName || "N/A"}</td>
+          <td>${r.email || "N/A"}</td>
+          <td>${r.organization || "N/A"}</td>
+          <td>${r.phone || "N/A"}</td>
+          <td>${r.purpose || "N/A"}</td>
+          <td>${r.status || "pending"}</td>
+          <td>
+            <button class="btn-approve" onclick="approveRequest('${docSnap.id}')">✔</button>
+            <button class="btn-reject" onclick="rejectRequest('${docSnap.id}')">✖</button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+    });
+
+    // 🔹 Approve / Reject
+    window.approveRequest = async (id) => {
+      await updateDoc(doc(db, "requests", id), { status: "approved" });
+      alert("✅ Request approved");
+    };
+    window.rejectRequest = async (id) => {
+      await updateDoc(doc(db, "requests", id), { status: "rejected" });
+      alert("❌ Request rejected");
+    };
+
+    // 🔹 Export
+    document.getElementById("exportBtn").addEventListener("click", () => {
+      const rows = document.querySelectorAll("table tr");
+      const csv = Array.from(rows).map(r => Array.from(r.children).map(c => `"${c.innerText}"`).join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "verification_requests.csv";
+      link.click();
+    });
+
+    // 🔹 Logout
+    document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth).then(() => location.href = "index.html"));
+
+    // 🔹 Search
+    document.getElementById("requestSearch").addEventListener("keyup", (e) => {
+      const term = e.target.value.toLowerCase();
+      document.querySelectorAll("#requestsTable tr").forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(term) ? "" : "none";
+      });
+    });
+
+    // 🔹 i18n Inline Setup
+    const translations = {
+      en: {
+        translation: {
+          title: "Verification Requests", dashboard:"Dashboard", verify:"Verification", addLicense:"Add License", users:"Users",
+          requests:"Requests", analytics:"Analytics", accessRequests:"Access Requests", export:"Export",
+          fullName:"Full Name", email:"Email", organization:"Organization", phone:"Phone", purpose:"Purpose", status:"Status", action:"Action",
+          noRequests:"No access requests found.", searchPlaceholder:"Search requests..."
+        }
+      },
+      fr: {
+        translation: {
+          title:"Demandes de Vérification", dashboard:"Tableau de bord", verify:"Vérification", addLicense:"Ajouter un permis", users:"Utilisateurs",
+          requests:"Demandes", analytics:"Analytique", accessRequests:"Demandes d’accès", export:"Exporter",
+          fullName:"Nom complet", email:"Courriel", organization:"Organisation", phone:"Téléphone", purpose:"Objectif", status:"Statut", action:"Action",
+          noRequests:"Aucune demande trouvée.", searchPlaceholder:"Rechercher une demande..."
+        }
+      },
+      ja: {
+        translation: {
+          title:"確認リクエスト", dashboard:"ダッシュボード", verify:"検証", addLicense:"免許を追加", users:"ユーザー",
+          requests:"リクエスト", analytics:"分析", accessRequests:"アクセスリクエスト", export:"エクスポート",
+          fullName:"氏名", email:"メール", organization:"組織", phone:"電話番号", purpose:"目的", status:"ステータス", action:"操作",
+          noRequests:"リクエストが見つかりません。", searchPlaceholder:"リクエストを検索..."
+        }
+      }
+    };
+
+    i18next.init({ resources: translations, lng: "en" }, (err, t) => {
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        const placeholder = el.getAttribute("data-i18n-placeholder");
+        if (key && el.hasAttribute("placeholder")) el.placeholder = t(key);
+        else if (key) el.textContent = t(key);
+      });
+    });
+
+    document.getElementById("languageSwitcher").addEventListener("change", (e) => {
+      const lang = e.target.value;
+      i18next.changeLanguage(lang, (err, t) => {
+        document.querySelectorAll("[data-i18n]").forEach(el => {
+          const key = el.getAttribute("data-i18n");
+          if (key && el.hasAttribute("placeholder")) el.placeholder = t(key);
+          else if (key) el.textContent = t(key);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
