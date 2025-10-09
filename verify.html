@@ -17,7 +17,7 @@
       --danger: #e74c3c;
     }
     * { box-sizing: border-box; }
-    body { margin:0; font-family: "Segoe UI", Arial, sans-serif; background:var(--bg); color:var(--text); }
+    body { margin:0; font-family:"Segoe UI",Arial,sans-serif; background:var(--bg); color:var(--text); }
 
     header {
       background:var(--brand-dark); color:#fff; padding:8px 16px;
@@ -41,7 +41,7 @@
       border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.1); padding:24px;
     }
     label { font-weight:600; margin-top:8px; display:block; }
-    input, textarea, button, select {
+    input, textarea, button {
       width:100%; padding:10px; margin:8px 0;
       border:1px solid #dcdcdc; border-radius:8px; font-size:0.95rem;
     }
@@ -60,13 +60,13 @@
     #verifyResult .bad { color:var(--danger); font-weight:700; }
   </style>
 
-  <!-- ===== i18n + jQuery ===== -->
+  <!-- i18n + jQuery -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
-  <!-- ===== Firebase ===== -->
+  <!-- Firebase -->
   <script type="module">
     import { auth, db } from "./firebase-config.js";
     import {
@@ -74,99 +74,127 @@
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-    /* 🌐 Translations */
+    // 🌐 Translations
     const resources = {
       en:{translation:{verificationPortal:"Verification",logout:"Logout",licenseNumber:"License Number",organization:"Organization",country:"Country",purpose:"Purpose",verify:"Verify"}},
       fr:{translation:{verificationPortal:"Vérification",logout:"Déconnexion",licenseNumber:"Numéro du permis",organization:"Organisation",country:"Pays",purpose:"Objet",verify:"Vérifier"}},
       ja:{translation:{verificationPortal:"照会",logout:"ログアウト",licenseNumber:"免許番号",organization:"組織",country:"国",purpose:"目的",verify:"照会する"}}
     };
-    i18next.use(i18nextBrowserLanguageDetector).init({resources,fallbackLng:"en"},()=>{jqueryI18next.init(i18next,$,{useOptionsAttr:true});$("body").localize();});
-    document.getElementById("languageSwitcher")?.addEventListener("change",e=>{i18next.changeLanguage(e.target.value,()=>$("body").localize());});
 
-    /* 🔐 ROLE ENFORCEMENT */
+    i18next.use(i18nextBrowserLanguageDetector).init({resources,fallbackLng:"en"},()=>{
+      jqueryI18next.init(i18next,$,{useOptionsAttr:true});
+      $("body").localize();
+    });
+    document.getElementById("languageSwitcher")?.addEventListener("change",e=>{
+      i18next.changeLanguage(e.target.value,()=>$("body").localize());
+    });
+
+    /* 🔒 SECURE ROLE ENFORCEMENT */
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        // Not logged in
+        console.warn("🚫 No user logged in");
         window.location.href = "index.html";
         return;
       }
 
+      // Show a loading message during verification
+      document.body.innerHTML = "<h2 style='text-align:center;margin-top:100px;'>🔄 Checking your access permissions...</h2>";
+
       try {
-        const roleSnap = await getDoc(doc(db, "roles", user.email));
-        const role = roleSnap.exists() ? roleSnap.data().role : "verifier";
+        const roleRef = doc(db, "roles", user.email);
+        const roleSnap = await getDoc(roleRef);
 
-        if (role === "admin") {
-          // ✅ Admin can access all pages, stays here or navigates freely
-          console.log("✅ Admin access granted:", user.email);
-          return;
-        }
-
-        if (role !== "verifier") {
-          // Unknown or unapproved role
-          console.warn("⛔ Unauthorized role, redirecting to login...");
+        // Wait until Firestore fetch completes
+        if (!roleSnap.exists()) {
+          console.warn("❌ Role not found, redirecting...");
+          await signOut(auth);
           window.location.href = "index.html";
           return;
         }
 
-        // Verifier confirmed
-        console.log("✅ Verifier access granted:", user.email);
+        const role = roleSnap.data().role;
+
+        if (role === "admin") {
+          console.log("✅ Admin access granted:", user.email);
+          // Optional: Admin can also access verify.html, so we simply load the form again
+          location.reload();
+          return;
+        }
+
+        if (role === "verifier") {
+          console.log("✅ Verifier access confirmed for:", user.email);
+          // Proceed — show full page content
+          document.body.innerHTML = document.body.dataset.originalHtml;
+          initVerifyPage();
+          return;
+        }
+
+        console.warn("🚫 Unknown role:", role);
+        await signOut(auth);
+        window.location.href = "index.html";
 
       } catch (err) {
-        console.error("❌ Role check error:", err);
+        console.error("❌ Role check failed:", err);
+        await signOut(auth);
         window.location.href = "index.html";
       }
     });
 
-    /* 🚪 Logout */
-    window.signOutUser = () => signOut(auth).then(() => window.location.href = "index.html");
+    /* 🧩 Initialize verification logic */
+    function initVerifyPage() {
+      window.signOutUser = () => signOut(auth).then(() => window.location.href = "index.html");
 
-    /* 🔍 Verification Logic */
-    window.verifyLicense = async (e)=>{
-      e.preventDefault();
-      const licenseNumber=document.getElementById("verifyLicenseNumber").value.trim();
-      const org=document.getElementById("verifyOrg").value.trim();
-      const country=document.getElementById("verifyCountry").value.trim();
-      const purpose=document.getElementById("verifyPurpose").value.trim();
-      const resultEl=document.getElementById("verifyResult");
-      const nextContainer=document.getElementById("verifyNextContainer");
+      window.verifyLicense = async (e)=>{
+        e.preventDefault();
+        const licenseNumber=document.getElementById("verifyLicenseNumber").value.trim();
+        const org=document.getElementById("verifyOrg").value.trim();
+        const country=document.getElementById("verifyCountry").value.trim();
+        const purpose=document.getElementById("verifyPurpose").value.trim();
+        const resultEl=document.getElementById("verifyResult");
+        const nextContainer=document.getElementById("verifyNextContainer");
 
-      if(!licenseNumber){ alert("⚠️ License number required"); return; }
+        if(!licenseNumber){ alert("⚠️ License number required"); return; }
 
-      try{
-        const snap=await getDoc(doc(db,"licenses",licenseNumber));
-        const exists=snap.exists();
-        const d=exists?snap.data():{};
-        const resultText=exists?"License found":"License not found";
+        try{
+          const snap=await getDoc(doc(db,"licenses",licenseNumber));
+          const exists=snap.exists();
+          const d=exists?snap.data():{};
+          const resultText=exists?"License found":"License not found";
 
-        await addDoc(collection(db,"verifications"),{
-          licenseNumber,requestingOrg:org||"",country:country||"",purpose:purpose||"",
-          email:auth.currentUser?.email||"",result:resultText,
-          verifiedAt:serverTimestamp()
-        });
+          await addDoc(collection(db,"verifications"),{
+            licenseNumber,requestingOrg:org||"",country:country||"",purpose:purpose||"",
+            email:auth.currentUser?.email||"",result:resultText,
+            verifiedAt:serverTimestamp()
+          });
 
-        resultEl.style.display="block";
-        resultEl.innerHTML=`
-          <h3 class="${exists?'ok':'bad'}">${exists?'✅ License Found':'❌ License Not Found'}</h3>
-          ${exists?`
-            <p><strong>Full Name:</strong> ${d.fullName||""}</p>
-            <p><strong>Class:</strong> ${d.class||""}</p>
-            <p><strong>Issue:</strong> ${d.issueDate||""}</p>
-            <p><strong>Expiry:</strong> ${d.expiryDate||""}</p>
-            <p><strong>Status:</strong> ${d.status||""}</p>
-          `:""}
-          <hr>
-          <p><strong>Organization:</strong> ${org}</p>
-          <p><strong>Country:</strong> ${country}</p>
-          <p><strong>Purpose:</strong> ${purpose}</p>
-        `;
-        nextContainer.style.display="block";
-        document.getElementById("verifyNextBtn").onclick=()=>{
-          document.getElementById("verifyForm").reset();
-          resultEl.style.display="none";
-          nextContainer.style.display="none";
-        };
-      }catch(err){console.error(err);alert("❌ "+err.message);}
-    };
+          resultEl.style.display="block";
+          resultEl.innerHTML=`
+            <h3 class="${exists?'ok':'bad'}">${exists?'✅ License Found':'❌ License Not Found'}</h3>
+            ${exists?`
+              <p><strong>Full Name:</strong> ${d.fullName||""}</p>
+              <p><strong>Class:</strong> ${d.class||""}</p>
+              <p><strong>Issue:</strong> ${d.issueDate||""}</p>
+              <p><strong>Expiry:</strong> ${d.expiryDate||""}</p>
+              <p><strong>Status:</strong> ${d.status||""}</p>
+            `:""}
+            <hr>
+            <p><strong>Organization:</strong> ${org}</p>
+            <p><strong>Country:</strong> ${country}</p>
+            <p><strong>Purpose:</strong> ${purpose}</p>
+          `;
+          nextContainer.style.display="block";
+          document.getElementById("verifyNextBtn").onclick=()=>{
+            document.getElementById("verifyForm").reset();
+            resultEl.style.display="none";
+            nextContainer.style.display="none";
+          };
+        }catch(err){console.error(err);alert("❌ "+err.message);}
+      };
+    }
+
+    // Save full HTML template for reloading after auth check
+    document.body.dataset.originalHtml = document.body.innerHTML;
+    document.body.innerHTML = "<h2 style='text-align:center;margin-top:100px;'>⏳ Loading verification portal...</h2>";
   </script>
 </head>
 
