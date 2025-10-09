@@ -3,206 +3,177 @@
 <head>
   <meta charset="UTF-8" />
   <title>GDLVS - Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
-  <!-- i18n + jQuery -->
-  <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
-  <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
-  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
-  <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
-
   <style>
-    /* ===== Background ===== */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      color: #333;
+    }
     .background-image {
       position: fixed;
       inset: 0;
-      background: url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg')
-        no-repeat center center fixed;
+      background: url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') no-repeat center center fixed;
       background-size: cover;
-      z-index: -1;
       filter: brightness(0.9);
+      z-index: -1;
+    }
+    header {
+      background: #2a3f54;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+    }
+    header h1 { margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
+    .controls select, .controls button {
+      border: none;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+    .controls select { background: #fff; color: #000; }
+    .controls button { background: #1e2d3c; color: #fff; cursor: pointer; }
+    .controls button:hover { background: #16222d; }
+    nav {
+      background: rgba(255,255,255,0.9);
+      padding: 10px 14px;
+      display: flex;
+      gap: 16px;
+      border-bottom: 1px solid #eaeaea;
+      backdrop-filter: blur(6px);
+    }
+    nav a {
+      text-decoration: none;
+      color: #2a3f54;
+      font-weight: bold;
+    }
+    nav a.active {
+      border-bottom: 2px solid #2a3f54;
+      padding-bottom: 3px;
     }
 
-    /* ===== Theme Variables ===== */
-    :root {
-      --brand-dark:#2a3f54;
-      --brand-dark-2:#1e2d3c;
-      --text:#333;
-      --muted:#666;
-      --panel-bg:rgba(255,255,255,0.88);
-      --card-shadow:0 2px 8px rgba(0,0,0,0.2);
-      --success:#27ae60;
-      --danger:#e74c3c;
-      --warn:#f1c40f;
-      --info:#2980b9;
-      --overlay:rgba(0,0,0,0.45);
+    .container {
+      max-width: 1100px;
+      margin: 25px auto;
+      background: rgba(255,255,255,0.9);
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      padding: 25px;
+      backdrop-filter: blur(6px);
     }
 
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{
-      font-family:Arial,sans-serif;
-      color:var(--text);
-      background:#f6f8fb;
-      min-height:100vh;
+    .dashboard-cards {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .card {
+      flex: 1;
+      min-width: 220px;
+      text-align: center;
+      border-radius: 10px;
+      color: white;
+      padding: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .card.total { background: #2980b9; }
+    .card.active { background: #27ae60; }
+    .card.suspended { background: #f1c40f; color: #333; }
+    .card.expired { background: #e74c3c; }
+    .card h2 { margin: 5px 0; font-size: 1.6rem; }
+
+    .table-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    #licenseSearch {
+      max-width: 320px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 8px;
+    }
+    .btn-export {
+      background: #2980b9;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    .btn-export:hover { background: #1f6392; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #e0e0e0;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.95);
+    }
+    th { background: rgba(240,240,240,0.95); font-weight: bold; }
+    td button {
+      background: #2980b9;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 8px;
+      cursor: pointer;
     }
 
-    /* ===== Header ===== */
-    header{
-      background:var(--brand-dark);
-      color:#fff;
-      padding:10px 14px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      box-shadow:var(--card-shadow);
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
     }
-    header h1{margin:0;font-size:1.1rem;display:flex;gap:8px;align-items:center}
-    .controls{display:flex;gap:8px;align-items:center}
-    .controls select,.controls button{padding:6px 10px;border-radius:8px;border:0;font-size:.9rem}
-    .controls select{background:#fff;color:#000}
-    .controls button{background:var(--brand-dark-2);color:#fff;cursor:pointer}
-    .controls button:hover{background:#16222d}
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+      width: min(520px, 90vw);
+      padding: 18px;
+    }
+    .modal header {
+      background: #2a3f54;
+      color: white;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 8px 8px 0 0;
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .btn-primary { background: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 8px; }
+    .btn-secondary { background: #95a5a6; color: white; border: none; padding: 8px 12px; border-radius: 8px; }
 
-    /* ===== Navigation ===== */
-    nav{
-      background:rgba(255,255,255,0.9);
-      padding:10px 14px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:16px;
-      border-bottom:1px solid #eaeaea;
-      backdrop-filter:blur(6px);
+    @media (max-width: 768px) {
+      .dashboard-cards { flex-direction: column; }
     }
-    nav a{color:var(--brand-dark);font-weight:bold;text-decoration:none}
-    nav a:hover{color:var(--brand-dark-2)}
-    nav a.active{border-bottom:2px solid var(--brand-dark);padding-bottom:3px}
-
-    /* ===== Main Container ===== */
-    .container{
-      max-width:1100px;
-      margin:20px auto 40px;
-      background:var(--panel-bg);
-      border-radius:12px;
-      box-shadow:var(--card-shadow);
-      padding:25px;
-      backdrop-filter:blur(6px);
-    }
-
-    /* ===== Cards ===== */
-    .dashboard-cards{
-      display:flex;
-      justify-content:center;
-      flex-wrap:wrap;
-      gap:15px;
-      margin-bottom:20px;
-    }
-    .dashboard-cards .card{
-      flex:1 1 calc(25% - 10px);
-      min-width:160px;
-      text-align:center;
-      border-radius:10px;
-      padding:15px;
-      color:#fff;
-      box-shadow:0 2px 6px rgba(0,0,0,0.2);
-      transition:transform 0.2s;
-    }
-    .dashboard-cards .card:hover{transform:translateY(-4px)}
-    .card.total{background:#2980b9}
-    .card.active{background:#27ae60}
-    .card.suspended{background:#f1c40f;color:#333}
-    .card.expired{background:#e74c3c}
-    .card h2{margin:5px 0;font-size:1.6rem}
-
-    /* ===== Table ===== */
-    .table-controls{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:10px;
-    }
-    input#licenseSearch{
-      max-width:320px;
-      border:1px solid #ccc;
-      border-radius:8px;
-      padding:8px;
-      background:rgba(255,255,255,0.95);
-    }
-    .btn-export{
-      background:var(--info);
-      color:#fff;
-      border:0;
-      padding:8px 12px;
-      border-radius:8px;
-      cursor:pointer;
-    }
-    .btn-export:hover{background:#1f6392}
-    .verification-table-wrapper{overflow-x:auto}
-    table.table{
-      width:100%;
-      border-collapse:separate;
-      border-spacing:0 6px;
-      margin-top:10px;
-    }
-    th,td{
-      border:1px solid #e0e0e0;
-      padding:10px 14px;
-      background:rgba(255,255,255,0.95);
-    }
-    th{background:rgba(240,240,240,0.95);font-weight:bold}
-    td button{
-      background:var(--info);
-      color:#fff;
-      border:0;
-      border-radius:8px;
-      padding:6px 8px;
-      cursor:pointer;
-    }
-
-    /* ===== Modal ===== */
-    .modal-overlay{
-      position:fixed;
-      inset:0;
-      background:var(--overlay);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      opacity:0;
-      transition:opacity .2s;
-      z-index:1000;
-    }
-    .modal-overlay.show{display:flex;opacity:1}
-    .modal{
-      background:rgba(255,255,255,0.95);
-      border-radius:12px;
-      box-shadow:0 8px 30px rgba(0,0,0,0.25);
-      width:min(520px,90vw);
-      padding:18px;
-      backdrop-filter:blur(8px);
-      transform:translateY(10px);
-      opacity:0;
-      transition:all .25s ease;
-    }
-    .modal-overlay.show .modal{transform:translateY(0);opacity:1}
-    .modal header{
-      background:var(--brand-dark);
-      color:#fff;
-      padding:10px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      border-radius:8px 8px 0 0;
-    }
-    .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
-    .btn-primary{background:var(--success);color:#fff;border:0;border-radius:8px;padding:8px 12px}
-    .btn-secondary{background:#95a5a6;color:#fff;border:0;border-radius:8px;padding:8px 12px}
   </style>
 </head>
 
 <body>
   <div class="background-image"></div>
 
-  <!-- Header -->
   <header>
     <h1><i class="fas fa-id-card"></i> Dashboard</h1>
     <div class="controls">
@@ -215,7 +186,6 @@
     </div>
   </header>
 
-  <!-- Nav -->
   <nav>
     <a href="dashboard.html" class="active">Dashboard</a>
     <a href="verify.html">Verification</a>
@@ -225,7 +195,6 @@
     <a href="analytics.html">Analytics</a>
   </nav>
 
-  <!-- Main -->
   <main class="container">
     <section class="dashboard-cards">
       <div class="card total"><h3>Total Licenses</h3><h2 id="totalLicenses">0</h2></div>
@@ -234,34 +203,30 @@
       <div class="card expired"><h3>Expired</h3><h2 id="expiredLicenses">0</h2></div>
     </section>
 
-    <section class="panel">
+    <section>
       <h2><i class="fas fa-id-badge"></i> Licenses</h2>
       <div class="table-controls">
         <input id="licenseSearch" type="text" placeholder="Search licenses..." />
         <button class="btn-export" id="exportLicenses"><i class="fas fa-file-export"></i> Export</button>
       </div>
-      <div class="verification-table-wrapper">
-        <table class="table" id="licensesTable">
-          <thead>
-            <tr>
-              <th>License #</th>
-              <th>Full Name</th>
-              <th>Class</th>
-              <th>Issue</th>
-              <th>Expiry</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody><tr><td colspan="7">Loading...</td></tr></tbody>
-        </table>
-      </div>
+      <table id="licensesTable">
+        <thead>
+          <tr>
+            <th>License #</th>
+            <th>Full Name</th>
+            <th>Class</th>
+            <th>Issue</th>
+            <th>Expiry</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody><tr><td colspan="7">Loading...</td></tr></tbody>
+      </table>
     </section>
   </main>
 
-  <footer style="text-align:center;margin:22px 0 40px;"><small>GDLVS © 2025</small></footer>
-
-  <!-- Edit Modal -->
+  <!-- Modal -->
   <div class="modal-overlay" id="editModalOverlay">
     <div class="modal">
       <header>
@@ -271,16 +236,13 @@
       <div>
         <input type="hidden" id="modalLicenseId"/>
         <label>Full Name</label><input type="text" id="modalFullName"/>
-        <label>Class</label>
-        <select id="modalClass">
+        <label>Class</label><select id="modalClass">
           <option value="Class A">A</option><option value="Class B">B</option>
           <option value="Class C">C</option><option value="Class D">D</option>
           <option value="Class E">E</option>
         </select>
-        <label>Status</label>
-        <select id="modalStatus">
-          <option value="Active">Active</option>
-          <option value="Suspended">Suspended</option>
+        <label>Status</label><select id="modalStatus">
+          <option value="Active">Active</option><option value="Suspended">Suspended</option>
           <option value="Expired">Expired</option>
         </select>
         <label>Issue</label><input type="date" id="modalIssue"/>
@@ -312,144 +274,48 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    /* Auth check */
-    onAuthStateChanged(auth, async (user)=>{
-      if(!user) window.location.href="index.html";
-      const roleSnap = await getDoc(doc(db,"roles",user.email));
+    const logoutBtn = document.getElementById("logoutBtn");
+    logoutBtn.addEventListener("click", () => signOut(auth).then(() => window.location.href = "index.html"));
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return (window.location.href = "index.html");
+      const roleSnap = await getDoc(doc(db, "roles", user.email));
       const role = roleSnap.exists() ? roleSnap.data().role : "verifier";
-      document.getElementById("navVerificationRequests").style.display = (role==="admin")?"block":"none";
+      document.getElementById("navVerificationRequests").style.display = role === "admin" ? "block" : "none";
     });
 
-    document.getElementById("logoutBtn").addEventListener("click",()=>signOut(auth).then(()=>location.href="index.html"));
+    const tbody = document.querySelector("#licensesTable tbody");
+    const totalLic = document.getElementById("totalLicenses");
+    const activeLic = document.getElementById("activeLicenses");
+    const suspendedLic = document.getElementById("suspendedLicenses");
+    const expiredLic = document.getElementById("expiredLicenses");
 
-    /* Modal handling */
-    const overlay=document.getElementById("editModalOverlay");
-    const closeBtn=document.getElementById("modalCloseBtn");
-    const cancelBtn=document.getElementById("modalCancelBtn");
-    const saveBtn=document.getElementById("modalSaveBtn");
-    const fields={
-      id:document.getElementById("modalLicenseId"),
-      name:document.getElementById("modalFullName"),
-      klass:document.getElementById("modalClass"),
-      status:document.getElementById("modalStatus"),
-      issue:document.getElementById("modalIssue"),
-      expiry:document.getElementById("modalExpiry")
-    };
-    function openModal(data){
-      fields.id.value=data.licenseNumber||data.id||"";
-      fields.name.value=data.fullName||"";
-      fields.klass.value=data.class||"Class A";
-      fields.status.value=data.status||"Active";
-      fields.issue.value=(data.issueDate||"").slice(0,10);
-      fields.expiry.value=(data.expiryDate||"").slice(0,10);
-      overlay.classList.add("show");
-    }
-    function closeModal(){overlay.classList.remove("show");}
-    closeBtn.onclick=closeModal;cancelBtn.onclick=closeModal;
-    overlay.addEventListener("click",e=>{if(e.target===overlay)closeModal();});
-    saveBtn.onclick=async()=>{
-      const id=fields.id.value.trim();
-      if(!id){alert("Missing license number");return;}
-      const payload={
-        licenseNumber:id,
-        fullName:fields.name.value.trim(),
-        class:fields.klass.value,
-        status:fields.status.value,
-        issueDate:fields.issue.value,
-        expiryDate:fields.expiry.value
-      };
-      await setDoc(doc(db,"licenses",id),payload,{merge:true});
-      closeModal();
-    };
-
-    /* Load licenses */
-    const tbody=document.querySelector("#licensesTable tbody");
-    const qLic=query(collection(db,"licenses"),orderBy("licenseNumber"));
-    onSnapshot(qLic,snap=>{
-      tbody.innerHTML="";
-      let total=0,active=0,susp=0,exp=0;
-      if(snap.empty){tbody.innerHTML="<tr><td colspan='7'>No data</td></tr>";}
-      snap.forEach(docSnap=>{
-        const d=docSnap.data(); total++;
-        const s=(d.status||"").toLowerCase();
-        if(s.startsWith("act"))active++;
-        else if(s.startsWith("sus"))susp++;
-        else if(s.startsWith("exp"))exp++;
-        const tr=document.createElement("tr");
-        tr.innerHTML=`
-          <td>${d.licenseNumber||docSnap.id}</td>
-          <td>${d.fullName||""}</td>
-          <td>${d.class||""}</td>
-          <td>${d.issueDate||""}</td>
-          <td>${d.expiryDate||""}</td>
-          <td>${d.status||""}</td>
-          <td><button class="btn-inline" data-id="${d.licenseNumber||docSnap.id}"><i class="fas fa-pen"></i> Edit</button></td>`;
-        tbody.appendChild(tr);
+    const q = query(collection(db, "licenses"), orderBy("licenseNumber"));
+    onSnapshot(q, (snap) => {
+      tbody.innerHTML = "";
+      let total = 0, active = 0, susp = 0, exp = 0;
+      snap.forEach((docSnap) => {
+        const d = docSnap.data(); total++;
+        const s = (d.status || "").toLowerCase();
+        if (s.startsWith("act")) active++;
+        else if (s.startsWith("sus")) susp++;
+        else if (s.startsWith("exp")) exp++;
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${d.licenseNumber || docSnap.id}</td>
+          <td>${d.fullName || ""}</td>
+          <td>${d.class || ""}</td>
+          <td>${d.issueDate || ""}</td>
+          <td>${d.expiryDate || ""}</td>
+          <td>${d.status || ""}</td>
+          <td><button class="btn-inline" data-id="${d.licenseNumber || docSnap.id}"><i class="fas fa-pen"></i> Edit</button></td>`;
+        tbody.appendChild(row);
       });
-      document.getElementById("totalLicenses").textContent=total;
-      document.getElementById("activeLicenses").textContent=active;
-      document.getElementById("suspendedLicenses").textContent=susp;
-      document.getElementById("expiredLicenses").textContent=exp;
+      totalLic.textContent = total;
+      activeLic.textContent = active;
+      suspendedLic.textContent = susp;
+      expiredLic.textContent = exp;
     });
-
-    /* Edit row */
-    tbody.addEventListener("click",async e=>{
-      const btn=e.target.closest(".btn-inline");
-      if(!btn)return;
-      const id=btn.dataset.id;
-      const snap=await getDoc(doc(db,"licenses",id));
-      const data=snap.exists()?snap.data():{licenseNumber:id};
-      openModal(data);
-    });
-
-    /* Search */
-    document.getElementById("licenseSearch").addEventListener("input",e=>{
-      const term=e.target.value.toLowerCase();
-      document.querySelectorAll("#
-      document.querySelectorAll("#licensesTable tbody tr").forEach(row => {
-        row.style.display = row.textContent.toLowerCase().includes(term) ? "" : "none";
-      });
-    });
-
-    /* ===== Export CSV ===== */
-    document.getElementById("exportLicenses").addEventListener("click", () => {
-      const rows = document.querySelectorAll("#licensesTable tr");
-      const csv = [];
-      rows.forEach(r => {
-        const cols = r.querySelectorAll("th, td");
-        const row = Array.from(cols)
-          .map(c => `"${c.innerText.replace(/"/g, '""')}"`)
-          .join(",");
-        csv.push(row);
-      });
-      const blob = new Blob([csv.join("\n")], { type: "text/csv" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "licenses_export.csv";
-      a.click();
-    });
-
-    /* ===== Language Switcher (basic placeholder version) ===== */
-    const i18nResources = {
-      en: { translation: { logout: "Logout", export: "Export" } },
-      fr: { translation: { logout: "Déconnexion", export: "Exporter" } },
-      ja: { translation: { logout: "ログアウト", export: "エクスポート" } },
-    };
-
-    i18next
-      .use(i18nextBrowserLanguageDetector)
-      .init({ resources: i18nResources, fallbackLng: "en" }, () => {
-        if (typeof jqueryI18next !== "undefined") {
-          jqueryI18next.init(i18next, $, { useOptionsAttr: true });
-          $("body").localize();
-        }
-      });
-
-    document
-      .getElementById("languageSwitcher")
-      .addEventListener("change", function () {
-        i18next.changeLanguage(this.value, () => $("body").localize());
-      });
   </script>
 </body>
 </html>
