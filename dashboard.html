@@ -49,7 +49,16 @@
     nav a.active{border-bottom:2px solid var(--brand-dark);padding-bottom:3px}
 
     /* ===== Containers / Panels ===== */
-    .container{max-width:1100px;margin:25px auto;background:var(--panel-bg);border-radius:12px;box-shadow:var(--card-shadow);padding:25px;backdrop-filter:blur(6px)}
+    /* 🔧 Stretch the white panel to viewport (no horizontal scroll) */
+    .container{
+      max-width:95vw;      /* stretch wider */
+      margin:25px auto;
+      background:var(--panel-bg);
+      border-radius:12px;
+      box-shadow:var(--card-shadow);
+      padding:25px;
+      backdrop-filter:blur(6px)
+    }
     .panel{background:var(--panel-bg);border-radius:10px;box-shadow:var(--card-shadow);padding:18px;margin:18px 0}
 
     /* ===== Stat Cards (equal width) ===== */
@@ -68,19 +77,21 @@
     .btn-export{width:auto;background:#2980b9;color:#fff;border:0;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:.9rem}
     .btn-export:hover{background:#1f6392}
     #licenseSearch{max-width:320px;border:1px solid #dcdcdc;border-radius:8px;padding:8px;background:#fff}
-    .verification-table-wrapper{overflow-x:auto}
 
-    table{width:100%;border-collapse:separate;border-spacing:0 6px;margin-top:10px}
-    th,td{border:1px solid #eee;padding:10px 14px;text-align:left;background:#fff;vertical-align:middle}
+    /* Keep everything visible without horizontal scroll */
+    .verification-table-wrapper{overflow-x:visible}
+    table{width:100%;border-collapse:separate;border-spacing:0 6px;margin-top:10px;table-layout:auto}
+    th,td{
+      border:1px solid #eee;padding:10px 14px;text-align:left;background:#fff;vertical-align:middle;
+      white-space:normal;           /* allow wrapping */
+      word-break:break-word;        /* wrap long values */
+    }
     th{background:#f2f2f2;font-weight:bold}
-
-    /* 🔧 Stretch table a bit more and keep one-line cells */
-    #licensesTable{min-width:1200px; table-layout:auto}
-    #licensesTable th,#licensesTable td{white-space:nowrap}
 
     /* Buttons inside table */
     .btn-inline{padding:6px 10px;border-radius:8px;border:0;cursor:pointer;color:#fff;background:var(--info)}
     .btn-inline:hover{opacity:.95}
+    .btn-danger{background:var(--danger)}
 
     /* ===== Modal ===== */
     .modal-overlay{position:fixed;inset:0;background:var(--overlay);display:none;align-items:center;justify-content:center;z-index:1000}
@@ -89,7 +100,7 @@
     .modal header{background:var(--brand-dark);color:#fff;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
     .modal .modal-body{padding:16px}
 
-    /* 🔧 Force vertical, tidy field stack in the modal */
+    /* keep modal fields vertically stacked & tidy */
     .modal .modal-body{display:flex;flex-direction:column;gap:10px}
     .modal .modal-body label{display:block;margin-top:2px;font-weight:600}
     .modal .modal-body input,.modal .modal-body select{width:100%}
@@ -208,7 +219,7 @@
     /* ===== Firebase v9+ Modular ===== */
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { getFirestore, collection, onSnapshot, doc, setDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, doc, setDoc, getDoc, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
@@ -232,7 +243,8 @@
         licensesList:"Licenses", licenseNumber:"License #", fullName:"Full Name", class:"Class",
         issueDate:"Issue", expiryDate:"Expiry", status:"Status", action:"Action",
         loading:"Loading...", export:"Export", searchLicenses:"Search licenses...",
-        editLicense:"Edit License", cancel:"Cancel", saveChanges:"Save Changes", active:"Active"
+        editLicense:"Edit License", cancel:"Cancel", saveChanges:"Save Changes", active:"Active",
+        delete:"Delete", confirmDelete:"Delete this license?"
       }},
       fr:{translation:{
         dashboard:"Tableau de bord", verificationPortal:"Vérification", addLicense:"Ajouter un permis",
@@ -242,7 +254,8 @@
         licensesList:"Permis", licenseNumber:"N° de permis", fullName:"Nom complet", class:"Catégorie",
         issueDate:"Émission", expiryDate:"Expiration", status:"Statut", action:"Action",
         loading:"Chargement...", export:"Exporter", searchLicenses:"Rechercher des permis…",
-        editLicense:"Modifier le permis", cancel:"Annuler", saveChanges:"Enregistrer", active:"Actif"
+        editLicense:"Modifier le permis", cancel:"Annuler", saveChanges:"Enregistrer", active:"Actif",
+        delete:"Supprimer", confirmDelete:"Supprimer ce permis ?"
       }},
       ja:{translation:{
         dashboard:"ダッシュボード", verificationPortal:"照合", addLicense:"免許を追加",
@@ -252,7 +265,8 @@
         licensesList:"免許一覧", licenseNumber:"免許番号", fullName:"氏名", class:"区分",
         issueDate:"発行", expiryDate:"有効期限", status:"ステータス", action:"操作",
         loading:"読み込み中…", export:"エクスポート", searchLicenses:"免許を検索…",
-        editLicense:"免許を編集", cancel:"キャンセル", saveChanges:"保存", active:"有効"
+        editLicense:"免許を編集", cancel:"キャンセル", saveChanges:"保存", active:"有効",
+        delete:"削除", confirmDelete:"この免許を削除しますか？"
       }}
     };
 
@@ -339,15 +353,19 @@
           total++;
           const s = String(d.status||"").toLowerCase();
           if (s.startsWith("act")) active++; else if (s.startsWith("sus")) suspended++; else if (s.startsWith("exp")) expired++;
+          const id = d.licenseNumber || docSnap.id;
           const tr = document.createElement("tr");
           tr.innerHTML = `
-            <td>${d.licenseNumber||docSnap.id}</td>
+            <td>${id}</td>
             <td>${d.fullName||""}</td>
             <td>${d.class||""}</td>
             <td>${d.issueDate||""}</td>
             <td>${d.expiryDate||""}</td>
             <td>${d.status||""}</td>
-            <td><button class="btn-inline" data-action="update" data-id="${d.licenseNumber||docSnap.id}"><i class="fas fa-pen"></i> ${i18next.t("editLicense")}</button></td>`;
+            <td style="white-space:nowrap">
+              <button class="btn-inline" data-action="update" data-id="${id}"><i class="fas fa-pen"></i> ${i18next.t("editLicense")}</button>
+              <button class="btn-inline btn-danger" data-action="delete" data-id="${id}"><i class="fas fa-trash"></i> ${i18next.t("delete")}</button>
+            </td>`;
           tbody.appendChild(tr);
         });
       }
@@ -357,16 +375,26 @@
       document.getElementById("expiredLicenses").textContent = expired;
     });
 
-    /* ===== Row actions: open modal with current data ===== */
+    /* ===== Row actions: open modal / delete ===== */
     tbody.addEventListener("click", async (e)=>{
-      const btn = e.target.closest("button[data-action='update']");
-      if(!btn) return;
-      const id = btn.getAttribute("data-id");
-      try {
-        const snap = await getDoc(doc(db,"licenses",id));
-        const data = snap.exists() ? snap.data() : { licenseNumber:id };
-        openModal({ id, ...data });
-      } catch(err){ alert("❌ " + err.message); }
+      const editBtn = e.target.closest("button[data-action='update']");
+      const delBtn  = e.target.closest("button[data-action='delete']");
+      if(editBtn){
+        const id = editBtn.getAttribute("data-id");
+        try {
+          const snap = await getDoc(doc(db,"licenses",id));
+          const data = snap.exists() ? snap.data() : { licenseNumber:id };
+          openModal({ id, ...data });
+        } catch(err){ alert("❌ " + err.message); }
+      }
+      if(delBtn){
+        const id = delBtn.getAttribute("data-id");
+        if(confirm(i18next.t("confirmDelete"))){
+          try{
+            await deleteDoc(doc(db,"licenses", id));
+          }catch(err){ alert("❌ " + err.message); }
+        }
+      }
     });
 
     /* ===== Search filter ===== */
