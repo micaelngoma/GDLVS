@@ -9,7 +9,6 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-functions.js"></script>
 
   <!-- i18n + jQuery -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
@@ -19,8 +18,12 @@
 
   <style>
     :root {
-      --brand-dark:#2a3f54;--brand-dark-2:#1e2d3c;--success:#27ae60;--danger:#e74c3c;
-      --text:#333;--muted:#666;--shadow:0 2px 6px rgba(0,0,0,.1);
+      --brand-dark:#2a3f54;
+      --brand-dark-2:#1e2d3c;
+      --blue:#007bff;
+      --text:#333;
+      --muted:#666;
+      --shadow:0 2px 6px rgba(0,0,0,.1);
     }
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:Arial,sans-serif;background:#f6f8fb;color:var(--text);}
@@ -29,11 +32,11 @@
     .car-hero{font-size:72px;color:var(--brand-dark);}
     .welcome-section h1{color:var(--brand-dark);margin:10px 0;}
     .welcome-text{max-width:860px;margin:0 auto;font-size:1.05rem;}
-    .login-container{max-width:420px;margin:30px auto;padding:24px;background:#fff;border-radius:10px;box-shadow:var(--shadow);text-align:center;}
+    .login-container{max-width:420px;margin:30px auto;padding:24px;background:#fff;border-radius:10px;box-shadow:var(--shadow);text-align:center;transition:all .3s ease;}
     input,button,select{width:100%;padding:10px;margin:8px 0;border:1px solid #dcdcdc;border-radius:8px;font-size:.98rem;}
     button{background:var(--brand-dark);color:#fff;cursor:pointer;transition:.2s;}
     button:hover{background:var(--brand-dark-2);}
-    a{color:var(--brand-dark);text-decoration:none;}
+    a{color:var(--blue);font-weight:bold;text-decoration:none;}
     a:hover{text-decoration:underline;}
     .muted{color:var(--muted);font-size:.95rem;}
     footer{text-align:center;margin:20px 0 40px;}
@@ -51,21 +54,24 @@
     </p>
   </section>
 
-  <div class="login-container">
-    <h2><i class="fas fa-id-card"></i> <span data-i18n="login">Login</span></h2>
-    <form id="loginForm" onsubmit="loginUser(event)">
-      <input type="email" id="email" required data-i18n="[placeholder]emailPlaceholder" placeholder="Email" />
-      <input type="password" id="password" required data-i18n="[placeholder]passwordPlaceholder" placeholder="Password" />
-      <button type="submit"><i class="fas fa-sign-in-alt"></i> <span data-i18n="loginBtn">Login</span></button>
-    </form>
-    <div class="links-row">
-      <a href="#" onclick="resetPassword()" data-i18n="forgotPassword">Forgot Password?</a>
+  <div class="login-container" id="mainContainer">
+    <!-- Default Login Page -->
+    <div id="loginPage">
+      <h2><i class="fas fa-id-card"></i> <span data-i18n="login">Login</span></h2>
+      <form id="loginForm" onsubmit="loginUser(event)">
+        <input type="email" id="email" required data-i18n="[placeholder]emailPlaceholder" placeholder="Email" />
+        <input type="password" id="password" required data-i18n="[placeholder]passwordPlaceholder" placeholder="Password" />
+        <button type="submit"><i class="fas fa-sign-in-alt"></i> <span data-i18n="loginBtn">Login</span></button>
+      </form>
+      <div class="links-row">
+        <a href="#" onclick="resetPassword()" data-i18n="forgotPassword">Forgot Password?</a>
+      </div>
+      <div id="msg" class="muted"></div>
+      <p class="muted">
+        <span data-i18n="noAccount">Don’t have an account?</span>
+        <a href="#" onclick="showRequestAccess()" data-i18n="requestAccessHere">Request access here</a>
+      </p>
     </div>
-    <div id="msg" class="muted"></div>
-    <p class="muted">
-      <span data-i18n="noAccount">Don’t have an account?</span>
-      <a href="#" onclick="requestAccessForm()" data-i18n="requestAccessHere">Request access here</a>
-    </p>
   </div>
 
   <footer>
@@ -90,7 +96,6 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
-    const functions = firebase.functions();
 
     /* === Translations === */
     const i18nResources = {
@@ -100,7 +105,8 @@
         forgotPassword:"Forgot Password?",noAccount:"Don’t have an account?",requestAccessHere:"Request access here",
         verifyEmailFirst:"Please verify your email before logging in.",adminWelcome:"Welcome Admin!",loginSuccess:"Login successful!",
         requestFormTitle:"Access Request",fullName:"Full Name",organization:"Organization",phone:"Phone",submitRequest:"Submit Request",
-        accessSubmitted:"✅ Your request has been submitted. You will receive confirmation within 72 hours."
+        accessSubmitted:"✅ Your request has been submitted. You will receive confirmation within 72 hours.",
+        backToLogin:"← Back to Login"
       }},
       fr:{translation:{
         welcomeTitle:"Bienvenue",welcomeMessage:"Bienvenue sur le Système Gabonais de Vérification des Permis de Conduire (GDLVS).",
@@ -108,7 +114,8 @@
         forgotPassword:"Mot de passe oublié ?",noAccount:"Pas de compte ?",requestAccessHere:"Demander un accès ici",
         verifyEmailFirst:"Veuillez d’abord vérifier votre e-mail.",adminWelcome:"Bienvenue Administrateur!",loginSuccess:"Connexion réussie!",
         requestFormTitle:"Demande d’accès",fullName:"Nom complet",organization:"Organisation",phone:"Téléphone",submitRequest:"Soumettre la demande",
-        accessSubmitted:"✅ Votre demande a été soumise. Vous recevrez une confirmation sous 72 heures."
+        accessSubmitted:"✅ Votre demande a été soumise. Vous recevrez une confirmation sous 72 heures.",
+        backToLogin:"← Retour à la connexion"
       }},
       ja:{translation:{
         welcomeTitle:"ようこそ",welcomeMessage:"ガボン運転免許証認証システム (GDLVS) へようこそ。ガボンの運転免許証の真正性を確認する安全なプラットフォームです。",
@@ -116,7 +123,8 @@
         forgotPassword:"パスワードをお忘れですか？",noAccount:"アカウントをお持ちでない場合",requestAccessHere:"アクセスをリクエストする",
         verifyEmailFirst:"ログインする前にメールを確認してください。",adminWelcome:"管理者としてようこそ!",loginSuccess:"ログイン成功!",
         requestFormTitle:"アクセス申請",fullName:"氏名",organization:"組織",phone:"電話番号",submitRequest:"送信",
-        accessSubmitted:"✅ リクエストが送信されました。72時間以内に確認メールが届きます。"
+        accessSubmitted:"✅ リクエストが送信されました。72時間以内に確認メールが届きます。",
+        backToLogin:"← ログインに戻る"
       }}
     };
     i18next.use(i18nextBrowserLanguageDetector).init(
@@ -153,9 +161,9 @@
       catch(err){alert("Error: "+err.message);}
     }
 
-    /* === Access Request === */
-    function requestAccessForm(){
-      const formHTML=`
+    /* === Request Access Page === */
+    function showRequestAccess(){
+      const html=`
         <div style='text-align:left'>
           <h3><i class='fa-solid fa-user-plus'></i> ${i18next.t("requestFormTitle")}</h3>
           <input id='reqName' placeholder='${i18next.t("fullName")}' required>
@@ -163,8 +171,15 @@
           <input id='reqOrg' placeholder='${i18next.t("organization")}' required>
           <input id='reqPhone' placeholder='${i18next.t("phone")}' required>
           <button onclick='submitAccessRequest()'>${i18next.t("submitRequest")}</button>
+          <p style='text-align:center;margin-top:10px;'>
+            <a href='#' onclick='showLoginPage()'>${i18next.t("backToLogin")}</a>
+          </p>
         </div>`;
-      document.querySelector(".login-container").innerHTML=formHTML;
+      document.getElementById("mainContainer").innerHTML=html;
+    }
+
+    function showLoginPage(){
+      location.reload(); // Simple reload restores login page and i18n
     }
 
     async function submitAccessRequest(){
@@ -172,19 +187,19 @@
       const email=document.getElementById("reqEmail").value.trim();
       const org=document.getElementById("reqOrg").value.trim();
       const phone=document.getElementById("reqPhone").value.trim();
-      if(!name||!email||!org) return showMsg("⚠️ All fields required");
+      if(!name||!email||!org) return alert("⚠️ All fields required");
       try{
         await db.collection("requests").doc(email).set({
           fullName:name,email,organization:org,phone,status:"pending",requestedAt:new Date()
         });
-        showMsg(i18next.t("accessSubmitted"),true);
-        alert("✅ Request submitted. The admin (m.ngoma1988@gmail.com) has been notified.");
-      }catch(err){showMsg("❌ "+err.message);}
+        alert(i18next.t("accessSubmitted"));
+        showLoginPage();
+      }catch(err){alert("❌ "+err.message);}
     }
 
     window.loginUser=loginUser;
     window.resetPassword=resetPassword;
-    window.requestAccessForm=requestAccessForm;
+    window.showRequestAccess=showRequestAccess;
     window.submitAccessRequest=submitAccessRequest;
   </script>
 </body>
