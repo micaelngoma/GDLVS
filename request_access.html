@@ -1,331 +1,223 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>GDLVS - Access Request</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-    />
-    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GDLVS - Request Access</title>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-    <!-- i18n + jQuery -->
-    <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
-    <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
-    <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
-    <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
+  <!-- Firebase v8 SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-    <style>
-      :root {
-        --brand-dark: #004aad;
-        --brand-dark-2: #003780;
-        --blue: #004aad;
-        --text: #333;
-        --muted: #666;
-        --shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      }
-      body {
-        font-family: "Segoe UI", Arial, sans-serif;
-        background: #f6f8fb;
-        color: var(--text);
-        margin: 0;
-        padding: 0;
-      }
-      .background {
-        position: fixed;
-        inset: 0;
-        background: url("https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg")
-          no-repeat center center fixed;
-        background-size: cover;
-        z-index: -1;
-        filter: brightness(0.85);
-      }
-      .container {
-        max-width: 480px;
-        margin: 70px auto;
-        background: rgba(255, 255, 255, 0.97);
-        border-radius: 10px;
-        box-shadow: var(--shadow);
-        padding: 30px 25px;
-        text-align: center;
-      }
-      h2 {
-        color: var(--brand-dark);
-        margin-bottom: 20px;
-      }
-      input,
-      textarea,
-      select,
-      button {
-        width: 100%;
-        padding: 10px;
-        margin: 8px 0;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-        font-size: 1rem;
-      }
-      button {
-        background: var(--brand-dark);
-        color: #fff;
-        cursor: pointer;
-        transition: 0.2s;
-        border: none;
-      }
-      button:hover {
-        background: var(--brand-dark-2);
-      }
-      a {
-        color: var(--blue);
-        font-weight: bold;
-        text-decoration: none;
-      }
-      a:hover {
-        text-decoration: underline;
-      }
-      footer {
-        text-align: center;
-        margin-top: 20px;
-      }
-      #msg {
-        margin-top: 10px;
-        color: green;
-        font-weight: bold;
-      }
-    </style>
-  </head>
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
-  <body>
-    <div class="background"></div>
+  <style>
+    :root {
+      --brand-dark: #2a3f54;
+      --brand-dark-2: #1e2d3c;
+      --blue: #007bff;
+      --text: #333;
+      --muted: #666;
+      --shadow: 0 2px 6px rgba(0,0,0,.1);
+    }
 
-    <div class="container">
-      <h2 data-i18n="title">
-        <i class="fa-solid fa-user-plus"></i> Access Request
-      </h2>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-      <form id="accessForm" onsubmit="submitAccessRequest(event)">
-        <input
-          id="fullName"
-          placeholder="Full Name"
-          data-i18n="[placeholder]fullName"
-          required
-        />
-        <input
-          type="email"
-          id="email"
-          placeholder="Email"
-          data-i18n="[placeholder]email"
-          required
-        />
-        <input
-          id="organization"
-          placeholder="Organization"
-          data-i18n="[placeholder]organization"
-          required
-        />
-        <input
-          id="phone"
-          placeholder="Phone Number"
-          data-i18n="[placeholder]phone"
-          required
-        />
+    body {
+      font-family: Arial, sans-serif;
+      background: #f6f8fb;
+      color: var(--text);
+    }
 
-        <label for="country" style="display: block; text-align: left; margin-top: 5px"
-          ><strong data-i18n="country">Country</strong></label
-        >
-        <select id="country" required></select>
+    .background-image {
+      position: fixed;
+      inset: 0;
+      background: url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') 
+                  no-repeat center center fixed;
+      background-size: cover;
+      z-index: -1;
+      filter: brightness(0.9);
+    }
 
-        <textarea
-          id="purpose"
-          rows="3"
-          placeholder="Purpose of Access"
-          data-i18n="[placeholder]purpose"
-          required
-        ></textarea>
+    .container {
+      max-width: 440px;
+      margin: 80px auto;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 28px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
 
-        <button type="submit">
-          <i class="fas fa-paper-plane"></i>
-          <span data-i18n="submit">Submit Request</span>
-        </button>
-      </form>
+    h2 {
+      color: var(--brand-dark);
+      margin-bottom: 18px;
+    }
 
-      <p id="msg"></p>
+    input, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #dcdcdc;
+      border-radius: 8px;
+      font-size: 0.98rem;
+    }
 
-      <footer>
-        <a href="index.html" data-i18n="backToLogin">← Back to Login</a>
-        <br /><br />
-        <label for="languageSwitcher"><i class="fas fa-globe"></i></label>
-        <select id="languageSwitcher">
-          <option value="en">🇬🇧 English</option>
-          <option value="fr">🇫🇷 Français</option>
-          <option value="ja">🇯🇵 日本語</option>
-        </select>
-      </footer>
-    </div>
+    textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
 
-    <script>
-      /* === Firebase Configuration === */
-      const firebaseConfig = {
-        apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
-        authDomain: "gdlvs-2348e.firebaseapp.com",
-        projectId: "gdlvs-2348e",
-        storageBucket: "gdlvs-2348e.appspot.com",
-        messagingSenderId: "358715790318",
-        appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff",
-      };
-      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-      const db = firebase.firestore();
+    button {
+      background: var(--brand-dark);
+      color: #fff;
+      cursor: pointer;
+      border: none;
+      transition: background 0.2s;
+      font-weight: bold;
+    }
 
-      /* === EmailJS Configuration === */
-      emailjs.init("TfmaZEvxtz2MNUb70");
+    button:hover {
+      background: var(--brand-dark-2);
+    }
 
-      /* === Translations === */
-      const i18nResources = {
-        en: {
-          translation: {
-            title: "Access Request",
-            fullName: "Full Name",
-            email: "Email",
-            organization: "Organization",
-            phone: "Phone Number",
-            purpose: "Purpose of Access",
-            submit: "Submit Request",
-            backToLogin: "← Back to Login",
-            success:
-              "✅ Your request has been submitted successfully. A confirmation email has been sent.",
-            country: "Country",
-          },
-        },
-        fr: {
-          translation: {
-            title: "Demande d’accès",
-            fullName: "Nom complet",
-            email: "Adresse e-mail",
-            organization: "Organisation",
-            phone: "Téléphone",
-            purpose: "Objet de la demande",
-            submit: "Soumettre la demande",
-            backToLogin: "← Retour à la connexion",
-            success:
-              "✅ Votre demande a été soumise avec succès. Un e-mail de confirmation a été envoyé.",
-            country: "Pays",
-          },
-        },
-        ja: {
-          translation: {
-            title: "アクセス申請",
-            fullName: "氏名",
-            email: "メールアドレス",
-            organization: "組織",
-            phone: "電話番号",
-            purpose: "アクセス目的",
-            submit: "申請を送信",
-            backToLogin: "← ログインに戻る",
-            success:
-              "✅ リクエストが正常に送信されました。確認メールが送信されました。",
-            country: "国",
-          },
-        },
-      };
-      i18next
-        .use(i18nextBrowserLanguageDetector)
-        .init(
-          { resources: i18nResources, fallbackLng: "en" },
-          () => {
-            jqueryI18next.init(i18next, $, { useOptionsAttr: true });
-            $("body").localize();
-          }
-        );
-      document
-        .getElementById("languageSwitcher")
-        .addEventListener("change", function () {
-          i18next.changeLanguage(this.value, () => $("body").localize());
+    a {
+      color: var(--blue);
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    a:hover { text-decoration: underline; }
+
+    .muted { color: var(--muted); font-size: 0.95rem; }
+
+    footer {
+      text-align: center;
+      margin: 20px 0 40px;
+    }
+
+    #languageSwitcher {
+      width: auto;
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+
+    #msg {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .success { color: green; }
+    .error { color: red; }
+    .loading { color: #004aad; }
+  </style>
+</head>
+
+<body>
+  <div class="background-image"></div>
+
+  <div class="container">
+    <h2><i class="fas fa-user-plus"></i> Request Access</h2>
+
+    <form id="requestForm" onsubmit="submitAccessRequest(event)">
+      <input type="text" id="requestFullName" placeholder="Full Name" required />
+      <input type="email" id="requestEmail" placeholder="Email" required />
+      <input type="text" id="organization" placeholder="Organization / Agency" required />
+      <input type="tel" id="phone" placeholder="Phone Number" required />
+      <textarea id="purpose" placeholder="Purpose of access (e.g., license verification)" required></textarea>
+
+      <button type="submit"><i class="fas fa-paper-plane"></i> Submit Request</button>
+    </form>
+
+    <div id="msg"></div>
+
+    <p class="muted" style="margin-top:12px;">
+      Already have an account? <a href="index.html">← Back to Login</a>
+    </p>
+  </div>
+
+  <footer>
+    <label for="languageSwitcher"><i class="fas fa-globe"></i></label>
+    <select id="languageSwitcher">
+      <option value="en">🇬🇧 English</option>
+      <option value="fr">🇫🇷 Français</option>
+      <option value="ja">🇯🇵 日本語</option>
+    </select>
+  </footer>
+
+  <script>
+    /* ===================================================
+       🔹 Initialize EmailJS
+    =================================================== */
+    (function() {
+      emailjs.init("TfmaZEvxtz2MNUb70"); // ✅ Your verified public key
+    })();
+
+    /* ===================================================
+       🔹 Initialize Firebase (v8)
+    =================================================== */
+    const firebaseConfig = {
+      apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
+      authDomain: "gdlvs-2348e.firebaseapp.com",
+      projectId: "gdlvs-2348e",
+      storageBucket: "gdlvs-2348e.appspot.com",
+      messagingSenderId: "358715790318",
+      appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    /* ===================================================
+       🔹 Submit Access Request Function
+    =================================================== */
+    async function submitAccessRequest(event) {
+      event.preventDefault();
+      const msgBox = document.getElementById("msg");
+      msgBox.textContent = "⏳ Submitting your request...";
+      msgBox.className = "loading";
+
+      const fullName = document.getElementById("requestFullName").value.trim();
+      const email = document.getElementById("requestEmail").value.trim();
+      const organization = document.getElementById("organization").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const purpose = document.getElementById("purpose").value.trim();
+
+      try {
+        // ✅ Step 1: Add record to Firestore
+        await db.collection("requests").add({
+          fullName,
+          email,
+          organization,
+          phone,
+          purpose,
+          status: "pending",
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-      /* === Populate Country Dropdown === */
-      const countries = [
-        "Gabon",
-        "United States",
-        "France",
-        "Japan",
-        "China",
-        "Brazil",
-        "United Kingdom",
-        "Canada",
-        "Germany",
-        "Nigeria",
-        "South Africa",
-        "India",
-        "Mexico",
-        "Spain",
-        "Italy",
-        "Australia",
-        "Singapore",
-        "Kenya",
-        "Cameroon",
-        "Morocco",
-      ];
-      const countrySelect = document.getElementById("country");
-      countries.forEach((c) => {
-        const opt = document.createElement("option");
-        opt.value = c;
-        opt.textContent = c;
-        countrySelect.appendChild(opt);
-      });
+        // ✅ Step 2: Send Email notification
+        await emailjs.send("service_ddq3kka", "template_inl3jsv", {
+          name: fullName,
+          email,
+          organization,
+          phone,
+          purpose
+        });
 
-      /* === Submit Access Request === */
-      async function submitAccessRequest(event) {
-        event.preventDefault();
+        // ✅ Step 3: Success feedback
+        msgBox.textContent = "✅ Request submitted successfully! You’ll receive confirmation within 72 hours.";
+        msgBox.className = "success";
+        document.getElementById("requestForm").reset();
 
-        const name = document.getElementById("fullName").value.trim();
-        const email = document.getElementById("email").value.trim();
-        const organization = document.getElementById("organization").value.trim();
-        const phone = document.getElementById("phone").value.trim();
-        const purpose = document.getElementById("purpose").value.trim();
-        const country = document.getElementById("country").value;
-
-        if (!name || !email || !organization || !phone || !purpose || !country) {
-          alert("⚠️ Please fill in all fields.");
-          return;
-        }
-
-        try {
-          await db.collection("requests").add({
-            fullName: name,
-            email,
-            organization,
-            phone,
-            purpose,
-            country,
-            status: "pending",
-            requestedAt: firebase.firestore.FieldValue.serverTimestamp(),
-          });
-
-          // Send EmailJS Notification (to requester + admin)
-          await emailjs.send("service_ddq3kka", "template_inl3jsv", {
-            name,
-            email,
-            organization,
-            phone,
-            purpose,
-            country,
-            status: "pending",
-            message:
-              "Your access request to the Gabon Driver’s License Verification System (GDLVS) has been received and is under review.",
-          });
-
-          document.getElementById("msg").innerText = i18next.t("success");
-          document.getElementById("accessForm").reset();
-        } catch (err) {
-          console.error(err);
-          alert("❌ Failed to submit request: " + err.message);
-        }
+      } catch (err) {
+        console.error("❌ Firestore/EmailJS error:", err);
+        msgBox.textContent = "⚠️ Submission failed: " + err.message;
+        msgBox.className = "error";
       }
-
-      window.submitAccessRequest = submitAccessRequest;
-    </script>
-  </body>
+    }
+  </script>
+</body>
 </html>
