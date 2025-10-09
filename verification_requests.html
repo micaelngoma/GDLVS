@@ -26,7 +26,7 @@
     html,body{height:100%}
     body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#333;background:#f6f8fb}
 
-    /* === Background (same as dashboard) === */
+    /* Background */
     .background-image{
       position:fixed; inset:0;
       background:url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') no-repeat center center fixed;
@@ -34,7 +34,7 @@
       z-index:-1;
     }
 
-    /* === Header & Nav (fixed like dashboard) === */
+    /* Header & Nav */
     header, nav{position:fixed; left:0; right:0; z-index:1000}
     header{
       top:0; background:var(--dark); color:#fff;
@@ -43,9 +43,7 @@
     }
     header h1{margin:0; font-size:1.1rem; display:flex; align-items:center; gap:8px}
     .controls{display:flex; align-items:center; gap:10px}
-    .controls select, .controls button{
-      border:0; border-radius:8px; padding:6px 10px; font-size:.9rem
-    }
+    .controls select, .controls button{border:0; border-radius:8px; padding:6px 10px; font-size:.9rem}
     .controls select{background:#fff; color:#000}
     .controls button{background:var(--dark-2); color:#fff; cursor:pointer}
     .controls button:hover{background:#16222d}
@@ -58,21 +56,19 @@
     nav a:hover{color:#1f2d3a}
     nav a.active{border-bottom:2px solid var(--dark); padding-bottom:3px}
 
-    /* Push page below fixed bars */
     body{padding-top:110px}
 
-    /* === Container === */
+    /* Container */
     .container{
       max-width:1100px; margin:24px auto 40px; background:var(--panel);
       border-radius:12px; box-shadow:var(--shadow); padding:22px; backdrop-filter:blur(6px);
       display:flex; flex-direction:column; gap:14px;
     }
 
-    /* === Insight Cards (equal widths) === */
+    /* Insight cards */
     .insights{display:flex; gap:15px; flex-wrap:wrap; justify-content:space-between}
     .insight-card{
-      flex:1; min-width:220px;
-      border-radius:12px; padding:16px; text-align:center; color:#fff;
+      flex:1; min-width:220px; border-radius:12px; padding:16px; text-align:center; color:#fff;
       box-shadow:0 2px 6px rgba(0,0,0,.2);
     }
     .insight-total{background:var(--info)}
@@ -82,13 +78,13 @@
     .insight-card h2{margin:2px 0 0; font-size:1.6rem; font-weight:800}
     .success-rate{font-size:.85rem; color:#eafbe4}
 
-    /* === Table controls === */
+    /* Table controls */
     .table-controls{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap}
     #searchRequests{max-width:320px; border:1px solid #ddd; border-radius:8px; padding:8px; background:#fff}
     .btn-export{background:var(--info); color:#fff; border:0; border-radius:8px; padding:8px 12px; cursor:pointer}
     .btn-export:hover{background:#1f6392}
 
-    /* === Table === */
+    /* Table */
     .table-wrapper{overflow:auto; border-top:1px solid #eee; border-bottom:1px solid #eee}
     table{width:100%; border-collapse:separate; border-spacing:0 6px}
     th,td{border:1px solid #eee; background:#fff; padding:10px 12px; text-align:left; vertical-align:middle}
@@ -98,7 +94,7 @@
     .btn-view{background:var(--info)} .btn-view:hover{opacity:.95}
     .btn-delete{background:var(--danger)} .btn-delete:hover{opacity:.95}
 
-    /* === Modal === */
+    /* Modal */
     .modal-overlay{position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:2000}
     .modal{background:#fff; border-radius:12px; width:min(460px,92vw); box-shadow:0 8px 28px rgba(0,0,0,.25); padding:20px; animation:fadeIn .2s ease}
     @keyframes fadeIn{from{opacity:0; transform:translateY(-8px)} to{opacity:1; transform:translateY(0)}}
@@ -117,7 +113,7 @@
 
   <!-- Header -->
   <header>
-    <h1 data-i18n="header.title"><i class="fas fa-clipboard-check"></i> <span data-i18n="header.title">Verification Records</span></h1>
+    <h1><i class="fas fa-clipboard-check"></i> <span data-i18n="header.title">Verification Records</span></h1>
     <div class="controls">
       <select id="languageSwitcher" aria-label="Language">
         <option value="en">🇬🇧 English</option>
@@ -128,7 +124,7 @@
     </div>
   </header>
 
-  <!-- Navigation -->
+  <!-- Nav -->
   <nav>
     <a href="dashboard.html"><i class="fas fa-id-card"></i> <span data-i18n="nav.dashboard">Dashboard</span></a>
     <a href="verify.html"><i class="fas fa-search"></i> <span data-i18n="nav.verification">Verification</span></a>
@@ -150,7 +146,7 @@
         <div class="insight-card insight-success">
           <h3><i class="fas fa-check-circle"></i> <span data-i18n="insights.success">Successful</span></h3>
           <h2 id="successfulVerifications">0</h2>
-          <div class="success-rate" id="successRate" data-i18n="insights.successRate">Success Rate: 0%</div>
+          <div class="success-rate" id="successRate">Success Rate: 0%</div>
         </div>
         <div class="insight-card insight-fail">
           <h3><i class="fas fa-times-circle"></i> <span data-i18n="insights.unsuccessful">Unsuccessful</span></h3>
@@ -214,13 +210,13 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    /* ===== i18n (minimal resources) ===== */
+    /* ===== i18n resources (with interpolation) ===== */
     const i18nResources = {
       en:{translation:{
         title:"GDLVS - Verification Records",
         header:{title:"Verification Records", logout:"Logout"},
         nav:{dashboard:"Dashboard", verification:"Verification", addLicense:"Add License", users:"User Management", verificationRequests:"Verification Requests", analytics:"Analytics"},
-        insights:{title:"Verification Insights", total:"Total", success:"Successful", unsuccessful:"Unsuccessful", successRate:"Success Rate: 0%"},
+        insights:{title:"Verification Insights", total:"Total", success:"Successful", unsuccessful:"Unsuccessful", successRate:"Success Rate: {{rate}}%"},
         table:{search:"Search verifications...", export:"Export", license:"License #", org:"Organization", purpose:"Purpose", country:"Country", result:"Result", email:"Email", date:"Date", action:"Action", loading:"Loading..."},
         modal:{title:"Verification Details", delete:"Delete", close:"Close"}
       }},
@@ -228,7 +224,7 @@
         title:"GDLVS - Enregistrements de vérification",
         header:{title:"Enregistrements de vérification", logout:"Déconnexion"},
         nav:{dashboard:"Tableau de bord", verification:"Vérification", addLicense:"Ajouter un permis", users:"Gestion des utilisateurs", verificationRequests:"Demandes de vérification", analytics:"Analytique"},
-        insights:{title:"Aperçus de vérification", total:"Total", success:"Réussies", unsuccessful:"Échouées", successRate:"Taux de réussite : 0%"},
+        insights:{title:"Aperçus de vérification", total:"Total", success:"Réussies", unsuccessful:"Échouées", successRate:"Taux de réussite : {{rate}}%"},
         table:{search:"Rechercher des vérifications…", export:"Exporter", license:"N° de permis", org:"Organisation", purpose:"Objet", country:"Pays", result:"Résultat", email:"E-mail", date:"Date", action:"Action", loading:"Chargement..."},
         modal:{title:"Détails de la vérification", delete:"Supprimer", close:"Fermer"}
       }},
@@ -236,18 +232,36 @@
         title:"GDLVS - 照合記録",
         header:{title:"照合記録", logout:"ログアウト"},
         nav:{dashboard:"ダッシュボード", verification:"照合", addLicense:"免許を追加", users:"ユーザー管理", verificationRequests:"照合リクエスト", analytics:"分析"},
-        insights:{title:"照合インサイト", total:"合計", success:"成功", unsuccessful:"失敗", successRate:"成功率: 0%"},
+        insights:{title:"照合インサイト", total:"合計", success:"成功", unsuccessful:"失敗", successRate:"成功率: {{rate}}%"},
         table:{search:"照合を検索…", export:"エクスポート", license:"免許番号", org:"組織", purpose:"目的", country:"国", result:"結果", email:"メール", date:"日時", action:"操作", loading:"読み込み中…"},
         modal:{title:"照合の詳細", delete:"削除", close:"閉じる"}
       }}
     };
 
-    i18next.use(i18nextBrowserLanguageDetector).init(
-      {resources:i18nResources, fallbackLng:"en"},
-      ()=>{ if(typeof jqueryI18next!=="undefined"){ jqueryI18next.init(i18next,$,{useOptionsAttr:true}); $("body").localize(); } }
-    );
+    /* ===== i18n init + apply ===== */
+    function applyI18n(){
+      if (typeof jqueryI18next !== "undefined"){
+        $("body").localize();
+      }
+      // Ensure <title> is updated too
+      document.title = i18next.t("title");
+      // Normalize the selector's current value to the active language
+      const sel = document.getElementById("languageSwitcher");
+      const short = (i18next.language || "en").split("-")[0];
+      if (sel && sel.value !== short) sel.value = short;
+    }
+
+    i18next
+      .use(i18nextBrowserLanguageDetector)
+      .init({ resources:i18nResources, fallbackLng:"en" }, () => {
+        if (typeof jqueryI18next !== "undefined") {
+          jqueryI18next.init(i18next, $, { useOptionsAttr:true });
+        }
+        applyI18n();
+      });
+
     document.getElementById("languageSwitcher").addEventListener("change", function(){
-      i18next.changeLanguage(this.value, () => $("body").localize());
+      i18next.changeLanguage(this.value).then(applyI18n);
     });
 
     /* ===== Auth guard & Logout ===== */
@@ -279,7 +293,7 @@
       document.getElementById("totalVerifications").textContent = total;
       document.getElementById("successfulVerifications").textContent = success;
       document.getElementById("unsuccessfulVerifications").textContent = fail;
-      document.getElementById("successRate").textContent = `${i18next.t('insights.successRate').split(':')[0]}: ${rate}%`;
+      document.getElementById("successRate").textContent = i18next.t("insights.successRate", { rate });
     }
 
     function renderTable(docs){
@@ -306,7 +320,7 @@
       });
     }
 
-    /* ===== Search ===== */
+    /* Search */
     searchInput.addEventListener("input", e=>{
       const kw = e.target.value.toLowerCase();
       const filtered = allDocs.filter(d =>
@@ -317,15 +331,25 @@
       renderTable(filtered);
     });
 
-    /* ===== Export ===== */
+    /* Export */
     document.getElementById("exportBtn").addEventListener("click", ()=>{
       if(allDocs.length===0) return alert("No data to export.");
-      const headers = ["License #","Organization","Purpose","Country","Result","Email","Date"];
+      const headers = [
+        i18next.t("table.license"),
+        i18next.t("table.org"),
+        i18next.t("table.purpose"),
+        i18next.t("table.country"),
+        i18next.t("table.result"),
+        i18next.t("table.email"),
+        i18next.t("table.date")
+      ];
       const rows = allDocs.map(d=>[
         d.licenseNumber||"", d.requestingOrg||"", d.purpose||"", d.country||"",
         d.result||"", d.email||"", d.verifiedAt?.toDate ? d.verifiedAt.toDate().toLocaleString() : ""
       ]);
-      const csv = [headers, ...rows].map(r => r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+      const csv = [headers, ...rows]
+        .map(r => r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(","))
+        .join("\n");
       const blob = new Blob([csv], {type:"text/csv"});
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
@@ -333,7 +357,7 @@
       a.click();
     });
 
-    /* ===== Modal: view + delete ===== */
+    /* Modal: view + delete */
     const modal = document.getElementById("modalOverlay");
     const modalBody = document.getElementById("modalBody");
     let currentId = null;
