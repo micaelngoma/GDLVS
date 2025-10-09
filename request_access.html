@@ -4,15 +4,104 @@
   <meta charset="UTF-8" />
   <title>GDLVS - Request Access</title>
 
-  <!-- Styles -->
-  <link rel="stylesheet" href="style.css" />
+  <!-- Font Awesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <style>
+    /* ===== Root Variables ===== */
+    :root {
+      --brand-dark: #2a3f54;
+      --brand-dark-2: #1e2d3c;
+      --text: #333;
+      --muted: #666;
+      --panel-bg: #fff;
+      --card-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      --success: #27ae60;
+      --danger: #e74c3c;
+      --warn: #f1c40f;
+      --info: #2980b9;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f6f8fb;
+      color: var(--text);
+    }
+
+    /* ===== Background ===== */
+    .background-image {
+      position: fixed;
+      inset: 0;
+      background: url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg')
+        no-repeat center center fixed;
+      background-size: cover;
+      z-index: -1;
+      filter: brightness(0.95);
+    }
+
+    /* ===== Container ===== */
+    .container {
+      max-width: 600px;
+      margin: 80px auto;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      box-shadow: var(--card-shadow);
+      text-align: center;
+    }
+
+    h2 {
+      color: var(--brand-dark);
+      margin-bottom: 20px;
+      font-size: 1.6rem;
+    }
+
+    /* ===== Inputs & Buttons ===== */
+    input, textarea, button, select {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #dcdcdc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    textarea { resize: vertical; min-height: 110px; }
+
+    button {
+      background: var(--brand-dark);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover { background: var(--brand-dark-2); }
+
+    /* ===== Messages ===== */
+    #msg { margin-top: 10px; font-weight: bold; }
+    .muted { color: var(--muted); font-size: 0.95rem; }
+    .muted a { color: var(--brand-dark); text-decoration: underline; }
+
+    /* ===== Footer / Language ===== */
+    footer {
+      text-align: center;
+      margin: 24px 0 40px;
+    }
+    #languageSwitcher {
+      width: auto;
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+  </style>
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-  <!-- i18n + jQuery -->
+  <!-- i18next + jQuery -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
@@ -22,8 +111,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
     (function(){
-      // ✅ Initialize EmailJS with your verified public key
-      emailjs.init("TfmaZEvxtz2MNUb70");
+      emailjs.init("TfmaZEvxtz2MNUb70"); // ✅ your EmailJS public key
     })();
   </script>
 
@@ -38,6 +126,7 @@
       appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
     };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
   </script>
 </head>
 
@@ -48,19 +137,22 @@
     <h2><i class="fas fa-user-plus"></i> <span data-i18n="requestAccess">Request Access</span></h2>
 
     <form id="requestForm" onsubmit="submitAccessRequest(event)">
-      <input type="text" id="requestFullName" required placeholder="Full Name" />
-      <input type="email" id="requestEmail" required placeholder="Email" />
-      <input type="text" id="organization" required placeholder="Organization / Agency" />
-      <input type="tel" id="phone" required placeholder="Phone Number" />
-      <textarea id="purpose" required rows="4" placeholder="Purpose of access (e.g., license verification)"></textarea>
+      <input type="text" id="requestFullName" required placeholder="Full Name" data-i18n="[placeholder]fullNamePlaceholder" />
+      <input type="email" id="requestEmail" required placeholder="Email" data-i18n="[placeholder]emailPlaceholder" />
+      <input type="text" id="organization" required placeholder="Organization / Agency" data-i18n="[placeholder]organizationPlaceholder" />
+      <input type="tel" id="phone" required placeholder="Phone Number" data-i18n="[placeholder]phonePlaceholder" />
+      <textarea id="purpose" required rows="4" placeholder="Purpose of access (e.g., license verification)" data-i18n="[placeholder]purposePlaceholder"></textarea>
 
-      <button type="submit"><i class="fas fa-paper-plane"></i> Submit Request</button>
+      <button type="submit"><i class="fas fa-paper-plane"></i> <span data-i18n="submitRequest">Submit Request</span></button>
     </form>
 
-    <div id="msg" style="margin-top:10px; font-weight:bold;"></div>
+    <div id="msg"></div>
 
-    <p class="muted">Your request will be reviewed by the administrator.</p>
-    <p class="muted">Already have an account? <a href="index.html">Login here</a></p>
+    <p class="muted" data-i18n="approvalNotice">Your request will be reviewed by the administrator.</p>
+    <p class="muted">
+      <span data-i18n="noAccount">Already have an account?</span>
+      <a href="index.html" data-i18n="login">Login here</a>
+    </p>
   </div>
 
   <footer>
@@ -72,8 +164,65 @@
     </select>
   </footer>
 
-  <!-- 🔹 Inline Script to Handle Access Request -->
+  <!-- === Unified Inline Script === -->
   <script>
+    /* ==========================================================
+       i18n Initialization
+       ========================================================== */
+    const i18nResources = {
+      en: { translation: {
+        requestAccess: "Request Access",
+        submitRequest: "Submit Request",
+        approvalNotice: "Your request will be reviewed by the administrator.",
+        noAccount: "Already have an account?",
+        login: "Login here",
+        fullNamePlaceholder: "Full Name",
+        emailPlaceholder: "Email",
+        organizationPlaceholder: "Organization / Agency",
+        phonePlaceholder: "Phone Number",
+        purposePlaceholder: "Purpose of access..."
+      }},
+      fr: { translation: {
+        requestAccess: "Demande d’accès",
+        submitRequest: "Soumettre la demande",
+        approvalNotice: "Votre demande sera examinée par l’administrateur.",
+        noAccount: "Vous avez déjà un compte ?",
+        login: "Connectez-vous ici",
+        fullNamePlaceholder: "Nom complet",
+        emailPlaceholder: "E-mail",
+        organizationPlaceholder: "Organisation / Agence",
+        phonePlaceholder: "Numéro de téléphone",
+        purposePlaceholder: "But de l'accès..."
+      }},
+      ja: { translation: {
+        requestAccess: "アクセス申請",
+        submitRequest: "申請を送信",
+        approvalNotice: "管理者が申請内容を確認します。",
+        noAccount: "すでにアカウントをお持ちですか？",
+        login: "ログインはこちら",
+        fullNamePlaceholder: "氏名",
+        emailPlaceholder: "メールアドレス",
+        organizationPlaceholder: "組織 / 機関",
+        phonePlaceholder: "電話番号",
+        purposePlaceholder: "アクセス目的..."
+      }}
+    };
+
+    i18next.use(i18nextBrowserLanguageDetector).init({
+      resources: i18nResources,
+      fallbackLng: "en"
+    }, function () {
+      jqueryI18next.init(i18next, $, { useOptionsAttr: true });
+      $("body").localize();
+    });
+
+    document.getElementById("languageSwitcher").addEventListener("change", function() {
+      i18next.changeLanguage(this.value, () => $("body").localize());
+    });
+
+    /* ==========================================================
+       Request Access Submission (Firestore + EmailJS)
+       ========================================================== */
     async function submitAccessRequest(event) {
       event.preventDefault();
 
@@ -88,8 +237,8 @@
       msgBox.style.color = "#004aad";
 
       try {
-        // ✅ 1. Save to Firestore
-        await firebase.firestore().collection("requests").add({
+        // Save to Firestore
+        await db.collection("requests").add({
           fullName,
           email,
           organization,
@@ -99,7 +248,7 @@
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
 
-        // ✅ 2. Send email via EmailJS
+        // Send Email via EmailJS
         await emailjs.send("service_ddq3kka", "template_inl3jsv", {
           name: fullName,
           email: email,
@@ -108,7 +257,6 @@
           purpose: purpose
         });
 
-        // ✅ 3. Success message
         msgBox.innerHTML = "✅ Your request has been submitted successfully! You'll receive a confirmation email within 72 hours.";
         msgBox.style.color = "green";
         document.getElementById("requestForm").reset();
