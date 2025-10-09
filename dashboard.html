@@ -3,52 +3,113 @@
 <head>
   <meta charset="UTF-8" />
   <title>GDLVS - Dashboard</title>
-  <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <!-- i18n + jQuery (UMD) -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
   <style>
     /* ===== Background (shared) ===== */
-    .background-image{position:fixed;inset:0;background:url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') no-repeat center center fixed;background-size:cover;z-index:-1;filter:brightness(0.95)}
+    .background-image {
+      position: fixed;
+      inset: 0;
+      background: url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') no-repeat center center fixed;
+      background-size: cover;
+      z-index: -1;
+      filter: brightness(0.95);
+    }
+
     /* ===== Global ===== */
-    :root{
-      --brand-dark:#2a3f54;
-      --brand-dark-2:#1e2d3c;
-      --text:#333;
-      --muted:#666;
-      --panel-bg:#fff;
-      --card-shadow:0 2px 6px rgba(0,0,0,0.1);
-      --success:#27ae60;
-      --danger:#e74c3c;
-      --warn:#f1c40f;
-      --info:#2980b9;
+    :root {
+      --brand-dark:#2a3f54; --brand-dark-2:#1e2d3c;
+      --text:#333; --muted:#666; --panel-bg:#fff; --card-shadow:0 2px 6px rgba(0,0,0,0.1);
+      --success:#27ae60; --danger:#e74c3c; --warn:#f1c40f; --info:#2980b9;
       --overlay: rgba(0,0,0,0.45);
     }
     *{box-sizing:border-box}
-    html,body{height:100%}
-    body{font-family:Arial, sans-serif;margin:0;color:var(--text);background:#f6f8fb}
-    /* ===== Header / Nav ===== */
-    header{background:var(--brand-dark);color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1b2a38}
-    header h1{margin:0;font-size:1.1rem;display:flex;gap:8px;align-items:center}
-    .controls{display:flex;gap:8px;align-items:center}
+    html,body{height:100%;margin:0;font-family:Arial,sans-serif;color:var(--text);background:#f6f8fb;overflow-x:hidden}
+
+    /* ===== Header (Fixed) ===== */
+    header {
+      background: var(--brand-dark);
+      color: #fff;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #1b2a38;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
+    header h1 {margin:0;font-size:1.1rem;display:flex;gap:8px;align-items:center}
+    .controls {display:flex;gap:8px;align-items:center}
     .controls select,.controls button{padding:6px 10px;border-radius:8px;border:0;font-size:.9rem}
     .controls select{background:#fff;color:#222}
     .controls button{background:var(--brand-dark-2);color:#fff;cursor:pointer}
     .controls button:hover{background:#16222d}
-    nav{background:#fff;border-bottom:1px solid #eaeaea;padding:10px 14px;display:flex;gap:15px;flex-wrap:wrap}
+
+    /* ===== Nav (Fixed) ===== */
+    nav {
+      background:#fff;
+      border-bottom:1px solid #eaeaea;
+      padding:10px 14px;
+      display:flex;
+      gap:15px;
+      flex-wrap:wrap;
+      position: fixed;
+      top: 54px; /* below header */
+      left: 0;
+      right: 0;
+      z-index: 999;
+    }
     nav a{color:var(--brand-dark);text-decoration:none;font-weight:bold}
     nav a:hover{text-decoration:underline}
     nav a.active{border-bottom:2px solid var(--brand-dark);padding-bottom:3px}
+
     /* ===== Containers / Panels ===== */
-    .container{max-width:1000px;margin:20px auto 40px;background:#fff;border-radius:10px;box-shadow:var(--card-shadow);padding:20px}
-    .panel{background:#fff;border-radius:10px;box-shadow:var(--card-shadow);padding:18px;margin:18px 0}
-    /* ===== Stat Cards (smaller; 4 in a row) ===== */
-    .dashboard-cards{display:flex;justify-content:center;align-items:stretch;gap:12px;flex-wrap:wrap;margin:12px auto 16px;max-width:900px}
-    .dashboard-cards .card{flex:1 1 calc(25% - 10px);min-width:150px;max-width:200px;padding:14px;border-radius:10px;color:#fff;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.1)}
+    main.container {
+      max-width:1000px;
+      margin:0 auto;
+      margin-top:130px; /* leave room for header+nav */
+      background:#fff;
+      border-radius:10px;
+      box-shadow:var(--card-shadow);
+      padding:20px;
+    }
+
+    .panel {
+      background:#fff;
+      border-radius:10px;
+      box-shadow:var(--card-shadow);
+      padding:18px;
+      margin:18px 0;
+    }
+
+    /* ===== Stat Cards ===== */
+    .dashboard-cards {
+      display:flex;
+      justify-content:center;
+      align-items:stretch;
+      gap:12px;
+      flex-wrap:wrap;
+      margin:12px auto 16px;
+      max-width:900px;
+    }
+    .dashboard-cards .card {
+      flex:1 1 calc(25% - 10px);
+      min-width:150px;
+      max-width:200px;
+      padding:14px;
+      border-radius:10px;
+      color:#fff;
+      text-align:center;
+      box-shadow:0 2px 6px rgba(0,0,0,0.1);
+    }
     .dashboard-cards .card h3{margin:6px 0;font-size:.9rem}
     .dashboard-cards .card h2{margin:0;font-size:1.5rem;font-weight:700}
     .card .card-icon{font-size:1.8rem;margin-bottom:4px;display:block}
@@ -56,47 +117,33 @@
     .card.active{background:#27ae60}
     .card.suspended{background:#f1c40f;color:#333}
     .card.expired{background:#e74c3c}
-    /* ===== Table & Controls ===== */
-    .table-controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-    .btn-export{width:auto;background:#2980b9;color:#fff;border:0;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:.9rem}
-    .btn-export:hover{background:#1f6392}
-    input#licenseSearch{max-width:260px;border:1px solid #dcdcdc;border-radius:8px;padding:8px}
-    .verification-table-wrapper{overflow-x:auto}
+
+    /* ===== Table Scroll ===== */
+    .verification-table-wrapper {
+      overflow-y: auto;
+      max-height: 400px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
     table.table{width:100%;border-collapse:separate;border-spacing:0 6px;margin-top:10px}
     .table th,.table td{border:1px solid #eee;padding:10px 14px;text-align:left;background:#fff;vertical-align:middle}
-    .table th{background:#f2f2f2;font-weight:bold}
-    /* Stretch Class + Status columns for readability */
-    #licensesTable th:nth-child(3),#licensesTable td:nth-child(3){min-width:200px;white-space:nowrap}
-    #licensesTable th:nth-child(6),#licensesTable td:nth-child(6){min-width:180px;white-space:nowrap}
+    .table th{background:#f2f2f2;font-weight:bold;position:sticky;top:0;z-index:2}
+
     /* Buttons inside table */
     .btn-inline{padding:6px 10px;border-radius:8px;border:0;cursor:pointer;color:#fff;background:var(--info)}
     .btn-inline:hover{opacity:.95}
-    /* ===== Modal ===== */
-    .modal-overlay{
-      position:fixed;inset:0;background:var(--overlay);display:none;align-items:center;justify-content:center;
-      opacity:0;transition:opacity .18s ease;z-index:1000;
-    }
-    .modal-overlay.show{display:flex;opacity:1}
-    .modal{
-      width:min(520px,90vw);background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);
-      transform:translateY(12px);opacity:0;transition:all .2s ease;overflow:hidden;
-    }
-    .modal-overlay.show .modal{transform:translateY(0);opacity:1}
-    .modal header{background:var(--brand-dark);color:#fff;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
-    .modal header h3{margin:0;font-size:1rem;display:flex;gap:8px;align-items:center}
-    .modal .modal-body{padding:16px}
-    .modal .modal-actions{display:flex;gap:10px;justify-content:flex-end;padding:12px 16px;border-top:1px solid #eee;background:#fafafa}
-    .btn-primary{background:var(--success);color:#fff;border:0;border-radius:8px;padding:8px 12px;cursor:pointer}
-    .btn-secondary{background:#95a5a6;color:#fff;border:0;border-radius:8px;padding:8px 12px;cursor:pointer}
-    .modal label{font-weight:600;display:block;margin-top:6px}
-    .modal input,.modal select{width:100%;padding:10px;margin-top:6px;border:1px solid #dcdcdc;border-radius:8px}
-    /* Utility */
+
+    /* ===== Footer ===== */
+    footer{text-align:center;margin:22px 0 40px;}
     .muted{color:var(--muted)}
+
     @media(max-width:900px){header{flex-direction:column;gap:8px}}
   </style>
 </head>
+
 <body>
   <div class="background-image"></div>
+
   <!-- Header -->
   <header>
     <h1><i class="fas fa-id-card"></i> <span data-i18n="dashboard">Dashboard</span></h1>
@@ -109,274 +156,52 @@
       <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></button>
     </div>
   </header>
-  <!-- Nav -->
+
+  <!-- Fixed Navigation -->
   <nav>
-    <a href="dashboard.html" class="active"><i class="fas fa-home"></i> <span data-i18n="dashboard">Dashboard</span></a>
-    <a href="verify.html"><i class="fas fa-search"></i> <span data-i18n="verificationPortal">Verification</span></a>
-    <a href="add_licenses.html"><i class="fas fa-id-card"></i> <span data-i18n="addLicense">Add License</span></a>
-    <a href="users.html"><i class="fas fa-users-cog"></i> <span data-i18n="userManagement">User Management</span></a>
-    <a id="navVerificationRequests" href="verification_requests.html"><i class="fas fa-inbox"></i> <span data-i18n="verificationRequests">Verification Requests</span></a>
-    <a href="analytics.html"><i class="fas fa-chart-bar"></i> <span data-i18n="analytics">Analytics</span></a>
+    <a href="dashboard.html" class="active"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="verify.html"><i class="fas fa-search"></i> Verification</a>
+    <a href="add_licenses.html"><i class="fas fa-id-card"></i> Add License</a>
+    <a href="users.html"><i class="fas fa-users-cog"></i> User Management</a>
+    <a id="navVerificationRequests" href="verification_requests.html"><i class="fas fa-inbox"></i> Verification Requests</a>
+    <a href="analytics.html"><i class="fas fa-chart-bar"></i> Analytics</a>
   </nav>
+
+  <!-- Main -->
   <main class="container">
-    <!-- Cards -->
     <section class="dashboard-cards">
-      <div class="card total"><div class="card-icon">👤</div><h3 data-i18n="totalLicenses">Total Licenses</h3><h2 id="totalLicenses">0</h2></div>
-      <div class="card active"><div class="card-icon">✅</div><h3 data-i18n="activeLicenses">Active</h3><h2 id="activeLicenses">0</h2></div>
-      <div class="card suspended"><div class="card-icon">⚠️</div><h3 data-i18n="suspended">Suspended</h3><h2 id="suspendedLicenses">0</h2></div>
-      <div class="card expired"><div class="card-icon">⛔</div><h3 data-i18n="expired">Expired</h3><h2 id="expiredLicenses">0</h2></div>
+      <div class="card total"><div class="card-icon">👤</div><h3>Total Licenses</h3><h2 id="totalLicenses">0</h2></div>
+      <div class="card active"><div class="card-icon">✅</div><h3>Active</h3><h2 id="activeLicenses">0</h2></div>
+      <div class="card suspended"><div class="card-icon">⚠️</div><h3>Suspended</h3><h2 id="suspendedLicenses">0</h2></div>
+      <div class="card expired"><div class="card-icon">⛔</div><h3>Expired</h3><h2 id="expiredLicenses">0</h2></div>
     </section>
-    <!-- Licenses Table -->
+
     <section class="panel">
-      <h2><i class="fas fa-id-badge"></i> <span data-i18n="licensesList">Licenses</span></h2>
+      <h2><i class="fas fa-id-badge"></i> Licenses</h2>
       <div class="table-controls">
-        <input id="licenseSearch" type="text" data-i18n="[placeholder]searchLicenses" placeholder="Search licenses..." />
-        <button class="btn-export" id="exportLicenses"><i class="fas fa-file-export"></i> <span data-i18n="export">Export</span></button>
+        <input id="licenseSearch" type="text" placeholder="Search licenses..." />
+        <button class="btn-export" id="exportLicenses"><i class="fas fa-file-export"></i> Export</button>
       </div>
+
       <div class="verification-table-wrapper">
         <table class="table" id="licensesTable">
           <thead>
             <tr>
-              <th data-i18n="licenseNumber">License #</th>
-              <th data-i18n="fullName">Full Name</th>
-              <th data-i18n="class">Class</th>
-              <th data-i18n="issueDate">Issue</th>
-              <th data-i18n="expiryDate">Expiry</th>
-              <th data-i18n="status">Status</th>
-              <th data-i18n="action">Action</th>
+              <th>License #</th>
+              <th>Full Name</th>
+              <th>Class</th>
+              <th>Issue</th>
+              <th>Expiry</th>
+              <th>Status</th>
+              <th>Action</th>
             </tr>
           </thead>
-          <tbody><tr><td colspan="7" data-i18n="loading">Loading...</td></tr></tbody>
+          <tbody><tr><td colspan="7">Loading...</td></tr></tbody>
         </table>
       </div>
     </section>
   </main>
-  <footer style="text-align:center;margin:22px 0 40px;">
-    <small class="muted">GDLVS</small>
-  </footer>
-  <!-- ===== Edit Modal (fade-in/out) ===== -->
-  <div class="modal-overlay" id="editModalOverlay" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
-      <header>
-        <h3 id="editModalTitle"><i class="fas fa-pen-to-square"></i> <span data-i18n="editLicense">Edit License</span></h3>
-        <button class="btn-secondary" id="modalCloseBtn"><i class="fas fa-times"></i></button>
-      </header>
-      <div class="modal-body">
-        <input type="hidden" id="modalLicenseId" />
-        <label for="modalFullName" data-i18n="fullName">Full Name</label>
-        <input type="text" id="modalFullName" />
-        <label for="modalClass" data-i18n="class">Class</label>
-        <select id="modalClass">
-          <option value="Class A">A</option>
-          <option value="Class B">B</option>
-          <option value="Class C">C</option>
-          <option value="Class D">D</option>
-          <option value="Class E">E</option>
-        </select>
-        <label for="modalStatus" data-i18n="status">Status</label>
-        <select id="modalStatus">
-          <option value="Active" data-i18n="active">Active</option>
-          <option value="Suspended" data-i18n="suspended">Suspended</option>
-          <option value="Expired" data-i18n="expired">Expired</option>
-        </select>
-        <label for="modalIssue" data-i18n="issueDate">Issue</label>
-        <input type="date" id="modalIssue" />
-        <label for="modalExpiry" data-i18n="expiryDate">Expiry</label>
-        <input type="date" id="modalExpiry" />
-      </div>
-      <div class="modal-actions">
-        <button class="btn-secondary" id="modalCancelBtn" data-i18n="cancel">Cancel</button>
-        <button class="btn-primary" id="modalSaveBtn"><i class="fas fa-save"></i> <span data-i18n="saveChanges">Save Changes</span></button>
-      </div>
-    </div>
-  </div>
-  <!-- Firebase + App Logic -->
-  <script type="module">
-    /* ===== Firebase v9+ Modular ===== */
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { getFirestore, collection, onSnapshot, doc, setDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-    const firebaseConfig = {
-      apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
-      authDomain: "gdlvs-2348e.firebaseapp.com",
-      projectId: "gdlvs-2348e",
-      storageBucket: "gdlvs-2348e.appspot.com",
-      messagingSenderId: "358715790318",
-      appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
-    };
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    /* ===== i18n ===== */
-    const i18nResources = {
-      en:{translation:{
-        dashboard:"Dashboard", verificationPortal:"Verification", addLicense:"Add License",
-        userManagement:"User Management", verificationRequests:"Verification Requests", analytics:"Analytics",
-        logout:"Logout", totalLicenses:"Total Licenses", activeLicenses:"Active", suspended:"Suspended",
-        expired:"Expired", licensesList:"Licenses", licenseNumber:"License #", fullName:"Full Name", class:"Class",
-        issueDate:"Issue", expiryDate:"Expiry", status:"Status", action:"Action", loading:"Loading...",
-        export:"Export", searchLicenses:"Search licenses...", editLicense:"Edit License", cancel:"Cancel",
-        saveChanges:"Save Changes", active:"Active"
-      }},
-      fr:{translation:{
-        dashboard:"Tableau de bord", verificationPortal:"Vérification", addLicense:"Ajouter un permis",
-        userManagement:"Gestion des utilisateurs", verificationRequests:"Demandes de vérification", analytics:"Analytique",
-        logout:"Déconnexion", totalLicenses:"Nombre total de permis", activeLicenses:"Actifs", suspended:"Suspendus",
-        expired:"Expirés", licensesList:"Permis", licenseNumber:"N° de permis", fullName:"Nom complet", class:"Catégorie",
-        issueDate:"Émission", expiryDate:"Expiration", status:"Statut", action:"Action", loading:"Chargement...",
-        export:"Exporter", searchLicenses:"Rechercher des permis…", editLicense:"Modifier le permis",
-        cancel:"Annuler", saveChanges:"Enregistrer"
-      }},
-      ja:{translation:{
-        dashboard:"ダッシュボード", verificationPortal:"照合", addLicense:"免許を追加", userManagement:"ユーザー管理",
-        verificationRequests:"照合リクエスト", analytics:"分析", logout:"ログアウト", totalLicenses:"総免許数",
-        activeLicenses:"有効", suspended:"停止中", expired:"期限切れ", licensesList:"免許一覧", licenseNumber:"免許番号",
-        fullName:"氏名", class:"区分", issueDate:"発行", expiryDate:"有効期限", status:"ステータス", action:"操作",
-        loading:"読み込み中…", export:"エクスポート", searchLicenses:"免許を検索…", editLicense:"免許を編集",
-        cancel:"キャンセル", saveChanges:"保存"
-      }}
-    };
-    i18next.use(i18nextBrowserLanguageDetector).init({ resources:i18nResources, fallbackLng:"en" }, () => {
-      if (typeof jqueryI18next !== "undefined") {
-        jqueryI18next.init(i18next, $, { useOptionsAttr:true });
-        $("body").localize();
-      }
-    });
-    document.getElementById("languageSwitcher").addEventListener("change", function(){
-      i18next.changeLanguage(this.value, () => $("body").localize());
-    });
-    /* ===== Auth Gate ===== */
-    onAuthStateChanged(auth, async (user)=>{
-      if(!user){
-        window.location.href="index.html";
-        return;
-      }
-      const roleSnap = await getDoc(doc(db, "roles", user.email));
-      const role = roleSnap.exists() ? roleSnap.data().role : "verifier";
-      const adminOnly = document.getElementById("navVerificationRequests");
-      if (adminOnly) adminOnly.style.display = (role==="admin") ? "block" : "none";
-    });
-    document.getElementById("logoutBtn").addEventListener("click", ()=>signOut(auth).then(()=>location.href="index.html"));
-    /* ===== Modal helpers ===== */
-    const overlay = document.getElementById("editModalOverlay");
-    const closeBtn = document.getElementById("modalCloseBtn");
-    const cancelBtn = document.getElementById("modalCancelBtn");
-    const saveBtn = document.getElementById("modalSaveBtn");
-    const modalFields = {
-      id: document.getElementById("modalLicenseId"),
-      fullName: document.getElementById("modalFullName"),
-      klass: document.getElementById("modalClass"),
-      status: document.getElementById("modalStatus"),
-      issue: document.getElementById("modalIssue"),
-      expiry: document.getElementById("modalExpiry")
-    };
-    function openModal(data){
-      modalFields.id.value = data.licenseNumber || data.id || "";
-      modalFields.fullName.value = data.fullName || "";
-      modalFields.klass.value = data.class || "Class A";
-      modalFields.status.value = data.status || "Active";
-      modalFields.issue.value = (data.issueDate || "").slice(0,10);
-      modalFields.expiry.value = (data.expiryDate || "").slice(0,10);
-      overlay.classList.add("show");
-      overlay.setAttribute("aria-hidden","false");
-    }
-    function closeModal(){
-      overlay.classList.remove("show");
-      overlay.setAttribute("aria-hidden","true");
-    }
-    closeBtn.addEventListener("click", closeModal);
-    cancelBtn.addEventListener("click", closeModal);
-    overlay.addEventListener("click", (e)=>{
-      if(e.target===overlay) closeModal();
-    });
-    saveBtn.addEventListener("click", async ()=>{
-      const id = modalFields.id.value.trim();
-      if(!id){
-        alert("Missing license number");
-        return;
-      }
-      const payload = {
-        licenseNumber: id,
-        fullName: modalFields.fullName.value.trim(),
-        class: modalFields.klass.value, // stores "Class A/B/C/D/E"
-        status: modalFields.status.value, // Active/Suspended/Expired
-        issueDate: modalFields.issue.value,
-        expiryDate: modalFields.expiry.value
-      };
-      try{
-        await setDoc(doc(db,"licenses", id), payload, { merge:true });
-        closeModal();
-      }catch(err){
-        alert("❌ " + err.message);
-      }
-    });
-    /* ===== Licenses: realtime table + counters ===== */
-    const tbody = document.querySelector("#licensesTable tbody");
-    const qLic = query(collection(db, "licenses"), orderBy("licenseNumber"));
-    onSnapshot(qLic, (snapshot)=>{
-      let total=0, active=0, suspended=0, expired=0;
-      tbody.innerHTML = "";
-      if (snapshot.empty){
-        tbody.innerHTML = `<tr><td colspan="7">${i18next.t("loading")}</td></tr>`;
-      }
-      snapshot.forEach(docSnap=>{
-        const d = docSnap.data();
-        total++;
-        const s = String(d.status||"").toLowerCase();
-        if (s.startsWith("act")) active++;
-        else if (s.startsWith("sus")) suspended++;
-        else if (s.startsWith("exp")) expired++;
-        const tr = document.createElement("tr");
-        tr.innerHTML =
-          `<td>${d.licenseNumber||docSnap.id}</td>
-           <td>${d.fullName||""}</td>
-           <td>${d.class||""}</td>
-           <td>${d.issueDate||""}</td>
-           <td>${d.expiryDate||""}</td>
-           <td>${d.status||""}</td>
-           <td><button class="btn-inline" data-action="update" data-id="${d.licenseNumber||docSnap.id}"><i class="fas fa-pen"></i> <span data-i18n="editLicense">Edit License</span></button></td>`;
-        tbody.appendChild(tr);
-      });
-      document.getElementById("totalLicenses").textContent = total;
-      document.getElementById("activeLicenses").textContent = active;
-      document.getElementById("suspendedLicenses").textContent = suspended;
-      document.getElementById("expiredLicenses").textContent = expired;
-    });
-    /* ===== Row actions: open modal with current data ===== */
-    tbody.addEventListener("click", async (e)=>{
-      const btn = e.target.closest("button[data-action='update']");
-      if(!btn) return;
-      const id = btn.getAttribute("data-id");
-      try {
-        const snap = await getDoc(doc(db,"licenses",id));
-        const data = snap.exists() ? snap.data() : { licenseNumber:id };
-        openModal({ id, ...data });
-      } catch(err){
-        alert("❌ " + err.message);
-      }
-    });
-    /* ===== Search filter ===== */
-    document.getElementById("licenseSearch").addEventListener("keyup", (e)=>{
-      const term = e.target.value.toLowerCase();
-      document.querySelectorAll("#licensesTable tbody tr").forEach(row=>{
-        row.style.display = row.textContent.toLowerCase().includes(term) ? "" : "none";
-      });
-    });
-    /* ===== Export CSV ===== */
-    document.getElementById("exportLicenses").addEventListener("click", ()=>{
-      const rows = document.querySelectorAll("#licensesTable tr");
-      const csv = [];
-      rows.forEach(r=>{
-        const cols = r.querySelectorAll("th,td");
-        const row = Array.from(cols).map(c => `"${c.innerText.replace(/"/g,'""')}"`).join(",");
-        csv.push(row);
-      });
-      const blob = new Blob([csv.join("\n")], { type:"text/csv" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "licenses_export.csv";
-      a.click();
-    });
-  </script>
+
+  <footer><small class="muted">GDLVS</small></footer>
 </body>
 </html>
