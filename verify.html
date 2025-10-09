@@ -16,57 +16,148 @@
       --success: #27ae60;
       --danger: #e74c3c;
     }
-    * { box-sizing: border-box; }
-    body { margin:0; font-family:"Segoe UI",Arial,sans-serif; background:var(--bg); color:var(--text); }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
 
     header {
-      background:var(--brand-dark); color:#fff; padding:8px 16px;
-      display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;
-      border-bottom:2px solid #1b2a38;
+      background: var(--brand-dark);
+      color: #fff;
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      border-bottom: 2px solid #1b2a38;
     }
-    header h1 { margin:0; font-size:1.1rem; display:flex; align-items:center; gap:6px; }
-    .header-actions { display:flex; align-items:center; gap:10px; }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
     header button {
-      background:#1f2d3a; color:#fff; border:none; padding:5px 9px;
-      border-radius:6px; font-size:0.8rem; cursor:pointer; display:flex; align-items:center; gap:4px;
+      background: #1f2d3a;
+      color: #fff;
+      border: none;
+      padding: 5px 9px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
-    header button:hover { background:#16222d; }
+
+    header button:hover {
+      background: #16222d;
+    }
+
     #languageSwitcher {
-      padding:4px 6px; border-radius:5px; font-size:0.8rem;
-      background:#1f2d3a; color:#fff; border:none; cursor:pointer;
+      padding: 4px 6px;
+      border-radius: 5px;
+      font-size: 0.8rem;
+      background: #1f2d3a;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    nav {
+      background: #fff;
+      border-bottom: 1px solid #eaeaea;
+      padding: 10px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    nav a {
+      color: var(--brand-dark);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    nav a.active {
+      border-bottom: 2px solid var(--brand-dark);
+      padding-bottom: 4px;
     }
 
     .container {
-      max-width:980px; margin:22px auto 40px; background:var(--panel-bg);
-      border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.1); padding:24px;
+      max-width: 980px;
+      margin: 22px auto 40px;
+      background: var(--panel-bg);
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      padding: 24px;
     }
-    label { font-weight:600; margin-top:8px; display:block; }
+
+    label { font-weight: 600; margin-top: 8px; display: block; }
     input, textarea, button {
-      width:100%; padding:10px; margin:8px 0;
-      border:1px solid #dcdcdc; border-radius:8px; font-size:0.95rem;
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #dcdcdc;
+      border-radius: 8px;
+      font-size: 0.95rem;
     }
-    textarea { min-height:110px; resize:vertical; }
+
+    textarea { min-height: 110px; resize: vertical; }
+
     button {
-      background:var(--brand-dark); color:#fff; border:none;
-      border-radius:8px; cursor:pointer; transition:background 0.2s;
+      background: var(--brand-dark);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
     }
-    button:hover { background:var(--brand-dark-2); }
+
+    button:hover { background: var(--brand-dark-2); }
+
     .panel {
-      margin-top:20px; padding:18px; border-radius:10px;
-      box-shadow:0 2px 8px rgba(0,0,0,0.08); background:#fff;
+      margin-top: 20px;
+      padding: 18px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      background: #fff;
     }
-    #verifyResult h3 { margin:0 0 8px; }
-    #verifyResult .ok { color:var(--success); font-weight:700; }
-    #verifyResult .bad { color:var(--danger); font-weight:700; }
+
+    #verifyResult h3 { margin: 0 0 8px; }
+    #verifyResult .ok { color: var(--success); font-weight: 700; }
+    #verifyResult .bad { color: var(--danger); font-weight: 700; }
+
+    footer {
+      text-align: center;
+      margin: 24px 0 40px;
+    }
+
+    @media(max-width: 900px) {
+      header { flex-direction: column; gap: 8px; }
+      .container { width: 95%; }
+      .header-actions { flex-direction: column; gap: 5px; }
+    }
   </style>
 
-  <!-- i18n + jQuery -->
+  <!-- ===== i18n + jQuery ===== -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
-  <!-- Firebase -->
+  <!-- ===== Firebase ===== -->
   <script type="module">
     import { auth, db } from "./firebase-config.js";
     import {
@@ -74,127 +165,119 @@
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-    // 🌐 Translations
+    /* 🌍 Multilingual setup */
     const resources = {
-      en:{translation:{verificationPortal:"Verification",logout:"Logout",licenseNumber:"License Number",organization:"Organization",country:"Country",purpose:"Purpose",verify:"Verify"}},
-      fr:{translation:{verificationPortal:"Vérification",logout:"Déconnexion",licenseNumber:"Numéro du permis",organization:"Organisation",country:"Pays",purpose:"Objet",verify:"Vérifier"}},
-      ja:{translation:{verificationPortal:"照会",logout:"ログアウト",licenseNumber:"免許番号",organization:"組織",country:"国",purpose:"目的",verify:"照会する"}}
+      en: { translation: { verificationPortal:"Verification",logout:"Logout",licenseNumber:"License Number",organization:"Organization",country:"Country",purpose:"Purpose",verify:"Verify" }},
+      fr: { translation: { verificationPortal:"Vérification",logout:"Déconnexion",licenseNumber:"Numéro du permis",organization:"Organisation",country:"Pays",purpose:"Objet",verify:"Vérifier" }},
+      ja: { translation: { verificationPortal:"照会",logout:"ログアウト",licenseNumber:"免許番号",organization:"組織",country:"国",purpose:"目的",verify:"照会する" }}
     };
 
-    i18next.use(i18nextBrowserLanguageDetector).init({resources,fallbackLng:"en"},()=>{
-      jqueryI18next.init(i18next,$,{useOptionsAttr:true});
+    i18next.use(i18nextBrowserLanguageDetector).init({ resources, fallbackLng:"en" }, ()=>{
+      jqueryI18next.init(i18next,$,{ useOptionsAttr:true });
       $("body").localize();
     });
+
     document.getElementById("languageSwitcher")?.addEventListener("change",e=>{
       i18next.changeLanguage(e.target.value,()=>$("body").localize());
     });
 
-    /* 🔒 SECURE ROLE ENFORCEMENT */
+    // 🔒 Secure role-based navigation
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        console.warn("🚫 No user logged in");
-        window.location.href = "index.html";
+        location.href = "index.html";
         return;
       }
 
-      // Show a loading message during verification
-      document.body.innerHTML = "<h2 style='text-align:center;margin-top:100px;'>🔄 Checking your access permissions...</h2>";
-
       try {
-        const roleRef = doc(db, "roles", user.email);
-        const roleSnap = await getDoc(roleRef);
+        const roleSnap = await getDoc(doc(db, "roles", user.email));
+        const role = roleSnap.exists() ? roleSnap.data().role : "verifier";
+        console.log("✅ User:", user.email, "| Role:", role);
 
-        // Wait until Firestore fetch completes
-        if (!roleSnap.exists()) {
-          console.warn("❌ Role not found, redirecting...");
-          await signOut(auth);
-          window.location.href = "index.html";
-          return;
-        }
-
-        const role = roleSnap.data().role;
-
-        if (role === "admin") {
-          console.log("✅ Admin access granted:", user.email);
-          // Optional: Admin can also access verify.html, so we simply load the form again
-          location.reload();
-          return;
-        }
+        const currentPage = window.location.pathname.split("/").pop();
 
         if (role === "verifier") {
-          console.log("✅ Verifier access confirmed for:", user.email);
-          // Proceed — show full page content
-          document.body.innerHTML = document.body.dataset.originalHtml;
-          initVerifyPage();
-          return;
+          // Hide admin pages in navigation
+          const adminPages = [
+            "dashboard.html",
+            "users.html",
+            "analytics.html",
+            "add_licenses.html",
+            "verification_requests.html"
+          ];
+          adminPages.forEach(pg => {
+            const link = document.querySelector(`a[href='${pg}']`);
+            if (link) link.style.display = "none";
+          });
+
+          // Only allow verify.html to stay visible
+          if (currentPage !== "verify.html") {
+            console.log("🔒 Redirecting verifier to verify.html");
+            location.href = "verify.html";
+          }
+        } else if (role === "admin") {
+          console.log("👑 Admin full access granted");
         }
-
-        console.warn("🚫 Unknown role:", role);
-        await signOut(auth);
-        window.location.href = "index.html";
-
       } catch (err) {
         console.error("❌ Role check failed:", err);
+        alert("Unable to verify your role. Please log in again.");
         await signOut(auth);
-        window.location.href = "index.html";
+        location.href = "index.html";
       }
     });
 
-    /* 🧩 Initialize verification logic */
-    function initVerifyPage() {
-      window.signOutUser = () => signOut(auth).then(() => window.location.href = "index.html");
+    // 🔓 Sign out
+    window.signOutUser = () => signOut(auth).then(()=>location.href="index.html");
 
-      window.verifyLicense = async (e)=>{
-        e.preventDefault();
-        const licenseNumber=document.getElementById("verifyLicenseNumber").value.trim();
-        const org=document.getElementById("verifyOrg").value.trim();
-        const country=document.getElementById("verifyCountry").value.trim();
-        const purpose=document.getElementById("verifyPurpose").value.trim();
-        const resultEl=document.getElementById("verifyResult");
-        const nextContainer=document.getElementById("verifyNextContainer");
+    // 🔍 Verify license
+    window.verifyLicense = async (e)=>{
+      e.preventDefault();
+      const licenseNumber=document.getElementById("verifyLicenseNumber").value.trim();
+      const org=document.getElementById("verifyOrg").value.trim();
+      const country=document.getElementById("verifyCountry").value.trim();
+      const purpose=document.getElementById("verifyPurpose").value.trim();
+      const resultEl=document.getElementById("verifyResult");
+      const nextContainer=document.getElementById("verifyNextContainer");
 
-        if(!licenseNumber){ alert("⚠️ License number required"); return; }
+      if(!licenseNumber){ alert("⚠️ License number required"); return; }
 
-        try{
-          const snap=await getDoc(doc(db,"licenses",licenseNumber));
-          const exists=snap.exists();
-          const d=exists?snap.data():{};
-          const resultText=exists?"License found":"License not found";
+      try{
+        const snap=await getDoc(doc(db,"licenses",licenseNumber));
+        const exists=snap.exists();
+        const d=exists?snap.data():{};
+        const resultText=exists?"License found":"License not found";
 
-          await addDoc(collection(db,"verifications"),{
-            licenseNumber,requestingOrg:org||"",country:country||"",purpose:purpose||"",
-            email:auth.currentUser?.email||"",result:resultText,
-            verifiedAt:serverTimestamp()
-          });
+        await addDoc(collection(db,"verifications"),{
+          licenseNumber,requestingOrg:org||"",country:country||"",purpose:purpose||"",
+          email:auth.currentUser?.email||"",result:resultText,
+          verifiedAt:serverTimestamp()
+        });
 
-          resultEl.style.display="block";
-          resultEl.innerHTML=`
-            <h3 class="${exists?'ok':'bad'}">${exists?'✅ License Found':'❌ License Not Found'}</h3>
-            ${exists?`
-              <p><strong>Full Name:</strong> ${d.fullName||""}</p>
-              <p><strong>Class:</strong> ${d.class||""}</p>
-              <p><strong>Issue:</strong> ${d.issueDate||""}</p>
-              <p><strong>Expiry:</strong> ${d.expiryDate||""}</p>
-              <p><strong>Status:</strong> ${d.status||""}</p>
-            `:""}
-            <hr>
-            <p><strong>Organization:</strong> ${org}</p>
-            <p><strong>Country:</strong> ${country}</p>
-            <p><strong>Purpose:</strong> ${purpose}</p>
-          `;
-          nextContainer.style.display="block";
-          document.getElementById("verifyNextBtn").onclick=()=>{
-            document.getElementById("verifyForm").reset();
-            resultEl.style.display="none";
-            nextContainer.style.display="none";
-          };
-        }catch(err){console.error(err);alert("❌ "+err.message);}
-      };
-    }
-
-    // Save full HTML template for reloading after auth check
-    document.body.dataset.originalHtml = document.body.innerHTML;
-    document.body.innerHTML = "<h2 style='text-align:center;margin-top:100px;'>⏳ Loading verification portal...</h2>";
+        resultEl.style.display="block";
+        resultEl.innerHTML=`
+          <h3 class="${exists?'ok':'bad'}">${exists?'✅ License Found':'❌ License Not Found'}</h3>
+          ${exists?`
+            <p><strong>Full Name:</strong> ${d.fullName||""}</p>
+            <p><strong>Class:</strong> ${d.class||""}</p>
+            <p><strong>Issue:</strong> ${d.issueDate||""}</p>
+            <p><strong>Expiry:</strong> ${d.expiryDate||""}</p>
+            <p><strong>Status:</strong> ${d.status||""}</p>
+          `:""}
+          <hr>
+          <p><strong>Organization:</strong> ${org}</p>
+          <p><strong>Country:</strong> ${country}</p>
+          <p><strong>Purpose:</strong> ${purpose}</p>
+        `;
+        nextContainer.style.display="block";
+        document.getElementById("verifyNextBtn").onclick=()=>{
+          document.getElementById("verifyForm").reset();
+          resultEl.style.display="none";
+          nextContainer.style.display="none";
+        };
+      }catch(err){
+        console.error(err);
+        alert("❌ "+err.message);
+      }
+    };
   </script>
 </head>
 
@@ -210,6 +293,15 @@
       <button onclick="signOutUser()"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></button>
     </div>
   </header>
+
+  <nav>
+    <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="verify.html" class="active"><i class="fas fa-search"></i> Verification</a>
+    <a href="add_licenses.html"><i class="fas fa-id-card"></i> Add License</a>
+    <a href="users.html"><i class="fas fa-users-cog"></i> Users</a>
+    <a href="verification_requests.html"><i class="fas fa-inbox"></i> Requests</a>
+    <a href="analytics.html"><i class="fas fa-chart-bar"></i> Analytics</a>
+  </nav>
 
   <main>
     <div class="container">
@@ -230,8 +322,9 @@
       </form>
 
       <div id="verifyResult" class="panel" style="display:none;"></div>
+
       <div id="verifyNextContainer" style="display:none; margin-top:15px;">
-        <button type="button" id="verifyNextBtn"><i class="fas fa-plus"></i> Verify Next License</button>
+        <button type="button" id="verifyNextBtn" class="inline"><i class="fas fa-plus"></i> Verify Next License</button>
       </div>
     </div>
   </main>
