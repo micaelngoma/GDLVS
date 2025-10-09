@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <!-- ===== Professional CSS ===== -->
   <style>
     :root {
       --brand-dark: #2a3f54;
@@ -17,144 +16,48 @@
       --success: #27ae60;
       --danger: #e74c3c;
     }
-
     * { box-sizing: border-box; }
+    body { margin:0; font-family: "Segoe UI", Arial, sans-serif; background:var(--bg); color:var(--text); }
 
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    /* === HEADER === */
     header {
-      background: var(--brand-dark);
-      color: #fff;
-      padding: 8px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      border-bottom: 2px solid #1b2a38;
+      background:var(--brand-dark); color:#fff; padding:8px 16px;
+      display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;
+      border-bottom:2px solid #1b2a38;
     }
-
-    header h1 {
-      margin: 0;
-      font-size: 1.1rem;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
+    header h1 { margin:0; font-size:1.1rem; display:flex; align-items:center; gap:6px; }
+    .header-actions { display:flex; align-items:center; gap:10px; }
     header button {
-      background: #1f2d3a;
-      color: #fff;
-      border: none;
-      padding: 5px 9px;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
+      background:#1f2d3a; color:#fff; border:none; padding:5px 9px;
+      border-radius:6px; font-size:0.8rem; cursor:pointer; display:flex; align-items:center; gap:4px;
     }
-
-    header button:hover {
-      background: #16222d;
-    }
-
+    header button:hover { background:#16222d; }
     #languageSwitcher {
-      padding: 4px 6px;
-      border-radius: 5px;
-      font-size: 0.8rem;
-      background: #1f2d3a;
-      color: #fff;
-      border: none;
-      cursor: pointer;
+      padding:4px 6px; border-radius:5px; font-size:0.8rem;
+      background:#1f2d3a; color:#fff; border:none; cursor:pointer;
     }
 
-    /* === NAV === */
-    nav {
-      background: #fff;
-      border-bottom: 1px solid #eaeaea;
-      padding: 10px 20px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
-    nav a {
-      color: var(--brand-dark);
-      text-decoration: none;
-      font-weight: 600;
-      transition: color 0.2s;
-    }
-    nav a.active {
-      border-bottom: 2px solid var(--brand-dark);
-      padding-bottom: 4px;
-    }
-
-    /* === CONTAINER === */
     .container {
-      max-width: 980px;
-      margin: 22px auto 40px;
-      background: var(--panel-bg);
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      padding: 24px;
+      max-width:980px; margin:22px auto 40px; background:var(--panel-bg);
+      border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.1); padding:24px;
     }
-
-    label { font-weight: 600; margin-top: 8px; display: block; }
+    label { font-weight:600; margin-top:8px; display:block; }
     input, textarea, button, select {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border: 1px solid #dcdcdc;
-      border-radius: 8px;
-      font-size: 0.95rem;
+      width:100%; padding:10px; margin:8px 0;
+      border:1px solid #dcdcdc; border-radius:8px; font-size:0.95rem;
     }
-
-    textarea { min-height: 110px; resize: vertical; }
-
+    textarea { min-height:110px; resize:vertical; }
     button {
-      background: var(--brand-dark);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.2s;
+      background:var(--brand-dark); color:#fff; border:none;
+      border-radius:8px; cursor:pointer; transition:background 0.2s;
     }
-
-    button:hover { background: var(--brand-dark-2); }
-
+    button:hover { background:var(--brand-dark-2); }
     .panel {
-      margin-top: 20px;
-      padding: 18px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      background: #fff;
+      margin-top:20px; padding:18px; border-radius:10px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.08); background:#fff;
     }
-
-    #verifyResult h3 { margin: 0 0 8px; }
-    #verifyResult .ok { color: var(--success); font-weight: 700; }
-    #verifyResult .bad { color: var(--danger); font-weight: 700; }
-
-    footer {
-      text-align: center;
-      margin: 24px 0 40px;
-    }
-
-    @media(max-width: 900px) {
-      header { flex-direction: column; gap: 8px; }
-      .container { width: 95%; }
-      .header-actions { flex-direction: column; gap: 5px; }
-    }
+    #verifyResult h3 { margin:0 0 8px; }
+    #verifyResult .ok { color:var(--success); font-weight:700; }
+    #verifyResult .bad { color:var(--danger); font-weight:700; }
   </style>
 
   <!-- ===== i18n + jQuery ===== -->
@@ -163,188 +66,98 @@
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
-  <!-- ===== EmailJS ===== -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-  <script>
-    (function(){ emailjs.init("TfmaZEvxtz2MNUb70"); })();
-    window.EMAILJS_SERVICE_ID = "service_ddq3kka";
-    window.EMAILJS_TEMPLATE_ID = "template_inl3jsv";
-    window.ADMIN_EMAIL = "m.ngoma1988@gmail.com";
-  </script>
-
-  <!-- ===== Firebase Modular ===== -->
+  <!-- ===== Firebase ===== -->
   <script type="module">
-    import { auth, db } from './firebase-config.js';
+    import { auth, db } from "./firebase-config.js";
     import {
       doc, getDoc, collection, addDoc, serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-    // ===== i18n translations =====
+    /* 🌐 Translations */
     const resources = {
-      en: { translation: {
-        verificationPortal: "Verification", logout: "Logout",
-        dashboard: "Dashboard", addLicense: "Add License",
-        userManagement: "User Management", verificationRequests: "Verification Requests",
-        analytics: "Analytics", licenseNumber: "License Number",
-        organization: "Requesting Organization", country: "Country",
-        purpose: "Purpose of Verification", verify: "Verify",
-        placeholders: {
-          licenseNumber:"Enter license number",
-          organization:"Enter requesting organization",
-          country:"Enter country",
-          purpose:"Describe the purpose"
-        },
-        defaults: {
-          licenseNumber: "Add license number",
-          organization: "Add requesting organization",
-          country: "Add country",
-          purpose: "Add verification purpose",
-          fullName: "Add license holder name",
-          class: "Add license class",
-          issue: "Add issue date",
-          expiry: "Add expiry date",
-          status: "Add status"
-        }
-      }},
-      fr: { translation: {
-        verificationPortal: "Vérification", logout: "Déconnexion",
-        dashboard: "Tableau de bord", addLicense: "Ajouter un permis",
-        userManagement: "Gestion des utilisateurs", verificationRequests: "Demandes de vérification",
-        analytics: "Analytique", licenseNumber: "Numéro du permis",
-        organization: "Organisme demandeur", country: "Pays",
-        purpose: "Objet de la vérification", verify: "Vérifier",
-        placeholders: {
-          licenseNumber:"Saisir le numéro du permis",
-          organization:"Saisir l’organisme",
-          country:"Saisir le pays",
-          purpose:"Décrivez l’objet"
-        },
-        defaults: {
-          licenseNumber: "Ajouter le numéro du permis",
-          organization: "Ajouter l’organisme demandeur",
-          country: "Ajouter le pays",
-          purpose: "Ajouter l’objet de la vérification",
-          fullName: "Ajouter le nom du titulaire",
-          class: "Ajouter la catégorie",
-          issue: "Ajouter la date d’émission",
-          expiry: "Ajouter la date d’expiration",
-          status: "Ajouter le statut"
-        }
-      }},
-      ja: { translation: {
-        verificationPortal: "照会", logout: "ログアウト",
-        dashboard: "ダッシュボード", addLicense: "免許を追加",
-        userManagement: "ユーザー管理", verificationRequests: "照会リクエスト",
-        analytics: "分析", licenseNumber: "免許番号",
-        organization: "照会機関", country: "国",
-        purpose: "照会の目的", verify: "照会する",
-        placeholders: {
-          licenseNumber:"免許番号を入力",
-          organization:"機関名を入力",
-          country:"国名を入力",
-          purpose:"目的を入力"
-        },
-        defaults: {
-          licenseNumber: "免許番号を追加",
-          organization: "照会機関を追加",
-          country: "国を追加",
-          purpose: "照会目的を追加",
-          fullName: "免許保有者名を追加",
-          class: "免許クラスを追加",
-          issue: "発行日を追加",
-          expiry: "有効期限を追加",
-          status: "ステータスを追加"
-        }
-      }}
+      en:{translation:{verificationPortal:"Verification",logout:"Logout",licenseNumber:"License Number",organization:"Organization",country:"Country",purpose:"Purpose",verify:"Verify"}},
+      fr:{translation:{verificationPortal:"Vérification",logout:"Déconnexion",licenseNumber:"Numéro du permis",organization:"Organisation",country:"Pays",purpose:"Objet",verify:"Vérifier"}},
+      ja:{translation:{verificationPortal:"照会",logout:"ログアウト",licenseNumber:"免許番号",organization:"組織",country:"国",purpose:"目的",verify:"照会する"}}
     };
+    i18next.use(i18nextBrowserLanguageDetector).init({resources,fallbackLng:"en"},()=>{jqueryI18next.init(i18next,$,{useOptionsAttr:true});$("body").localize();});
+    document.getElementById("languageSwitcher")?.addEventListener("change",e=>{i18next.changeLanguage(e.target.value,()=>$("body").localize());});
 
-    i18next.use(i18nextBrowserLanguageDetector).init({ resources, fallbackLng: "en" }, () => {
-      if (typeof jqueryI18next !== "undefined") {
-        jqueryI18next.init(i18next, $, { useOptionsAttr: true });
-        $("body").localize();
-        applyPlaceholders();
+    /* 🔐 ROLE ENFORCEMENT */
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        // Not logged in
+        window.location.href = "index.html";
+        return;
+      }
+
+      try {
+        const roleSnap = await getDoc(doc(db, "roles", user.email));
+        const role = roleSnap.exists() ? roleSnap.data().role : "verifier";
+
+        if (role === "admin") {
+          // ✅ Admin can access all pages, stays here or navigates freely
+          console.log("✅ Admin access granted:", user.email);
+          return;
+        }
+
+        if (role !== "verifier") {
+          // Unknown or unapproved role
+          console.warn("⛔ Unauthorized role, redirecting to login...");
+          window.location.href = "index.html";
+          return;
+        }
+
+        // Verifier confirmed
+        console.log("✅ Verifier access granted:", user.email);
+
+      } catch (err) {
+        console.error("❌ Role check error:", err);
+        window.location.href = "index.html";
       }
     });
 
-    function applyPlaceholders(){
-      const p = i18next.t("placeholders", { returnObjects: true });
-      const ids = {
-        verifyLicenseNumber: p.licenseNumber,
-        verifyOrg: p.organization,
-        verifyCountry: p.country,
-        verifyPurpose: p.purpose
-      };
-      Object.keys(ids).forEach(id=>{
-        const el=document.getElementById(id);
-        if(el) el.placeholder=ids[id];
-      });
-    }
+    /* 🚪 Logout */
+    window.signOutUser = () => signOut(auth).then(() => window.location.href = "index.html");
 
-    document.getElementById("languageSwitcher")?.addEventListener("change", (e)=>{
-      i18next.changeLanguage(e.target.value, ()=>{ $("body").localize(); applyPlaceholders(); });
-    });
-
-    // Auth
-    onAuthStateChanged(auth, async (user)=>{
-      const reqLink = document.getElementById("navVerificationRequests");
-      if(!user) return window.location.href="index.html";
-      try {
-        const snap = await getDoc(doc(db, "roles", user.email));
-        const role = snap.exists() ? snap.data().role : "verifier";
-        if(reqLink) reqLink.style.display = (role==="admin")?"inline-block":"none";
-      } catch { if(reqLink) reqLink.style.display="none"; }
-    });
-
-    window.signOutUser = ()=> signOut(auth).then(()=>window.location.href="index.html");
-
-    // Verify
+    /* 🔍 Verification Logic */
     window.verifyLicense = async (e)=>{
       e.preventDefault();
-      const t = i18next.t.bind(i18next);
-      const def = t("defaults", { returnObjects: true });
       const licenseNumber=document.getElementById("verifyLicenseNumber").value.trim();
       const org=document.getElementById("verifyOrg").value.trim();
       const country=document.getElementById("verifyCountry").value.trim();
       const purpose=document.getElementById("verifyPurpose").value.trim();
       const resultEl=document.getElementById("verifyResult");
       const nextContainer=document.getElementById("verifyNextContainer");
-      if(!licenseNumber){ alert("⚠️ "+t("licenseNumber")+" required"); return; }
+
+      if(!licenseNumber){ alert("⚠️ License number required"); return; }
 
       try{
         const snap=await getDoc(doc(db,"licenses",licenseNumber));
         const exists=snap.exists();
         const d=exists?snap.data():{};
         const resultText=exists?"License found":"License not found";
+
         await addDoc(collection(db,"verifications"),{
           licenseNumber,requestingOrg:org||"",country:country||"",purpose:purpose||"",
           email:auth.currentUser?.email||"",result:resultText,
-          verifiedAt:serverTimestamp(),verifiedBy:auth.currentUser?.uid||""
+          verifiedAt:serverTimestamp()
         });
-
-        try{
-          await emailjs.send(window.EMAILJS_SERVICE_ID,window.EMAILJS_TEMPLATE_ID,{
-            to_email:window.ADMIN_EMAIL,subject:"GDLVS - New Verification",
-            licenseNumber,org,country,purpose,result:resultText,
-            user_email:auth.currentUser?.email||""
-          });
-        }catch(e){console.warn("EmailJS error:",e);}
 
         resultEl.style.display="block";
         resultEl.innerHTML=`
           <h3 class="${exists?'ok':'bad'}">${exists?'✅ License Found':'❌ License Not Found'}</h3>
-          <p><strong>${t('licenseNumber')}:</strong> ${licenseNumber||def.licenseNumber}</p>
           ${exists?`
-            <p><strong>Full Name:</strong> ${d.fullName||def.fullName}</p>
-            <p><strong>Class:</strong> ${d.class||def.class}</p>
-            <p><strong>Issue:</strong> ${d.issueDate||def.issue}</p>
-            <p><strong>Expiry:</strong> ${d.expiryDate||def.expiry}</p>
-            <p><strong>Status:</strong> ${d.status||def.status}</p>
+            <p><strong>Full Name:</strong> ${d.fullName||""}</p>
+            <p><strong>Class:</strong> ${d.class||""}</p>
+            <p><strong>Issue:</strong> ${d.issueDate||""}</p>
+            <p><strong>Expiry:</strong> ${d.expiryDate||""}</p>
+            <p><strong>Status:</strong> ${d.status||""}</p>
           `:""}
           <hr>
-          <p><strong>${t('organization')}:</strong> ${org||def.organization}</p>
-          <p><strong>${t('country')}:</strong> ${country||def.country}</p>
-          <p><strong>${t('purpose')}:</strong> ${purpose||def.purpose}</p>
+          <p><strong>Organization:</strong> ${org}</p>
+          <p><strong>Country:</strong> ${country}</p>
+          <p><strong>Purpose:</strong> ${purpose}</p>
         `;
         nextContainer.style.display="block";
         document.getElementById("verifyNextBtn").onclick=()=>{
@@ -352,10 +165,7 @@
           resultEl.style.display="none";
           nextContainer.style.display="none";
         };
-      }catch(err){
-        console.error(err);
-        alert("❌ "+err.message);
-      }
+      }catch(err){console.error(err);alert("❌ "+err.message);}
     };
   </script>
 </head>
@@ -373,37 +183,27 @@
     </div>
   </header>
 
-  <nav>
-    <a href="dashboard.html"><i class="fas fa-home"></i> <span data-i18n="dashboard">Dashboard</span></a>
-    <a href="verify.html" class="active"><i class="fas fa-search"></i> <span data-i18n="verificationPortal">Verification</span></a>
-    <a href="add_licenses.html"><i class="fas fa-id-card"></i> <span data-i18n="addLicense">Add License</span></a>
-    <a href="users.html"><i class="fas fa-users-cog"></i> <span data-i18n="userManagement">User Management</span></a>
-    <a id="navVerificationRequests" href="verification_requests.html" style="display:none;"><i class="fas fa-inbox"></i> <span data-i18n="verificationRequests">Verification Requests</span></a>
-    <a href="analytics.html"><i class="fas fa-chart-bar"></i> <span data-i18n="analytics">Analytics</span></a>
-  </nav>
-
   <main>
     <div class="container">
       <form id="verifyForm" onsubmit="verifyLicense(event)">
         <label data-i18n="licenseNumber">License Number</label>
         <input type="text" id="verifyLicenseNumber" required />
 
-        <label data-i18n="organization">Requesting Organization</label>
+        <label data-i18n="organization">Organization</label>
         <input type="text" id="verifyOrg" />
 
         <label data-i18n="country">Country</label>
         <input type="text" id="verifyCountry" />
 
-        <label data-i18n="purpose">Purpose of Verification</label>
+        <label data-i18n="purpose">Purpose</label>
         <textarea id="verifyPurpose"></textarea>
 
         <button type="submit"><i class="fas fa-search"></i> <span data-i18n="verify">Verify</span></button>
       </form>
 
       <div id="verifyResult" class="panel" style="display:none;"></div>
-
       <div id="verifyNextContainer" style="display:none; margin-top:15px;">
-        <button type="button" id="verifyNextBtn" class="inline"><i class="fas fa-plus"></i> Verify Next Driver License</button>
+        <button type="button" id="verifyNextBtn"><i class="fas fa-plus"></i> Verify Next License</button>
       </div>
     </div>
   </main>
