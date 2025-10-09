@@ -3,60 +3,98 @@
 <head>
   <meta charset="UTF-8">
   <title>GDLVS - Add License</title>
-  <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-  <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
-  <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
-  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
-  <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
-  <script defer src="script.js"></script>
+  <style>
+    :root{--brand:#2a3f54;--brand2:#1e2d3c;--shadow:0 2px 6px rgba(0,0,0,.1);--success:#27ae60}
+    body{margin:0;font-family:Arial;background:#f6f8fb;color:#333}
+    header{background:#2a3f54;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:10px 14px}
+    header h1{margin:0;font-size:18px;display:flex;gap:8px;align-items:center}
+    .header-controls{display:flex;gap:8px}
+    .mini-btn{background:#1e2d3c;color:#fff;border:0;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer}
+    .mini-select{border:1px solid #dcdcdc;border-radius:8px;padding:6px 8px;font-size:12px;background:#fff}
+    nav{background:#fff;border-bottom:1px solid #eaeaea;padding:10px 14px;display:flex;gap:14px}
+    nav a{color:#2a3f54;text-decoration:none;font-weight:700}
+    nav a.active{border-bottom:2px solid #2a3f54;padding-bottom:4px}
+    .container{max-width:800px;margin:20px auto;padding:0 14px}
+    .panel{background:#fff;border-radius:10px;box-shadow:var(--shadow);padding:20px}
+    form label{font-weight:700;margin-top:8px;display:block}
+    form input, form select{width:100%;padding:10px;border:1px solid #dcdcdc;border-radius:8px;margin:6px 0}
+    .btn-save{background:var(--success);color:#fff;border:0;border-radius:8px;padding:10px 14px;cursor:pointer}
+    #msg{margin-top:8px;font-weight:700}
+  </style>
 </head>
 <body>
   <header>
-    <h1><i class="fas fa-id-card"></i> <span>Add License</span></h1>
-    <button onclick="signOutUser()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    <h1><i class="fa-solid fa-id-card"></i> <span data-i18n="addLicense">Add License</span></h1>
+    <div class="header-controls">
+      <select id="languageSwitcher" class="mini-select"><option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option><option value="ja">🇯🇵 日本語</option></select>
+      <button id="logoutBtn" class="mini-btn"><i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="logout">Logout</span></button>
+    </div>
   </header>
 
   <nav>
-    <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
-    <a href="verify.html"><i class="fas fa-search"></i> Verification</a>
-    <a href="add_licenses.html" class="active"><i class="fas fa-id-card"></i> Add License</a>
-    <a href="users.html"><i class="fas fa-users-cog"></i> User Management</a>
-    <a href="verification_requests.html"><i class="fas fa-list"></i> Verification Requests</a>
-    <a href="analytics.html"><i class="fas fa-chart-line"></i> Analytics</a>
+    <a href="dashboard.html"><i class="fa-solid fa-house"></i> <span data-i18n="dashboard">Dashboard</span></a>
+    <a href="verify.html"><i class="fa-solid fa-search"></i> <span data-i18n="verificationPortal">Verification</span></a>
+    <a class="active" href="add_licenses.html"><i class="fa-solid fa-id-card"></i> <span data-i18n="addLicense">Add License</span></a>
+    <a href="users.html"><i class="fa-solid fa-users-cog"></i> <span data-i18n="userManagement">User Management</span></a>
+    <a href="verification_requests.html"><i class="fa-solid fa-inbox"></i> <span data-i18n="requests">Requests</span></a>
+    <a href="analytics.html"><i class="fa-solid fa-chart-bar"></i> <span data-i18n="analytics">Analytics</span></a>
   </nav>
 
-  <main>
-    <div class="container">
-      <h2><i class="fas fa-plus-circle"></i> Add a New License</h2>
-      <form id="addLicenseForm" onsubmit="addLicense(); return false;">
-        <label for="licenseNumber">License Number</label>
-        <input type="text" id="licenseNumber" required placeholder="Enter license number">
-        <label for="fullName">Full Name</label>
-        <input type="text" id="fullName" required placeholder="Enter full name">
-        <label for="licenseClass">Class</label>
+  <main class="container">
+    <section class="panel">
+      <h2><i class="fa-solid fa-plus-circle"></i> <span data-i18n="addNewLicense">Add a New License</span></h2>
+      <form id="addLicenseForm">
+        <label for="licenseNumber" data-i18n="licenseNumber">License #</label>
+        <input id="licenseNumber" type="text" required data-i18n="[placeholder]enterLicensePh" placeholder="Enter license number">
+        <label for="fullName" data-i18n="fullName">Full Name</label>
+        <input id="fullName" type="text" required data-i18n="[placeholder]enterFullnamePh" placeholder="Enter full name">
+        <label for="licenseClass" data-i18n="class">Class</label>
         <select id="licenseClass" required>
-          <option value="">-- Select Class --</option>
-          <option value="Class A">Class A</option>
-          <option value="Class B">Class B</option>
-          <option value="Class C">Class C</option>
+          <option value="" data-i18n="selectClass">-- Select Class --</option>
+          <option value="Class A">Class A</option><option value="Class B">Class B</option><option value="Class C">Class C</option>
         </select>
-        <label for="issueDate">Issue Date</label>
-        <input type="date" id="issueDate" required>
-        <label for="expiryDate">Expiry Date</label>
-        <input type="date" id="expiryDate" required>
-        <button type="submit"><i class="fas fa-save"></i> Save License</button>
-        <p id="msg" class="muted"></p>
+        <label for="issueDate" data-i18n="issue">Issue</label>
+        <input id="issueDate" type="date" required>
+        <label for="expiryDate" data-i18n="expiry">Expiry</label>
+        <input id="expiryDate" type="date" required>
+        <button class="btn-save" type="submit"><i class="fa-solid fa-floppy-disk"></i> <span data-i18n="saveLicense">Save License</span></button>
+        <p id="msg"></p>
       </form>
-    </div>
+    </section>
   </main>
 
-  <footer>
-    <label for="languageSwitcher"><i class="fas fa-globe"></i></label>
-    <select id="languageSwitcher"><option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option><option value="ja">🇯🇵 日本語</option></select>
-  </footer>
+  <script type="module">
+    import { auth, db } from './firebase-config.js';
+    import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+    import { setDoc, doc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+    const i18n={en:{addLicense:"Add License",logout:"Logout",dashboard:"Dashboard",verificationPortal:"Verification",userManagement:"User Management",requests:"Requests",analytics:"Analytics",addNewLicense:"Add a New License",licenseNumber:"License #",fullName:"Full Name",class:"Class",issue:"Issue",expiry:"Expiry",saveLicense:"Save License",enterLicensePh:"Enter license number",enterFullnamePh:"Enter full name",selectClass:"-- Select Class --",saved:"✅ License saved.",missing:"⚠️ Please fill all fields."},
+               fr:{addLicense:"Ajouter un permis",logout:"Déconnexion",dashboard:"Tableau de bord",verificationPortal:"Vérification",userManagement:"Gestion des utilisateurs",requests:"Demandes",analytics:"Analytique",addNewLicense:"Ajouter un nouveau permis",licenseNumber:"N° de permis",fullName:"Nom complet",class:"Catégorie",issue:"Émission",expiry:"Expiration",saveLicense:"Enregistrer",enterLicensePh:"Saisir le numéro",enterFullnamePh:"Saisir le nom complet",selectClass:"-- Sélectionner la catégorie --",saved:"✅ Permis enregistré.",missing:"⚠️ Veuillez remplir tous les champs."},
+               ja:{addLicense:"免許を追加",logout:"ログアウト",dashboard:"ダッシュボード",verificationPortal:"照会",userManagement:"ユーザー管理",requests:"リクエスト",analytics:"分析",addNewLicense:"新しい免許を追加",licenseNumber:"免許番号",fullName:"氏名",class:"区分",issue:"発行日",expiry:"有効期限",saveLicense:"保存",enterLicensePh:"免許番号を入力",enterFullnamePh:"氏名を入力",selectClass:"-- 区分を選択 --",saved:"✅ 保存しました。",missing:"⚠️ すべて入力してください。"}};
+    let lang=localStorage.getItem('gdlvs_lang')||'en';
+    const t=(k)=>i18n[lang][k]||i18n.en[k];
+    const apply=()=>document.querySelectorAll('[data-i18n]').forEach(el=>{
+      const k=el.dataset.i18n; if(k.startsWith('[placeholder]')) el.placeholder=t(k.replace('[placeholder]','')); else el.textContent=t(k);
+    });
+    const sel=document.getElementById('languageSwitcher'); sel.value=lang; apply();
+    sel.onchange=()=>{lang=sel.value;localStorage.setItem('gdlvs_lang',lang);apply();};
+
+    onAuthStateChanged(auth,u=>{if(!u) location.href='index.html';});
+    document.getElementById('logoutBtn').onclick=()=>signOut(auth).then(()=>location.href='index.html');
+
+    const msg=document.getElementById('msg');
+    document.getElementById('addLicenseForm').onsubmit=async(e)=>{
+      e.preventDefault();
+      const licenseNumber=document.getElementById('licenseNumber').value.trim();
+      const fullName=document.getElementById('fullName').value.trim();
+      const licenseClass=document.getElementById('licenseClass').value;
+      const issueDate=document.getElementById('issueDate').value;
+      const expiryDate=document.getElementById('expiryDate').value;
+      if(!licenseNumber||!fullName||!licenseClass||!issueDate||!expiryDate){ msg.textContent=t('missing'); msg.style.color='#e74c3c'; return; }
+      await setDoc(doc(db,'licenses',licenseNumber),{licenseNumber,fullName,class:licenseClass,issueDate,expiryDate,status:'Active'},{merge:true});
+      msg.textContent=t('saved'); msg.style.color='#27ae60'; e.target.reset();
+    };
+  </script>
 </body>
 </html>
