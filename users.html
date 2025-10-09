@@ -2,172 +2,242 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>GDLVS - Users</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <title>GDLVS - User Management</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <!-- i18n + jQuery -->
+  <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
+  <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
+  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
+  <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
+
   <style>
-    :root{--brand:#2a3f54;--brand2:#1e2d3c;--shadow:0 2px 6px rgba(0,0,0,.1);--success:#27ae60;--danger:#e74c3c;--info:#2980b9}
-    body{margin:0;font-family:Arial;background:#f6f8fb;color:#333}
-    header{background:#2a3f54;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:10px 14px}
-    header h1{margin:0;font-size:18px;display:flex;gap:8px;align-items:center}
-    .header-controls{display:flex;gap:8px}
-    .mini-btn{background:#1e2d3c;color:#fff;border:0;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer}
-    .mini-select{border:1px solid #dcdcdc;border-radius:8px;padding:6px 8px;font-size:12px;background:#fff}
-    nav{background:#fff;border-bottom:1px solid #eaeaea;padding:10px 14px;display:flex;gap:14px}
-    nav a{color:#2a3f54;text-decoration:none;font-weight:700}
-    nav a.active{border-bottom:2px solid #2a3f54;padding-bottom:4px}
-    .container{max-width:1100px;margin:20px auto;padding:0 14px}
-    .panel{background:#fff;border-radius:10px;box-shadow:var(--shadow);padding:20px}
-    .table-controls{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-    .table-controls input{max-width:320px;border:1px solid #dcdcdc;border-radius:8px;padding:8px 10px}
+    .background-image{position:fixed;inset:0;background:url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') no-repeat center center fixed;background-size:cover;z-index:-1;filter:brightness(0.95)}
+    :root{--brand-dark:#2a3f54;--brand-dark-2:#1e2d3c;--text:#333;--panel-bg:#fff;--card-shadow:0 2px 6px rgba(0,0,0,.1);--success:#27ae60;--danger:#e74c3c;--info:#2980b9}
+    body{margin:0;font-family:Arial,sans-serif;background:#f6f8fb;color:#333}
+    header{background:var(--brand-dark);color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+    header h1{margin:0;font-size:1.1rem;display:flex;gap:8px;align-items:center}
+    .controls{display:flex;gap:8px}
+    .controls select,.controls button{padding:6px 10px;border-radius:8px;border:0}
+    .controls select{background:#fff}
+    .controls button{background:var(--brand-dark-2);color:#fff}
+    nav{background:#fff;border-bottom:1px solid #eaeaea;padding:10px 14px;display:flex;gap:15px;flex-wrap:wrap}
+    nav a{color:var(--brand-dark);font-weight:bold;text-decoration:none}
+    nav a.active{border-bottom:2px solid var(--brand-dark);padding-bottom:3px}
+    .container{max-width:1000px;margin:20px auto 40px;background:#fff;border-radius:10px;box-shadow:var(--card-shadow);padding:20px}
+    .muted{color:#666}
+    .table{width:100%;border-collapse:separate;border-spacing:0 6px;margin-top:12px}
+    .table th,.table td{border:1px solid #eee;padding:10px 14px;background:#fff}
+    .table th{background:#f2f2f2}
     .btn-export{background:var(--info);color:#fff;border:0;border-radius:8px;padding:8px 12px;cursor:pointer}
-    table{width:100%;border-collapse:separate;border-spacing:0 6px;margin-top:10px}
-    th,td{background:#fff;border:1px solid #eee;padding:10px 12px}
-    th{background:#f2f2f2}
-    .inline{padding:6px 10px;border-radius:8px;border:0;color:#fff;cursor:pointer;font-size:12px}
-    .btn-green{background:var(--success)} .btn-red{background:var(--danger)}
-    form#addUserForm{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-    form#addUserForm input, form#addUserForm select{padding:8px 10px;border:1px solid #dcdcdc;border-radius:8px}
+    .inline{padding:6px 12px;border-radius:8px;border:0;color:#fff;cursor:pointer}
+    .btn-edit{background:var(--success)}
+    .btn-delete{background:var(--danger)}
+    input,select{padding:10px;border:1px solid #dcdcdc;border-radius:8px}
   </style>
 </head>
 <body>
+  <div class="background-image"></div>
+
   <header>
-    <h1><i class="fa-solid fa-users-cog"></i> <span data-i18n="userManagement">User Management</span></h1>
-    <div class="header-controls">
-      <select id="languageSwitcher" class="mini-select">
+    <h1><i class="fas fa-users-cog"></i> <span data-i18n="userManagement">User Management</span></h1>
+    <div class="controls">
+      <select id="languageSwitcher">
         <option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option><option value="ja">🇯🇵 日本語</option>
       </select>
-      <button id="logoutBtn" class="mini-btn"><i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="logout">Logout</span></button>
+      <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></button>
     </div>
   </header>
 
   <nav>
-    <a href="dashboard.html"><i class="fa-solid fa-house"></i> <span data-i18n="dashboard">Dashboard</span></a>
-    <a href="verify.html"><i class="fa-solid fa-search"></i> <span data-i18n="verificationPortal">Verification</span></a>
-    <a href="add_licenses.html"><i class="fa-solid fa-id-card"></i> <span data-i18n="addLicense">Add License</span></a>
-    <a class="active" href="users.html"><i class="fa-solid fa-users-cog"></i> <span data-i18n="userManagement">User Management</span></a>
-    <a href="verification_requests.html"><i class="fa-solid fa-inbox"></i> <span data-i18n="requests">Requests</span></a>
-    <a href="analytics.html"><i class="fa-solid fa-chart-bar"></i> <span data-i18n="analytics">Analytics</span></a>
+    <a href="dashboard.html"><i class="fas fa-home"></i> <span data-i18n="dashboard">Dashboard</span></a>
+    <a href="verify.html"><i class="fas fa-search"></i> <span data-i18n="verificationPortal">Verification</span></a>
+    <a href="add_licenses.html"><i class="fas fa-id-card"></i> <span data-i18n="addLicense">Add License</span></a>
+    <a href="users.html" class="active"><i class="fas fa-users-cog"></i> <span data-i18n="userManagement">User Management</span></a>
+    <a id="navVerificationRequests" href="verification_requests.html"><i class="fas fa-inbox"></i> <span data-i18n="verificationRequests">Verification Requests</span></a>
+    <a href="analytics.html"><i class="fas fa-chart-bar"></i> <span data-i18n="analytics">Analytics</span></a>
   </nav>
 
-  <main class="container">
-    <section class="panel">
-      <h2><i class="fa-solid fa-users"></i> <span data-i18n="userManagement">User Management</span></h2>
-      <p class="muted" data-i18n="adminHint">Admins can add, edit, or remove users directly from here.</p>
+  <main>
+    <div class="container">
+      <h2><i class="fas fa-users"></i> <span data-i18n="userManagement">User Management</span></h2>
+      <p class="muted" data-i18n="userTip">Admins can add, edit, or remove users directly from here.</p>
 
-      <div class="table-controls">
-        <input id="userSearch" type="text" data-i18n="[placeholder]searchUsersPh" placeholder="Search users by name or email...">
-        <button class="btn-export" id="exportUsers"><i class="fa-solid fa-file-export"></i> <span data-i18n="export">Export</span></button>
-      </div>
+      <input type="text" id="userSearch" data-i18n="[placeholder]searchUsers" placeholder="Search users by name or email...">
 
       <form id="addUserForm">
-        <input id="newUserName" type="text" required data-i18n="[placeholder]fullNamePh" placeholder="Full Name">
-        <input id="newUserEmail" type="email" required data-i18n="[placeholder]emailPh" placeholder="Email">
+        <input type="text" id="newUserName" data-i18n="[placeholder]fullName" placeholder="Full Name" required>
+        <input type="email" id="newUserEmail" placeholder="Email" required data-i18n="[placeholder]emailPlaceholder">
         <select id="newUserRole">
           <option value="verifier">verifier</option>
           <option value="admin">admin</option>
         </select>
-        <button class="inline btn-green" type="submit"><i class="fa-solid fa-user-plus"></i> <span data-i18n="addUser">Add User</span></button>
+        <button type="submit" class="inline btn-edit"><i class="fas fa-user-plus"></i> <span data-i18n="addUser">Add User</span></button>
       </form>
 
-      <div class="verification-table-wrapper">
-        <table id="usersTable">
-          <thead>
-            <tr>
-              <th data-i18n="fullName">Full Name</th>
-              <th data-i18n="email">Email</th>
-              <th data-i18n="role">Role</th>
-              <th data-i18n="status">Status</th>
-              <th data-i18n="action">Action</th>
-            </tr>
-          </thead>
-          <tbody><tr><td colspan="5" data-i18n="loading">Loading...</td></tr></tbody>
-        </table>
-      </div>
-    </section>
+      <button class="btn-export" id="exportUsers">📥 <span data-i18n="exportUsers">Export Users</span></button>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th data-i18n="fullName">Full Name</th>
+            <th data-i18n="email">Email</th>
+            <th data-i18n="role">Role</th>
+            <th data-i18n="status">Status</th>
+            <th data-i18n="action">Action</th>
+          </tr>
+        </thead>
+        <tbody id="usersTable"><tr><td colspan="5" data-i18n="loading">Loading...</td></tr></tbody>
+      </table>
+    </div>
   </main>
 
+  <footer style="text-align:center;margin:22px 0 40px;">
+    <small class="muted">GDLVS</small>
+  </footer>
+
   <script type="module">
-    import { auth, db } from './firebase-config.js';
-    import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-    import { collection, onSnapshot, getDocs, setDoc, doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    const i18n={en:{userManagement:"User Management",logout:"Logout",dashboard:"Dashboard",verificationPortal:"Verification",addLicense:"Add License",requests:"Requests",analytics:"Analytics",adminHint:"Admins can add, edit, or remove users directly from here.",searchUsersPh:"Search users by name or email...",export:"Export",addUser:"Add User",fullName:"Full Name",email:"Email",role:"Role",status:"Status",action:"Action",loading:"Loading...",fullNamePh:"Full Name",emailPh:"Email",update:"Update",delete:"Delete"},
-               fr:{userManagement:"Gestion des utilisateurs",logout:"Déconnexion",dashboard:"Tableau de bord",verificationPortal:"Vérification",addLicense:"Ajouter un permis",requests:"Demandes",analytics:"Analytique",adminHint:"Les admins peuvent ajouter, modifier ou supprimer des utilisateurs ici.",searchUsersPh:"Rechercher par nom ou e-mail...",export:"Exporter",addUser:"Ajouter",fullName:"Nom complet",email:"E-mail",role:"Rôle",status:"Statut",action:"Action",loading:"Chargement...",fullNamePh:"Nom complet",emailPh:"E-mail",update:"Mettre à jour",delete:"Supprimer"},
-               ja:{userManagement:"ユーザー管理",logout:"ログアウト",dashboard:"ダッシュボード",verificationPortal:"照会",addLicense:"免許を追加",requests:"リクエスト",analytics:"分析",adminHint:"ここでユーザーの追加・編集・削除ができます。",searchUsersPh:"氏名またはメールで検索…",export:"エクスポート",addUser:"ユーザー追加",fullName:"氏名",email:"メール",role:"権限",status:"状態",action:"操作",loading:"読み込み中…",fullNamePh:"氏名",emailPh:"メール",update:"更新",delete:"削除"}};
-    let lang=localStorage.getItem('gdlvs_lang')||'en';
-    const t=(k)=>i18n[lang][k]||i18n.en[k];
-    const apply=()=>document.querySelectorAll('[data-i18n]').forEach(el=>{
-      const k=el.dataset.i18n; if(k.startsWith('[placeholder]')) el.placeholder=t(k.replace('[placeholder]','')); else el.textContent=t(k);
+    const firebaseConfig = {
+      apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
+      authDomain: "gdlvs-2348e.firebaseapp.com",
+      projectId: "gdlvs-2348e",
+      storageBucket: "gdlvs-2348e.appspot.com",
+      messagingSenderId: "358715790318",
+      appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const i18nResources = {
+      en:{translation:{
+        dashboard:"Dashboard", verificationPortal:"Verification", addLicense:"Add License", userManagement:"User Management", verificationRequests:"Verification Requests", analytics:"Analytics", logout:"Logout",
+        userTip:"Admins can add, edit, or remove users directly from here.",
+        searchUsers:"Search users by name or email...", fullName:"Full Name", email:"Email", role:"Role", status:"Status", action:"Action",
+        addUser:"Add User", exportUsers:"Export Users", loading:"Loading...", emailPlaceholder:"Email"
+      }},
+      fr:{translation:{
+        dashboard:"Tableau de bord", verificationPortal:"Vérification", addLicense:"Ajouter un permis", userManagement:"Gestion des utilisateurs", verificationRequests:"Demandes de vérification", analytics:"Analytique", logout:"Déconnexion",
+        userTip:"Les administrateurs peuvent ajouter, modifier ou supprimer des utilisateurs ici.",
+        searchUsers:"Rechercher des utilisateurs par nom ou e-mail…", fullName:"Nom complet", email:"Email", role:"Rôle", status:"Statut", action:"Action",
+        addUser:"Ajouter l’utilisateur", exportUsers:"Exporter les utilisateurs", loading:"Chargement...", emailPlaceholder:"Email"
+      }},
+      ja:{translation:{
+        dashboard:"ダッシュボード", verificationPortal:"照合", addLicense:"免許を追加", userManagement:"ユーザー管理", verificationRequests:"照合リクエスト", analytics:"分析", logout:"ログアウト",
+        userTip:"管理者はここでユーザーを追加・編集・削除できます。",
+        searchUsers:"氏名またはメールで検索…", fullName:"氏名", email:"メール", role:"役割", status:"ステータス", action:"操作",
+        addUser:"ユーザーを追加", exportUsers:"ユーザーをエクスポート", loading:"読み込み中…", emailPlaceholder:"メール"
+      }}
+    };
+    i18next.use(i18nextBrowserLanguageDetector).init({resources:i18nResources,fallbackLng:"en"},()=>{ jqueryI18next.init(i18next,$,{useOptionsAttr:true}); $("body").localize(); });
+    document.getElementById("languageSwitcher").addEventListener("change", function(){ i18next.changeLanguage(this.value, ()=>$("body").localize()); });
+
+    onAuthStateChanged(auth, async (user)=>{
+      if(!user){ location.href="index.html"; return; }
+      const roleSnap = await getDoc(doc(db,"roles",user.email));
+      const adminOnly = document.getElementById("navVerificationRequests");
+      adminOnly.style.display = (roleSnap.exists() && roleSnap.data().role==="admin") ? "block":"none";
     });
-    const sel=document.getElementById('languageSwitcher'); sel.value=lang; apply();
-    sel.onchange=()=>{lang=sel.value;localStorage.setItem('gdlvs_lang',lang);apply();};
+    document.getElementById("logoutBtn").addEventListener("click", ()=>signOut(auth).then(()=>location.href="index.html"));
 
-    onAuthStateChanged(auth,u=>{if(!u) location.href='index.html';});
-    document.getElementById('logoutBtn').onclick=()=>signOut(auth).then(()=>location.href='index.html');
+    // Realtime users + roles
+    const usersTbody = document.getElementById("usersTable");
+    onSnapshot(collection(db,"users"), async (snap)=>{
+      // Preload roles
+      const rolesMap = {};
+      const rolesSnap = await onSnapshot(collection(db,"roles"), ()=>{}); // dummy to ensure cache
+      // Fallback single fetch of roles
+      const rolesColl = await (await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js")).getDocs(collection(db,"roles"));
+      rolesColl.forEach(r=>rolesMap[r.id]=(r.data().role||"verifier"));
 
-    const tbody=document.querySelector('#usersTable tbody');
-
-    async function paintUsers(){
-      const snap=await getDocs(collection(db,'users'));
-      const rolesSnap=await getDocs(collection(db,'roles')); const roles={}; rolesSnap.forEach(r=>roles[r.id]=r.data().role||'verifier');
-      tbody.innerHTML='';
-      if(snap.empty){ tbody.innerHTML=`<tr><td colspan="5">${t('loading')}</td></tr>`; return; }
-      snap.forEach(d=>{
-        const u=d.data(); const role=roles[u.email]||u.role||'verifier';
-        const tr=document.createElement('tr');
+      usersTbody.innerHTML="";
+      if(snap.empty){ usersTbody.innerHTML = `<tr><td colspan="5">${i18next.t("loading")}</td></tr>`; return; }
+      snap.forEach(uDoc=>{
+        const u=uDoc.data(); const role=rolesMap[u.email]||u.role||"verifier";
+        const tr=document.createElement("tr");
         tr.innerHTML=`
-          <td contenteditable data-field="fullName">${u.fullName||''}</td>
+          <td contenteditable data-field="fullName">${u.fullName||""}</td>
           <td>${u.email}</td>
-          <td><select data-field="role"><option ${role==='verifier'?'selected':''}>verifier</option><option ${role==='admin'?'selected':''}>admin</option></select></td>
-          <td><select data-field="status"><option ${u.status==='approved'?'selected':''}>approved</option><option ${u.status==='pending'?'selected':''}>pending</option><option ${u.status==='disabled'?'selected':''}>disabled</option></select></td>
           <td>
-            <button class="inline btn-green" data-action="update">${t('update')}</button>
-            <button class="inline btn-red" data-action="delete">${t('delete')}</button>
+            <select data-field="role">
+              <option ${role==="verifier"?"selected":""}>verifier</option>
+              <option ${role==="admin"?"selected":""}>admin</option>
+            </select>
+          </td>
+          <td>
+            <select data-field="status">
+              <option ${u.status==="approved"?"selected":""}>approved</option>
+              <option ${u.status==="pending"?"selected":""}>pending</option>
+              <option ${u.status==="disabled"?"selected":""}>disabled</option>
+            </select>
+          </td>
+          <td>
+            <button class="inline btn-edit" data-email="${u.email}">${i18next.t("addUser")}</button>
+            <button class="inline btn-delete" data-email="${u.email}">Delete</button>
           </td>`;
-        tbody.appendChild(tr);
-
-        tr.querySelector('[data-action="update"]').onclick=async()=>{
-          const updates={};
-          tr.querySelectorAll('[data-field]').forEach(el=>{
-            const key=el.dataset.field; updates[key]= (el.tagName==='TD')? el.textContent.trim(): el.value;
-          });
-          await setDoc(doc(db,'users',u.email),{fullName:updates.fullName,status:updates.status},{merge:true});
-          await setDoc(doc(db,'roles',u.email),{role:updates.role},{merge:true});
-        };
-        tr.querySelector('[data-action="delete"]').onclick=async()=>{
-          if(!confirm(`${t('delete')} ${u.email}?`)) return;
-          await deleteDoc(doc(db,'users',u.email));
-          await deleteDoc(doc(db,'roles',u.email));
-          tr.remove();
-        };
+        usersTbody.appendChild(tr);
       });
-    }
-    paintUsers();
+    });
+
+    // Add user
+    document.getElementById("addUserForm").addEventListener("submit", async (e)=>{
+      e.preventDefault();
+      const name = document.getElementById("newUserName").value.trim();
+      const email = document.getElementById("newUserEmail").value.trim();
+      const role = document.getElementById("newUserRole").value;
+      if(!name||!email) return alert("Name & Email required");
+      await setDoc(doc(db,"users",email),{fullName:name,email,status:"approved",approved:true},{merge:true});
+      await setDoc(doc(db,"roles",email),{role},{merge:true});
+      e.target.reset();
+    });
+
+    // Row actions (update/delete)
+    usersTbody.addEventListener("click", async (e)=>{
+      const t = e.target;
+      if(t.closest(".btn-edit")){
+        const email = t.dataset.email;
+        const tr = t.closest("tr");
+        const updates = {};
+        tr.querySelectorAll("[data-field]").forEach(el=>{
+          const key = el.dataset.field;
+          updates[key] = (el.tagName==="TD") ? el.textContent.trim() : el.value;
+        });
+        await setDoc(doc(db,"users",email),{fullName:updates.fullName,status:updates.status,approved:(updates.status==="approved")},{merge:true});
+        await setDoc(doc(db,"roles",email),{role:updates.role},{merge:true});
+        alert("User updated");
+      }
+      if(t.closest(".btn-delete")){
+        const email = t.dataset.email;
+        if(!confirm(`Delete ${email}?`)) return;
+        await deleteDoc(doc(db,"users",email));
+        await deleteDoc(doc(db,"roles",email));
+      }
+    });
 
     // Search
-    document.getElementById('userSearch').addEventListener('keyup',(e)=>{
-      const term=e.target.value.toLowerCase();
-      document.querySelectorAll('#usersTable tbody tr').forEach(r=>{
-        r.style.display=r.textContent.toLowerCase().includes(term)?'':'none';
+    document.getElementById("userSearch").addEventListener("keyup",(e)=>{
+      const term = e.target.value.toLowerCase();
+      document.querySelectorAll("#usersTable tr").forEach(row=>{
+        row.style.display = row.textContent.toLowerCase().includes(term) ? "" : "none";
       });
     });
+
     // Export
-    document.getElementById('exportUsers').onclick=()=>{
-      const rows=[...document.querySelectorAll('#usersTable tr')];
-      const csv=rows.map(r=>[...r.querySelectorAll('th,td')].map(c=>`"${c.innerText.replace(/"/g,'""')}"`).join(',')).join('\n');
-      const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='users.csv'; a.click();
-    };
-    // Add user
-    document.getElementById('addUserForm').onsubmit=async(e)=>{
-      e.preventDefault();
-      const name=document.getElementById('newUserName').value.trim();
-      const email=document.getElementById('newUserEmail').value.trim();
-      const role=document.getElementById('newUserRole').value;
-      if(!name||!email) return;
-      await setDoc(doc(db,'users',email),{fullName:name,email,status:'approved'},{merge:true});
-      await setDoc(doc(db,'roles',email),{role},{merge:true});
-      e.target.reset(); paintUsers();
-    };
+    document.getElementById("exportUsers").addEventListener("click", ()=>{
+      const rows = document.querySelectorAll(".table tr");
+      const csv = [];
+      rows.forEach(r=>{
+        const cols = r.querySelectorAll("th,td");
+        csv.push(Array.from(cols).map(c=>`"${c.innerText.replace(/"/g,'""')}"`).join(","));
+      });
+      const blob = new Blob([csv.join("\n")],{type:"text/csv"});
+      const a = document.createElement("a");
+      a.href=URL.createObjectURL(blob); a.download="users_export.csv"; a.click();
+    });
   </script>
 </body>
 </html>
