@@ -15,7 +15,7 @@
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
   <style>
-    /* ===== Background (shared) ===== */
+    /* ===== Background ===== */
     .background-image{
       position:fixed;inset:0;
       background:url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') no-repeat center center fixed;
@@ -34,21 +34,58 @@
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:Arial, sans-serif;color:var(--text);background:#f6f8fb;min-height:100vh}
 
-    /* ===== Header / Nav ===== */
-    header{background:var(--brand-dark);color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--card-shadow)}
-    header h1{margin:0;font-size:1.1rem;display:flex;gap:8px;align-items:center}
+    /* ===== Header / Nav (Restored Dark Blue Theme) ===== */
+    header {
+      background: var(--brand-dark);
+      color: #fff;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--card-shadow);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 999;
+      backdrop-filter: blur(8px);
+    }
+
+    header h1 {margin:0;font-size:1.1rem;display:flex;gap:8px;align-items:center}
     .controls{display:flex;gap:8px;align-items:center}
     .controls select,.controls button{padding:6px 10px;border-radius:8px;border:0;font-size:.9rem}
     .controls select{background:#fff;color:#000}
     .controls button{background:var(--brand-dark-2);color:#fff;cursor:pointer}
     .controls button:hover{background:#16222d}
 
-    nav{background:rgba(255,255,255,0.9);border-bottom:1px solid #eaeaea;padding:10px 14px;display:flex;gap:16px;flex-wrap:wrap;backdrop-filter:blur(6px)}
-    nav a{color:var(--brand-dark);text-decoration:none;font-weight:bold}
-    nav a:hover{color:var(--brand-dark-2)}
-    nav a.active{border-bottom:2px solid var(--brand-dark);padding-bottom:3px}
+    nav {
+      background: var(--brand-dark-2);
+      color: #fff;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      padding: 10px 14px;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      position: fixed;
+      top: 56px;
+      left: 0;
+      right: 0;
+      z-index: 998;
+      backdrop-filter: blur(6px);
+    }
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav a:hover {color: #f1c40f;}
+    nav a.active {
+      border-bottom: 2px solid #f1c40f;
+      padding-bottom: 3px;
+    }
 
     /* ===== Containers / Panels ===== */
+    body {padding-top: 130px;}
     .container{
       max-width:95vw;
       margin:25px auto;
@@ -56,7 +93,9 @@
       border-radius:12px;
       box-shadow:var(--card-shadow);
       padding:25px;
-      backdrop-filter:blur(6px)
+      backdrop-filter:blur(6px);
+      max-height: calc(100vh - 160px);
+      overflow-y: auto;
     }
     .panel{background:var(--panel-bg);border-radius:10px;box-shadow:var(--card-shadow);padding:18px;margin:18px 0}
 
@@ -71,16 +110,26 @@
     .card h3{margin:6px 0}
     .card h2{margin:0;font-size:1.6rem;font-weight:700}
 
-    /* ===== Table & Controls ===== */
+    /* ===== Table ===== */
     .table-controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-    .btn-export{width:auto;background:#2980b9;color:#fff;border:0;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:.9rem}
+    .btn-export{background:#2980b9;color:#fff;border:0;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:.9rem}
     .btn-export:hover{background:#1f6392}
     #licenseSearch{max-width:320px;border:1px solid #dcdcdc;border-radius:8px;padding:8px;background:#fff}
-    .verification-table-wrapper{overflow-x:visible}
-    table{width:100%;border-collapse:separate;border-spacing:0 6px;margin-top:10px;table-layout:auto}
+
+    .verification-table-wrapper{
+      max-height:60vh;
+      overflow-y:auto;
+      overflow-x:auto;
+      border-radius:8px;
+    }
+
+    table{width:100%;border-collapse:separate;border-spacing:0 6px;margin-top:10px}
     th,td{
-      border:1px solid #eee;padding:10px 14px;text-align:left;background:#fff;vertical-align:middle;
-      white-space:normal;
+      border:1px solid #eee;
+      padding:10px 14px;
+      text-align:left;
+      background:#fff;
+      vertical-align:middle;
       word-break:break-word;
     }
     th{background:#f2f2f2;font-weight:bold}
@@ -101,49 +150,7 @@
     .btn-primary{background:var(--success);color:#fff;border:0;border-radius:8px;padding:8px 12px;cursor:pointer}
     .btn-secondary{background:#95a5a6;color:#fff;border:0;border-radius:8px;padding:8px 12px;cursor:pointer}
 
-    @media(max-width:900px){header{flex-direction:column;gap:8px}}
-
-    /* ===== Fixed Header and Nav with Blur Effect ===== */
-    header, nav {
-      position: fixed;
-      left: 0;
-      right: 0;
-      z-index: 999;
-      backdrop-filter: blur(10px) saturate(180%);
-      -webkit-backdrop-filter: blur(10px) saturate(180%);
-      background: rgba(42, 63, 84, 0.85);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-
-    header {
-      top: 0;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    nav {
-      top: 56px;
-      background: rgba(255,255,255,0.65);
-      border-bottom: 1px solid rgba(255,255,255,0.2);
-      backdrop-filter: blur(8px);
-    }
-
-    body {
-      padding-top: 130px;
-    }
-
-    main.container {
-      max-height: calc(100vh - 160px);
-      overflow-y: auto;
-      padding-bottom: 40px;
-    }
-
-    .verification-table-wrapper {
-      max-height: 60vh;
-      overflow-y: auto;
-      overflow-x: auto;
-      border-radius: 8px;
-    }
-
+    /* ===== Responsive ===== */
     @media (max-width: 768px) {
       header {
         flex-direction: column;
@@ -157,63 +164,16 @@
         justify-content: flex-start;
         padding: 8px 10px;
       }
-      body {
-        padding-top: 160px;
-      }
-      main.container {
-        max-height: calc(100vh - 200px);
-        padding: 15px;
-      }
-      table th, table td {
-        font-size: 0.85rem;
-        padding: 6px;
-      }
+      body {padding-top: 160px;}
+      main.container {max-height: calc(100vh - 200px);padding: 15px;}
+      table th, table td {font-size: 0.85rem;padding: 6px;}
     }
 
-    /* ===== Auto Light/Dark Mode Adaptation ===== */
+    /* ===== Auto Light/Dark Mode ===== */
     @media (prefers-color-scheme: dark) {
-      header {
-        background: rgba(30, 45, 60, 0.9);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        color: #f1f1f1;
-      }
-
-      nav {
-        background: rgba(40, 55, 70, 0.7);
-        color: #f1f1f1;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-      }
-
-      body {
-        background-color: #1a1d22;
-        color: #eaeaea;
-      }
-
-      .container, .panel, table th, table td {
-        background: rgba(255, 255, 255, 0.07);
-        color: #f0f0f0;
-      }
-
-      .btn-export, .btn-inline, .btn-primary {
-        background: #3a80d3;
-      }
-    }
-
-    @media (prefers-color-scheme: light) {
-      header {
-        background: rgba(255, 255, 255, 0.85);
-        color: #1e2d3c;
-      }
-
-      nav {
-        background: rgba(255, 255, 255, 0.7);
-        color: #2a3f54;
-      }
-
-      body {
-        background-color: #f6f8fb;
-        color: #333;
-      }
+      body {background-color: #1a1d22;color: #eaeaea;}
+      .container, .panel, table th, table td {background: rgba(255,255,255,0.07);color: #f0f0f0;}
+      .btn-export, .btn-inline, .btn-primary {background: #3a80d3;}
     }
   </style>
 </head>
@@ -235,42 +195,44 @@
 
   <!-- Nav -->
   <nav>
-    <a href="dashboard.html" class="active"><i class="fas fa-home"></i> <span data-i18n="dashboard">Dashboard</span></a>
-    <a href="verify.html"><i class="fas fa-search"></i> <span data-i18n="verificationPortal">Verification</span></a>
-    <a href="add_licenses.html"><i class="fas fa-id-card"></i> <span data-i18n="addLicense">Add License</span></a>
-    <a href="users.html"><i class="fas fa-users-cog"></i> <span data-i18n="userManagement">User Management</span></a>
-    <a id="navVerificationRequests" href="verification_requests.html"><i class="fas fa-inbox"></i> <span data-i18n="verificationRequests">Verification Requests</span></a>
-    <a href="analytics.html"><i class="fas fa-chart-bar"></i> <span data-i18n="analytics">Analytics</span></a>
+    <a href="dashboard.html" class="active"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="verify.html"><i class="fas fa-search"></i> Verification</a>
+    <a href="add_licenses.html"><i class="fas fa-id-card"></i> Add License</a>
+    <a href="users.html"><i class="fas fa-users-cog"></i> User Management</a>
+    <a id="navVerificationRequests" href="verification_requests.html"><i class="fas fa-inbox"></i> Verification Requests</a>
+    <a href="analytics.html"><i class="fas fa-chart-bar"></i> Analytics</a>
   </nav>
 
   <main class="container">
+    <!-- Cards -->
     <section class="dashboard-cards">
-      <div class="card total"><div>👤</div><h3 data-i18n="totalLicenses">Total Licenses</h3><h2 id="totalLicenses">0</h2></div>
-      <div class="card active"><div>✅</div><h3 data-i18n="activeLicenses">Active</h3><h2 id="activeLicenses">0</h2></div>
-      <div class="card suspended"><div>⚠️</div><h3 data-i18n="suspended">Suspended</h3><h2 id="suspendedLicenses">0</h2></div>
-      <div class="card expired"><div>⛔</div><h3 data-i18n="expired">Expired</h3><h2 id="expiredLicenses">0</h2></div>
+      <div class="card total"><div>👤</div><h3>Total Licenses</h3><h2 id="totalLicenses">0</h2></div>
+      <div class="card active"><div>✅</div><h3>Active</h3><h2 id="activeLicenses">0</h2></div>
+      <div class="card suspended"><div>⚠️</div><h3>Suspended</h3><h2 id="suspendedLicenses">0</h2></div>
+      <div class="card expired"><div>⛔</div><h3>Expired</h3><h2 id="expiredLicenses">0</h2></div>
     </section>
 
+    <!-- Licenses Table -->
     <section class="panel">
-      <h2><i class="fas fa-id-badge"></i> <span data-i18n="licensesList">Licenses</span></h2>
+      <h2><i class="fas fa-id-badge"></i> Licenses</h2>
       <div class="table-controls">
-        <input id="licenseSearch" type="text" data-i18n="[placeholder]searchLicenses" placeholder="Search licenses..." />
-        <button class="btn-export" id="exportLicenses"><i class="fas fa-file-export"></i> <span data-i18n="export">Export</span></button>
+        <input id="licenseSearch" type="text" placeholder="Search licenses..." />
+        <button class="btn-export" id="exportLicenses"><i class="fas fa-file-export"></i> Export</button>
       </div>
       <div class="verification-table-wrapper">
         <table id="licensesTable">
           <thead>
             <tr>
-              <th data-i18n="licenseNumber">License #</th>
-              <th data-i18n="fullName">Full Name</th>
-              <th data-i18n="class">Class</th>
-              <th data-i18n="issueDate">Issue</th>
-              <th data-i18n="expiryDate">Expiry</th>
-              <th data-i18n="status">Status</th>
-              <th data-i18n="action">Action</th>
+              <th>License #</th>
+              <th>Full Name</th>
+              <th>Class</th>
+              <th>Issue</th>
+              <th>Expiry</th>
+              <th>Status</th>
+              <th>Action</th>
             </tr>
           </thead>
-          <tbody><tr><td colspan="7" data-i18n="loading">Loading...</td></tr></tbody>
+          <tbody><tr><td colspan="7">Loading...</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -280,7 +242,7 @@
     <small class="muted">GDLVS</small>
   </footer>
 
-  <!-- Modal (unchanged) -->
-  <!-- [All your JS Firebase logic remains exactly the same as in your working version] -->
+  <!-- ===== Modal (unchanged) and JS Firebase Logic ===== -->
+  <!-- Keep your existing JS script block here (Firebase, i18n, Auth, etc.) -->
 </body>
 </html>
