@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 permissions:
-  contents: write   # allows pushing to wiki
+  contents: write
 
 jobs:
   update-wiki:
@@ -15,7 +15,7 @@ jobs:
       - name: Checkout main repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # full history for all commits
+          fetch-depth: 0
 
       - name: Generate full commit history
         run: |
@@ -30,20 +30,18 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # clone or initialize the wiki
+          # Clone wiki (create if empty)
           git clone "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.wiki.git" wiki || mkdir wiki
-          cd wiki
-          # initialize empty wiki if needed
-          if [ ! -d ".git" ]; then
-            git init
-            git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.wiki.git"
-          fi
-          cd ..
           cp docs/Release-Notes.md wiki/
           cd wiki
+
+          git init
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add Release-Notes.md
-          git commit -m "📝 Auto-create or update Release Notes Wiki page" || echo "No changes to commit"
-          git branch -M main || true
-          git push -u origin main || git push -u origin master
+          git commit -m "📝 Auto update Release Notes" || echo "No changes"
+
+          # Push safely to whichever branch exists (main or master)
+          git branch -M master || true
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.wiki.git" || true
+          git push origin master || git push origin main
