@@ -30,8 +30,21 @@
     nav a{color:var(--dark); text-decoration:none; font-weight:700} nav a:hover{color:#1f2d3a} nav a.active{border-bottom:2px solid var(--dark); padding-bottom:3px}
     body{padding-top:110px}
 
-    /* Wider container for more readable single-line rows */
-    .container{max-width:1300px; margin:24px auto 40px; background:var(--panel); border-radius:12px; box-shadow:var(--shadow); padding:22px; backdrop-filter:blur(6px); display:flex; flex-direction:column; gap:14px}
+    /* Container now full width */
+    .container{
+      width:95vw;
+      max-width:100%;
+      margin:24px auto 40px;
+      background:var(--panel);
+      border-radius:12px;
+      box-shadow:var(--shadow);
+      padding:22px;
+      backdrop-filter:blur(6px);
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      overflow-x:auto;
+    }
 
     .insights{display:flex; gap:15px; flex-wrap:wrap; justify-content:space-between}
     .insight-card{flex:1; min-width:220px; border-radius:12px; padding:16px; text-align:center; color:#fff; box-shadow:0 2px 6px rgba(0,0,0,.2)}
@@ -43,11 +56,32 @@
     #searchRequests{max-width:360px; border:1px solid #ddd; border-radius:8px; padding:8px; background:#fff}
     .btn-export{background:var(--info); color:#fff; border:0; border-radius:8px; padding:8px 12px; cursor:pointer} .btn-export:hover{background:#1f6392}
 
-    /* Stretch table + keep one-line cells */
+    /* Stretch table + full visibility */
     .table-wrapper{overflow:auto; border-top:1px solid #eee; border-bottom:1px solid #eee}
-    table{width:100%; min-width:1200px; border-collapse:separate; border-spacing:0 6px; table-layout:auto}
-    th,td{border:1px solid #eee; background:#fff; padding:10px 12px; text-align:left; vertical-align:middle; white-space:nowrap}
-    th{background:#f2f2f2; font-weight:700; position:sticky; top:0; z-index:1}
+    table{
+      width:100%;
+      min-width:unset;
+      border-collapse:separate;
+      border-spacing:0 6px;
+      table-layout:fixed;
+    }
+    th,td{
+      border:1px solid #eee;
+      background:#fff;
+      padding:10px 12px;
+      text-align:left;
+      vertical-align:middle;
+      white-space:normal;     /* allow wrapping */
+      word-break:break-word;  /* break long text */
+    }
+    th{
+      background:#f2f2f2;
+      font-weight:700;
+      position:sticky;
+      top:0;
+      z-index:1;
+      text-align:left;
+    }
 
     /* Unified action button */
     .btn-action{border:0; border-radius:8px; padding:6px 12px; cursor:pointer; color:#fff; background:var(--info)}
@@ -153,7 +187,6 @@
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
     import { getFirestore, collection, onSnapshot, doc, deleteDoc, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    /* ===== Firebase ===== */
     const firebaseConfig = {
       apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
       authDomain: "gdlvs-2348e.firebaseapp.com",
@@ -166,7 +199,6 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    /* ===== i18n resources ===== */
     const i18nResources = {
       en:{translation:{
         title:"GDLVS - Verification Records",
@@ -194,7 +226,6 @@
       }}
     };
 
-    /* ===== i18n init + helpers ===== */
     function applyI18n(){
       if (window.jqueryI18next && typeof $("body").localize === "function") $("body").localize();
       document.title = i18next.t("title");
@@ -216,11 +247,9 @@
       i18next.changeLanguage(this.value);
     });
 
-    /* ===== Auth guard & Logout ===== */
     onAuthStateChanged(auth, user => { if(!user) location.href = "index.html"; });
     document.getElementById("logoutBtn").addEventListener("click", ()=>signOut(auth).then(()=>location.href="index.html"));
 
-    /* ===== Data load ===== */
     const tbody = document.getElementById("requestsTable");
     const searchInput = document.getElementById("searchRequests");
     let allDocs = [];
@@ -247,9 +276,6 @@
       document.getElementById("successRate").textContent = i18next.t("insights.successRate", { rate });
     }
 
-    /* === ONE action button per row (Manage) ===
-       - Opens modal with details
-       - Delete is done from the modal's Delete button */
     function renderTable(docs){
       tbody.innerHTML = "";
       if(docs.length===0){
@@ -273,7 +299,6 @@
       });
     }
 
-    /* Search */
     searchInput.addEventListener("input", e=>{
       const kw = e.target.value.toLowerCase();
       const filtered = allDocs.filter(d =>
@@ -284,7 +309,6 @@
       renderTable(filtered);
     });
 
-    /* Export */
     document.getElementById("exportBtn").addEventListener("click", ()=>{
       if(allDocs.length===0) return alert("No data to export.");
       const headers = [
@@ -305,7 +329,6 @@
       a.click();
     });
 
-    /* Modal: manage + delete from modal */
     const modal = document.getElementById("modalOverlay");
     const modalBody = document.getElementById("modalBody");
     let currentId = null;
