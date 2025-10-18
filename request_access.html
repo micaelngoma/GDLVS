@@ -3,173 +3,175 @@
 <head>
   <meta charset="UTF-8" />
   <title>GDLVS - Access Requests</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- jQuery + i18n -->
+  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
+  <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
+  <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
+  <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
   <style>
+    :root {
+      --brand-dark:#2a3f54;
+      --brand-dark-2:#1e2d3c;
+      --panel-bg:rgba(255,255,255,0.9);
+      --card-shadow:0 2px 8px rgba(0,0,0,0.25);
+      --success:#27ae60;
+      --danger:#e74c3c;
+      --warn:#f1c40f;
+    }
+
+    * {box-sizing:border-box;}
     body {
-      font-family: Arial, sans-serif;
-      color: #333;
-      margin: 0;
-      background: #f6f8fb;
+      margin:0;
+      font-family:Arial, sans-serif;
+      background:#f6f8fb;
+      color:#333;
+      min-height:100vh;
     }
-    .background-image {
-      position: fixed; inset: 0;
-      background: url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') center/cover no-repeat;
-      z-index: -1; filter: brightness(0.9);
-    }
+
     header {
-      background: #2a3f54;
-      color: #fff;
-      padding: 10px 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: fixed; top: 0; left: 0; right: 0;
-      z-index: 1000;
+      position:fixed;
+      top:0; left:0; right:0;
+      z-index:1000;
+      background:rgba(42,63,84,0.95);
+      color:#fff;
+      padding:10px 14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      box-shadow:var(--card-shadow);
+      backdrop-filter:blur(8px);
     }
-    header h1 { margin: 0; font-size: 1.1rem; display: flex; gap: 8px; align-items: center; }
-    .controls { display: flex; gap: 8px; align-items: center; }
-    .controls select, .controls button {
-      padding: 6px 10px;
-      border-radius: 8px;
-      border: 0;
-      font-size: .9rem;
+    header h1 {
+      margin:0;
+      font-size:1.1rem;
+      display:flex;
+      align-items:center;
+      gap:8px;
     }
-    .controls select { background: #fff; color: #000; }
-    .controls button { background: #1e2d3c; color: #fff; cursor: pointer; }
+    .controls {display:flex;gap:8px;align-items:center;}
+    .controls select,
+    .controls button {
+      padding:6px 10px;
+      border-radius:8px;
+      border:0;
+      font-size:.9rem;
+    }
+    .controls select {background:#fff;color:#000;}
+    .controls button {background:var(--brand-dark-2);color:#fff;cursor:pointer;}
+    .controls button:hover {background:#16222d;}
 
     nav {
-      background: #1e2d3c;
-      color: #fff;
-      padding: 10px 14px;
-      display: flex;
-      gap: 16px;
-      position: fixed; top: 56px; left: 0; right: 0;
-      z-index: 999;
+      position:fixed;
+      top:52px; left:0; right:0;
+      z-index:999;
+      background:rgba(255,255,255,0.9);
+      border-bottom:1px solid #eaeaea;
+      padding:10px 14px;
+      display:flex;
+      gap:16px;
+      flex-wrap:wrap;
+      backdrop-filter:blur(6px);
     }
     nav a {
-      color: #fff;
-      text-decoration: none;
-      font-weight: bold;
-      transition: all 0.25s ease-in-out;
+      color:var(--brand-dark);
+      text-decoration:none;
+      font-weight:bold;
+      transition:.2s;
     }
+    nav a:hover {color:var(--brand-dark-2);}
     nav a.active {
-      border-bottom: 2px solid #f1c40f;
-      padding-bottom: 3px;
-    }
-    nav a:hover {
-      border-bottom: 2px solid #f1c40f;
-      padding-bottom: 3px;
-      box-shadow: 0 2px 6px rgba(241,196,15,0.7);
+      border-bottom:2px solid var(--brand-dark);
+      padding-bottom:3px;
     }
 
-    main.container {
-      max-width: 95vw;
-      margin: 120px auto 0;
-      background: rgba(255,255,255,0.95);
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.2);
+    .container {
+      max-width:1200px;
+      margin:130px auto 25px;
+      padding:0 16px;
     }
 
+    section.panel {
+      background:var(--panel-bg);
+      border-radius:10px;
+      box-shadow:var(--card-shadow);
+      padding:20px;
+      margin-top:20px;
+      backdrop-filter:blur(6px);
+    }
+    h2, h3 {color:var(--brand-dark);margin-top:0;}
     table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      table-layout: fixed;
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0 6px;
+      margin-top:10px;
     }
     th, td {
-      border: 1px solid #eee;
-      padding: 8px;
-      background: #fff;
-      text-align: left;
-      word-wrap: break-word;
+      background:#fff;
+      border:1px solid #eee;
+      padding:10px 12px;
+      text-align:left;
     }
-    th { background: #f2f2f2; }
-    th:nth-child(1){width:13%}
-    th:nth-child(2){width:17%}
-    th:nth-child(3){width:15%}
-    th:nth-child(4){width:12%}
-    th:nth-child(5){width:20%}
-    th:nth-child(6){width:10%}
-    th:nth-child(7){width:13%}
-
-    .status {
-      font-weight: bold;
-      text-transform: capitalize;
-    }
-    .status.pending { color: #f1c40f; }
-    .status.approved { color: #27ae60; }
-    .status.rejected { color: #e74c3c; }
-
-    .btn-inline {
-      padding: 5px 8px;
-      border-radius: 6px;
-      border: 0;
-      cursor: pointer;
-      color: #fff;
-      background: #2980b9;
-      margin: 2px;
-    }
-    .btn-danger { background: #e74c3c; }
-    .btn-success { background: #27ae60; }
+    th {background:#f2f2f2;}
+    td.status.pending {color:var(--warn);font-weight:bold;}
+    td.status.approved {color:var(--success);font-weight:bold;}
+    td.status.rejected {color:var(--danger);font-weight:bold;}
   </style>
 </head>
-<body>
-  <div class="background-image"></div>
 
+<body>
   <header>
-    <h1><i class="fas fa-user-check"></i> Access Requests</h1>
+    <h1><i class="fa-solid fa-user-check"></i> <span data-i18n="accessRequestsTitle">Access Requests</span></h1>
     <div class="controls">
       <select id="languageSwitcher">
         <option value="en">🇬🇧 English</option>
         <option value="fr">🇫🇷 Français</option>
         <option value="ja">🇯🇵 日本語</option>
       </select>
-      <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      <button id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="signOut">Sign Out</span></button>
     </div>
   </header>
 
   <nav>
-    <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
-    <a href="verify.html"><i class="fas fa-search"></i> Verification</a>
-    <a href="add_licenses.html"><i class="fas fa-id-card"></i> Add License</a>
-    <a href="users.html"><i class="fas fa-users-cog"></i> Users</a>
-    <a href="verification_requests.html"><i class="fas fa-inbox"></i> Verification Requests</a>
-    <a href="analytics.html"><i class="fas fa-chart-bar"></i> Analytics</a>
-    <a href="request_access_list.html" class="active"><i class="fas fa-user-check"></i> Access Requests</a>
+    <a href="dashboard.html"><i class="fa-solid fa-house"></i> <span data-i18n="dashboard">Dashboard</span></a>
+    <a href="verify.html"><i class="fa-solid fa-search"></i> <span data-i18n="verification">Verification</span></a>
+    <a href="add_licenses.html"><i class="fa-solid fa-id-card"></i> <span data-i18n="addLicense">Add License</span></a>
+    <a href="users.html"><i class="fa-solid fa-users"></i> <span data-i18n="users">Users</span></a>
+    <a href="verification_requests.html"><i class="fa-solid fa-inbox"></i> <span data-i18n="requests">Verification Requests</span></a>
+    <a class="active" href="request_access.html"><i class="fa-solid fa-user-lock"></i> <span data-i18n="accessRequests">Access Requests</span></a>
+    <a href="analytics.html"><i class="fa-solid fa-chart-bar"></i> <span data-i18n="analytics">Analytics</span></a>
   </nav>
 
   <main class="container">
-    <h2><i class="fas fa-table"></i> Access Request Records</h2>
-    <input type="text" id="searchInput" placeholder="Search by name, email, or organization..." style="width:100%;padding:10px;margin-bottom:10px;border-radius:8px;border:1px solid #ccc;">
-
-    <table id="accessTable">
-      <thead>
-        <tr>
-          <th>Full Name</th>
-          <th>Email</th>
-          <th>Organization</th>
-          <th>Phone</th>
-          <th>Purpose</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td colspan="7">Loading...</td></tr>
-      </tbody>
-    </table>
+    <section class="panel">
+      <h2><i class="fa-solid fa-table"></i> <span data-i18n="accessRequestsList">Access Requests List</span></h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Organization</th>
+            <th>Phone</th>
+            <th>Purpose</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="accessRequestsBody">
+          <tr><td colspan="7" data-i18n="loading">Loading...</td></tr>
+        </tbody>
+      </table>
+    </section>
   </main>
 
-  <!-- Firebase + Firestore -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, query, orderBy, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     // Firebase setup
     const firebaseConfig = {
@@ -181,76 +183,98 @@
       appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
     };
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    onAuthStateChanged(auth, user => { if (!user) location.href = "index.html"; });
+    // Redirect to login if not authenticated
+    onAuthStateChanged(auth, u => { if (!u) location.href = "index.html"; });
     document.getElementById("logoutBtn").onclick = () => signOut(auth).then(() => location.href = "index.html");
 
-    // Table reference
-    const tbody = document.querySelector("#accessTable tbody");
-    const qAccess = query(collection(db, "access_requests"), orderBy("createdAt", "desc"));
+    const tbody = document.getElementById("accessRequestsBody");
 
-    // Load Firestore requests in real time
-    onSnapshot(qAccess, snapshot => {
-      tbody.innerHTML = "";
-      if (snapshot.empty) {
-        tbody.innerHTML = `<tr><td colspan="7">No access requests found.</td></tr>`;
-        return;
-      }
-
-      snapshot.forEach(docSnap => {
-        const d = docSnap.data();
-        const id = docSnap.id;
-        const status = (d.status || "pending").toLowerCase();
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${d.fullName || ""}</td>
-          <td>${d.email || ""}</td>
-          <td>${d.organization || ""}</td>
-          <td>${d.phone || ""}</td>
-          <td>${d.purpose || ""}</td>
-          <td class="status ${status}">${status}</td>
-          <td>
-            ${status === "pending" ? `
-              <button class="btn-inline btn-success" data-id="${id}" data-action="approve">
-                <i class="fas fa-check"></i> Approve
-              </button>
-              <button class="btn-inline btn-danger" data-id="${id}" data-action="reject">
-                <i class="fas fa-times"></i> Reject
-              </button>
-            ` : `<button class="btn-inline" disabled>Done</button>`}
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    });
-
-    // Approve / Reject logic
-    tbody.addEventListener("click", async e => {
-      const btn = e.target.closest("button[data-action]");
-      if (!btn) return;
-
-      const id = btn.getAttribute("data-id");
-      const action = btn.getAttribute("data-action");
-      const newStatus = action === "approve" ? "approved" : "rejected";
-
-      if (!confirm(`Are you sure you want to ${newStatus} this request?`)) return;
-
+    // Load requests
+    async function loadRequests() {
+      tbody.innerHTML = `<tr><td colspan="7">Loading...</td></tr>`;
       try {
-        await updateDoc(doc(db, "access_requests", id), { status: newStatus });
-        alert(`✅ Request ${newStatus}`);
+        const qAccess = query(collection(db, "access_requests"), orderBy("createdAt", "desc"));
+        const snap = await getDocs(qAccess);
+        tbody.innerHTML = "";
+        if (snap.empty) {
+          tbody.innerHTML = `<tr><td colspan="7">No requests found.</td></tr>`;
+          return;
+        }
+        snap.forEach(docSnap => {
+          const d = docSnap.data();
+          const date = d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleString() : "—";
+          const statusClass = (d.status || "pending").toLowerCase();
+          tbody.innerHTML += `
+            <tr>
+              <td>${d.fullName || ""}</td>
+              <td>${d.email || ""}</td>
+              <td>${d.organization || ""}</td>
+              <td>${d.phone || ""}</td>
+              <td>${d.purpose || ""}</td>
+              <td class="status ${statusClass}">${d.status || "Pending"}</td>
+              <td>${date}</td>
+            </tr>`;
+        });
       } catch (err) {
-        alert("❌ Error updating request: " + err.message);
+        console.error("Error loading requests:", err);
+        tbody.innerHTML = `<tr><td colspan="7" style="color:red;">Error loading data</td></tr>`;
       }
-    });
+    }
 
-    // Search filter
-    document.getElementById("searchInput").addEventListener("input", e => {
-      const term = e.target.value.toLowerCase();
-      document.querySelectorAll("#accessTable tbody tr").forEach(row => {
-        row.style.display = row.textContent.toLowerCase().includes(term) ? "" : "none";
-      });
+    loadRequests();
+
+    // i18n setup
+    const i18nResources = {
+      en: { translation: {
+        accessRequestsTitle: "Access Requests",
+        signOut: "Sign Out",
+        dashboard: "Dashboard",
+        verification: "Verification",
+        addLicense: "Add License",
+        users: "Users",
+        requests: "Verification Requests",
+        accessRequests: "Access Requests",
+        analytics: "Analytics",
+        accessRequestsList: "Access Requests List",
+        loading: "Loading..."
+      }},
+      fr: { translation: {
+        accessRequestsTitle: "Demandes d'accès",
+        signOut: "Déconnexion",
+        dashboard: "Tableau de bord",
+        verification: "Vérification",
+        addLicense: "Ajouter un permis",
+        users: "Utilisateurs",
+        requests: "Demandes de vérification",
+        accessRequests: "Demandes d'accès",
+        analytics: "Analytique",
+        accessRequestsList: "Liste des demandes d'accès",
+        loading: "Chargement..."
+      }},
+      ja: { translation: {
+        accessRequestsTitle: "アクセスリクエスト",
+        signOut: "ログアウト",
+        dashboard: "ダッシュボード",
+        verification: "照会",
+        addLicense: "免許を追加",
+        users: "ユーザー",
+        requests: "照会リクエスト",
+        accessRequests: "アクセスリクエスト",
+        analytics: "分析",
+        accessRequestsList: "アクセスリクエスト一覧",
+        loading: "読み込み中..."
+      }}
+    };
+
+    i18next.use(i18nextBrowserLanguageDetector).init({resources:i18nResources,fallbackLng:"en"},()=>{
+      jqueryI18next.init(i18next,$,{useOptionsAttr:true});
+      $("body").localize();
+    });
+    document.getElementById("languageSwitcher").addEventListener("change",function(){
+      i18next.changeLanguage(this.value,()=>{$("body").localize();});
     });
   </script>
 </body>
