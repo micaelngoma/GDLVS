@@ -184,6 +184,8 @@
       </header>
       <div class="modal-body">
         <input type="hidden" id="modalLicenseId" />
+        <label for="modalLicenseNumber" data-i18n="licenseNumber">License Number</label>
+        <input type="text" id="modalLicenseNumber" />
         <label for="modalFullName" data-i18n="fullName">Full Name</label>
         <input type="text" id="modalFullName" />
         <label for="modalClass" data-i18n="class">Class</label>
@@ -207,14 +209,13 @@
       </div>
       <div class="modal-actions">
         <button class="btn-secondary" id="modalCancelBtn" data-i18n="cancel">Cancel</button>
-        <button class="btn-primary" id="modalSaveBtn"><i class="fas fa-save"></i> <span data-i18n="saveChanges">Save Changes</span></button>
+        <button class="btn-primary" id="modalSaveBtn"><i class="fas fa-save"></i> <span data-i18n="saveChanges">Save / Update</span></button>
       </div>
     </div>
   </div>
 
   <!-- ===== Firebase + App Logic ===== -->
   <script type="module">
-    /* Firebase v9+ Modular */
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
     import { getFirestore, collection, onSnapshot, doc, setDoc, getDoc, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
@@ -231,78 +232,23 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    /* ===== i18n (EN/FR/JA) ===== */
-    const i18nResources = {
-      en:{translation:{
-        dashboard:"Dashboard", verificationPortal:"Verification", addLicense:"Add License",
-        userManagement:"User Management", verificationRequests:"Verification Requests", analytics:"Analytics",
-        logout:"Logout",
-        totalLicenses:"Total Licenses", activeLicenses:"Active", suspended:"Suspended", expired:"Expired",
-        licensesList:"Licenses", licenseNumber:"License #", fullName:"Full Name", class:"Class",
-        issueDate:"Issue", expiryDate:"Expiry", status:"Status", action:"Action",
-        loading:"Loading...", export:"Export", searchLicenses:"Search licenses...",
-        editLicense:"Edit License", cancel:"Cancel", saveChanges:"Save Changes", active:"Active",
-        delete:"Delete", confirmDelete:"Delete this license?"
-      }},
-      fr:{translation:{
-        dashboard:"Tableau de bord", verificationPortal:"Vérification", addLicense:"Ajouter un permis",
-        userManagement:"Gestion des utilisateurs", verificationRequests:"Demandes de vérification", analytics:"Analytique",
-        logout:"Déconnexion",
-        totalLicenses:"Nombre total de permis", activeLicenses:"Actifs", suspended:"Suspendus", expired:"Expirés",
-        licensesList:"Permis", licenseNumber:"N° de permis", fullName:"Nom complet", class:"Catégorie",
-        issueDate:"Émission", expiryDate:"Expiration", status:"Statut", action:"Action",
-        loading:"Chargement...", export:"Exporter", searchLicenses:"Rechercher des permis…",
-        editLicense:"Modifier le permis", cancel:"Annuler", saveChanges:"Enregistrer", active:"Actif",
-        delete:"Supprimer", confirmDelete:"Supprimer ce permis ?"
-      }},
-      ja:{translation:{
-        dashboard:"ダッシュボード", verificationPortal:"照合", addLicense:"免許を追加",
-        userManagement:"ユーザー管理", verificationRequests:"照合リクエスト", analytics:"分析",
-        logout:"ログアウト",
-        totalLicenses:"総免許数", activeLicenses:"有効", suspended:"停止中", expired:"期限切れ",
-        licensesList:"免許一覧", licenseNumber:"免許番号", fullName:"氏名", class:"区分",
-        issueDate:"発行", expiryDate:"有効期限", status:"ステータス", action:"操作",
-        loading:"読み込み中…", export:"エクスポート", searchLicenses:"免許を検索…",
-        editLicense:"免許を編集", cancel:"キャンセル", saveChanges:"保存", active:"有効",
-        delete:"削除", confirmDelete:"この免許を削除しますか？"
-      }}
-    };
-
-    i18next.use(i18nextBrowserLanguageDetector).init(
-      { resources:i18nResources, fallbackLng:"en" },
-      () => { if (typeof jqueryI18next!=="undefined"){ jqueryI18next.init(i18next,$,{useOptionsAttr:true}); $("body").localize(); } }
-    );
-    document.getElementById("languageSwitcher").addEventListener("change", function(){
-      i18next.changeLanguage(this.value, () => $("body").localize());
-    });
-
-    /* ===== Auth Gate ===== */
-    onAuthStateChanged(auth, async (user)=>{
-      if(!user){ window.location.href="index.html"; return; }
-      const roleSnap = await getDoc(doc(db, "roles", user.email));
-      const role = roleSnap.exists() ? roleSnap.data().role : "verifier";
-      const adminOnly = document.getElementById("navVerificationRequests");
-      if (adminOnly) adminOnly.style.display = (role==="admin") ? "block" : "none";
-    });
-
-    /* ===== Logout ===== */
-    document.getElementById("logoutBtn").addEventListener("click", ()=>signOut(auth).then(()=>location.href="index.html"));
-
-    /* ===== Modal helpers ===== */
     const overlay = document.getElementById("editModalOverlay");
     const closeBtn = document.getElementById("modalCloseBtn");
     const cancelBtn = document.getElementById("modalCancelBtn");
     const saveBtn = document.getElementById("modalSaveBtn");
     const fields = {
       id: document.getElementById("modalLicenseId"),
+      licenseNumber: document.getElementById("modalLicenseNumber"),
       fullName: document.getElementById("modalFullName"),
       klass: document.getElementById("modalClass"),
       status: document.getElementById("modalStatus"),
       issue: document.getElementById("modalIssue"),
       expiry: document.getElementById("modalExpiry")
     };
+
     function openModal(d){
-      fields.id.value = d.licenseNumber || d.id || "";
+      fields.id.value = d.id || "";
+      fields.licenseNumber.value = d.licenseNumber || d.id || "";
       fields.fullName.value = d.fullName || "";
       fields.klass.value = d.class || "Class A";
       fields.status.value = d.status || "Active";
@@ -311,6 +257,7 @@
       overlay.classList.add("show");
       overlay.setAttribute("aria-hidden","false");
     }
+
     function closeModal(){
       overlay.classList.remove("show");
       overlay.setAttribute("aria-hidden","true");
@@ -320,7 +267,7 @@
     overlay.addEventListener("click", (e)=>{ if(e.target===overlay) closeModal(); });
 
     saveBtn.addEventListener("click", async ()=>{
-      const id = fields.id.value.trim();
+      const id = fields.licenseNumber.value.trim();
       if(!id){ alert("Missing license number"); return; }
       const payload = {
         licenseNumber: id,
@@ -328,41 +275,50 @@
         class: fields.klass.value,
         status: fields.status.value,
         issueDate: fields.issue.value,
+        expiryDate: fields.expiry
         expiryDate: fields.expiry.value
       };
-      try{
-        await setDoc(doc(db,"licenses", id), payload, { merge:true });
+      try {
+        await setDoc(doc(db, "licenses", id), payload, { merge: true });
         closeModal();
-      }catch(err){ alert("❌ " + err.message); }
+      } catch (err) {
+        alert("❌ " + err.message);
+      }
     });
 
     /* ===== Licenses: realtime table + counters ===== */
     const tbody = document.querySelector("#licensesTable tbody");
     const qLic = query(collection(db, "licenses"), orderBy("licenseNumber"));
 
-    onSnapshot(qLic, (snapshot)=>{
-      let total=0, active=0, suspended=0, expired=0;
+    onSnapshot(qLic, (snapshot) => {
+      let total = 0, active = 0, suspended = 0, expired = 0;
       tbody.innerHTML = "";
       if (snapshot.empty) {
         tbody.innerHTML = `<tr><td colspan="7">No licenses found.</td></tr>`;
       } else {
-        snapshot.forEach(docSnap=>{
+        snapshot.forEach((docSnap) => {
           const d = docSnap.data();
           total++;
-          const s = String(d.status||"").toLowerCase();
-          if (s.startsWith("act")) active++; else if (s.startsWith("sus")) suspended++; else if (s.startsWith("exp")) expired++;
+          const s = String(d.status || "").toLowerCase();
+          if (s.startsWith("act")) active++;
+          else if (s.startsWith("sus")) suspended++;
+          else if (s.startsWith("exp")) expired++;
           const id = d.licenseNumber || docSnap.id;
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${id}</td>
-            <td>${d.fullName||""}</td>
-            <td>${d.class||""}</td>
-            <td>${d.issueDate||""}</td>
-            <td>${d.expiryDate||""}</td>
-            <td>${d.status||""}</td>
+            <td>${d.fullName || ""}</td>
+            <td>${d.class || ""}</td>
+            <td>${d.issueDate || ""}</td>
+            <td>${d.expiryDate || ""}</td>
+            <td>${d.status || ""}</td>
             <td style="white-space:nowrap">
-              <button class="btn-inline" data-action="update" data-id="${id}"><i class="fas fa-pen"></i> ${i18next.t("editLicense")}</button>
-              <button class="btn-inline btn-danger" data-action="delete" data-id="${id}"><i class="fas fa-trash"></i> ${i18next.t("delete")}</button>
+              <button class="btn-inline" data-action="update" data-id="${id}">
+                <i class="fas fa-pen"></i> ${i18next.t("editLicense")}
+              </button>
+              <button class="btn-inline btn-danger" data-action="delete" data-id="${id}">
+                <i class="fas fa-trash"></i> ${i18next.t("delete")}
+              </button>
             </td>`;
           tbody.appendChild(tr);
         });
@@ -374,49 +330,72 @@
     });
 
     /* ===== Row actions: open modal / delete ===== */
-    tbody.addEventListener("click", async (e)=>{
+    tbody.addEventListener("click", async (e) => {
       const editBtn = e.target.closest("button[data-action='update']");
-      const delBtn  = e.target.closest("button[data-action='delete']");
-      if(editBtn){
+      const delBtn = e.target.closest("button[data-action='delete']");
+      if (editBtn) {
         const id = editBtn.getAttribute("data-id");
         try {
-          const snap = await getDoc(doc(db,"licenses",id));
-          const data = snap.exists() ? snap.data() : { licenseNumber:id };
+          const snap = await getDoc(doc(db, "licenses", id));
+          const data = snap.exists() ? snap.data() : { licenseNumber: id };
           openModal({ id, ...data });
-        } catch(err){ alert("❌ " + err.message); }
+        } catch (err) {
+          alert("❌ " + err.message);
+        }
       }
-      if(delBtn){
+      if (delBtn) {
         const id = delBtn.getAttribute("data-id");
-        if(confirm(i18next.t("confirmDelete"))){
-          try{
-            await deleteDoc(doc(db,"licenses", id));
-          }catch(err){ alert("❌ " + err.message); }
+        if (confirm(i18next.t("confirmDelete"))) {
+          try {
+            await deleteDoc(doc(db, "licenses", id));
+          } catch (err) {
+            alert("❌ " + err.message);
+          }
         }
       }
     });
 
     /* ===== Search filter ===== */
-    document.getElementById("licenseSearch").addEventListener("input", (e)=>{
+    document.getElementById("licenseSearch").addEventListener("input", (e) => {
       const term = e.target.value.toLowerCase();
-      document.querySelectorAll("#licensesTable tbody tr").forEach(row=>{
+      document.querySelectorAll("#licensesTable tbody tr").forEach((row) => {
         row.style.display = row.textContent.toLowerCase().includes(term) ? "" : "none";
       });
     });
 
     /* ===== Export CSV ===== */
-    document.getElementById("exportLicenses").addEventListener("click", ()=>{
+    document.getElementById("exportLicenses").addEventListener("click", () => {
       const rows = document.querySelectorAll("#licensesTable tr");
       const csv = [];
-      rows.forEach(r=>{
+      rows.forEach((r) => {
         const cols = r.querySelectorAll("th,td");
-        const row = Array.from(cols).map(c => `"${c.innerText.replace(/"/g,'""')}"`).join(",");
+        const row = Array.from(cols)
+          .map((c) => `"${c.innerText.replace(/"/g, '""')}"`)
+          .join(",");
         csv.push(row);
       });
-      const blob = new Blob([csv.join("\n")], { type:"text/csv" });
+      const blob = new Blob([csv.join("\n")], { type: "text/csv" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
       a.download = "licenses_export.csv";
       a.click();
+    });
+
+    /* ===== Auth and Logout ===== */
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+      const roleSnap = await getDoc(doc(db, "roles", user.email));
+      const role = roleSnap.exists() ? roleSnap.data().role : "verifier";
+      const adminOnly = document.getElementById("navVerificationRequests");
+      if (adminOnly) adminOnly.style.display = (role === "admin") ? "block" : "none";
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      signOut(auth).then(() => location.href = "index.html");
     });
   </script>
 </body>
