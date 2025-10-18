@@ -15,41 +15,34 @@
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
   <style>
-    /* Base layout */
     body{font-family:Arial,sans-serif;color:#333;margin:0;background:#f6f8fb}
     .background-image{position:fixed;inset:0;background:url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') center/cover no-repeat;z-index:-1;filter:brightness(0.9)}
-
     header{background:#2a3f54;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:10px 14px;position:fixed;top:0;left:0;right:0;z-index:1000}
     header h1{margin:0;font-size:1.1rem;display:flex;gap:8px;align-items:center}
     .controls{display:flex;gap:8px;align-items:center}
     .controls select,.controls button{padding:6px 10px;border-radius:8px;border:0;font-size:.9rem}
     .controls select{background:#fff;color:#000}
     .controls button{background:#1e2d3c;color:#fff;cursor:pointer}
-
     nav{background:#1e2d3c;color:#fff;padding:10px 14px;display:flex;gap:16px;position:fixed;top:56px;left:0;right:0;z-index:999}
-    nav a{color:#fff;text-decoration:none;font-weight:bold;transition:all .25s ease-in-out}
+    nav a{color:#fff;text-decoration:none;font-weight:bold;transition:all 0.25s ease-in-out}
     nav a.active{border-bottom:2px solid #f1c40f;padding-bottom:3px}
-    /* Hover underline + soft glow */
-    nav a:hover{border-bottom:2px solid #f1c40f;padding-bottom:3px;box-shadow:0 2px 6px rgba(241,196,15,.7)}
-
-    .container{max-width:95vw;margin:120px auto 0;background:rgba(255,255,255,.9);padding:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
-    .dashboard-cards{display:flex;gap:15px;flex-wrap:wrap;margin-bottom:16px}
-    .card{flex:1;min-width:220px;padding:14px;border-radius:10px;color:#fff;text-align:center}
+    /* ✅ Yellow underline + glow when hovering */
+    nav a:hover {
+      border-bottom: 2px solid #f1c40f;
+      padding-bottom: 3px;
+      box-shadow: 0 2px 6px rgba(241,196,15,0.7);
+      transition: all 0.25s ease-in-out;
+    }
+    .container{max-width:95vw;margin:120px auto 0;background:rgba(255,255,255,0.9);padding:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+    .dashboard-cards{display:flex;gap:15px;flex-wrap:wrap;margin-bottom:20px}
+    .card{flex:1;min-width:220px;padding:16px;border-radius:10px;color:#fff;text-align:center}
     .card.total{background:#2980b9}.card.active{background:#27ae60}.card.suspended{background:#f1c40f;color:#333}.card.expired{background:#e74c3c}
-
-    /* Compact table */
-    .verification-table-wrapper{max-height:60vh;overflow:auto;border-radius:8px;margin-top:8px}
-    table{width:100%;border-collapse:separate;border-spacing:0 4px;margin-top:6px;font-size:.92rem}
-    th,td{border:1px solid #eee;padding:6px 10px;text-align:left;background:#fff;vertical-align:middle;word-break:break-word}
-    th{background:#f2f2f2;font-weight:bold}
-    td button{font-size:.85rem}
-
-    .btn-inline{padding:5px 8px;border-radius:6px;border:0;cursor:pointer;color:#fff;background:#2980b9}
-    .btn-inline:hover{opacity:.95}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{border:1px solid #eee;padding:10px;background:#fff;text-align:left}
+    th{background:#f2f2f2}
+    .btn-inline{padding:6px 10px;border-radius:8px;border:0;cursor:pointer;color:#fff;background:#2980b9}
     .btn-danger{background:#e74c3c}
-
-    /* Modal */
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:2000}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:center;justify-content:center;z-index:2000}
     .modal-overlay.show{display:flex}
     .modal{background:#fff;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.3);width:min(500px,90vw)}
     .modal header{background:#2a3f54;color:#fff;padding:10px;display:flex;justify-content:space-between;align-items:center}
@@ -59,15 +52,13 @@
     .btn-secondary{background:#95a5a6;color:#fff;border:0;border-radius:8px;padding:8px 12px;cursor:pointer}
   </style>
 </head>
-
 <body>
   <div class="background-image"></div>
 
-  <!-- Header -->
   <header>
     <h1><i class="fas fa-id-card"></i> <span data-i18n="dashboard">Dashboard</span></h1>
     <div class="controls">
-      <select id="languageSwitcher" aria-label="Language">
+      <select id="languageSwitcher">
         <option value="en">🇬🇧 English</option>
         <option value="fr">🇫🇷 Français</option>
         <option value="ja">🇯🇵 日本語</option>
@@ -76,7 +67,6 @@
     </div>
   </header>
 
-  <!-- Nav -->
   <nav>
     <a href="dashboard.html" class="active"><i class="fas fa-home"></i> <span data-i18n="dashboard">Dashboard</span></a>
     <a href="verify.html"><i class="fas fa-search"></i> <span data-i18n="verificationPortal">Verification</span></a>
@@ -87,7 +77,6 @@
   </nav>
 
   <main class="container">
-    <!-- Cards -->
     <section class="dashboard-cards">
       <div class="card total"><h3 data-i18n="totalLicenses">Total Licenses</h3><h2 id="totalLicenses">0</h2></div>
       <div class="card active"><h3 data-i18n="activeLicenses">Active</h3><h2 id="activeLicenses">0</h2></div>
@@ -95,57 +84,34 @@
       <div class="card expired"><h3 data-i18n="expired">Expired</h3><h2 id="expiredLicenses">0</h2></div>
     </section>
 
-    <!-- Licenses Table -->
     <section>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <input id="licenseSearch" type="text" data-i18n="[placeholder]searchLicenses" placeholder="Search licenses..." style="max-width:300px;border:1px solid #ccc;border-radius:6px;padding:6px 8px;background:#fff;">
-        <button class="btn-inline" id="exportLicenses"><i class="fas fa-file-export"></i> <span data-i18n="export">Export</span></button>
-      </div>
-      <div class="verification-table-wrapper">
-        <table id="licensesTable">
-          <thead>
-            <tr>
-              <th data-i18n="licenseNumber">License #</th>
-              <th data-i18n="fullName">Full Name</th>
-              <th data-i18n="class">Class</th>
-              <th data-i18n="issueDate">Issue</th>
-              <th data-i18n="expiryDate">Expiry</th>
-              <th data-i18n="status">Status</th>
-              <th data-i18n="action">Action</th>
-            </tr>
-          </thead>
-          <tbody><tr><td colspan="7" data-i18n="loading">Loading...</td></tr></tbody>
-        </table>
-      </div>
+      <input id="licenseSearch" type="text" data-i18n="[placeholder]searchLicenses" placeholder="Search licenses..." />
+      <button class="btn-inline" id="exportLicenses"><i class="fas fa-file-export"></i> <span data-i18n="export">Export</span></button>
+      <table id="licensesTable">
+        <thead><tr><th data-i18n="licenseNumber">License #</th><th data-i18n="fullName">Full Name</th><th data-i18n="class">Class</th><th data-i18n="issueDate">Issue</th><th data-i18n="expiryDate">Expiry</th><th data-i18n="status">Status</th><th data-i18n="action">Action</th></tr></thead>
+        <tbody><tr><td colspan="7" data-i18n="loading">Loading...</td></tr></tbody>
+      </table>
     </section>
   </main>
 
-  <!-- ===== Edit Modal ===== -->
   <div class="modal-overlay" id="editModalOverlay" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+    <div class="modal">
       <header>
-        <h3 id="editModalTitle"><i class="fas fa-pen-to-square"></i> <span data-i18n="editLicense">Edit License</span></h3>
-        <button class="btn-secondary" id="modalCloseBtn" aria-label="Close"><i class="fas fa-times"></i></button>
+        <h3><i class="fas fa-pen-to-square"></i> <span data-i18n="editLicense">Edit License</span></h3>
+        <button class="btn-secondary" id="modalCloseBtn"><i class="fas fa-times"></i></button>
       </header>
       <div class="modal-body">
         <input type="hidden" id="modalLicenseId" />
-        <label for="modalLicenseNumber" data-i18n="licenseNumber">License #</label>
+        <label for="modalLicenseNumber" data-i18n="licenseNumber">License Number</label>
         <input type="text" id="modalLicenseNumber" />
         <label for="modalFullName" data-i18n="fullName">Full Name</label>
         <input type="text" id="modalFullName" />
         <label for="modalClass" data-i18n="class">Class</label>
-        <select id="modalClass">
-          <option>Class A</option><option>Class B</option><option>Class C</option>
-          <option>Class D</option><option>Class E</option><option>Class F</option>
-        </select>
+        <select id="modalClass"><option>Class A</option><option>Class B</option><option>Class C</option><option>Class D</option><option>Class E</option><option>Class F</option></select>
         <label for="modalStatus" data-i18n="status">Status</label>
-        <select id="modalStatus">
-          <option>Active</option><option>Suspended</option><option>Expired</option>
-        </select>
-        <label for="modalIssue" data-i18n="issueDate">Issue</label>
-        <input type="date" id="modalIssue" />
-        <label for="modalExpiry" data-i18n="expiryDate">Expiry</label>
-        <input type="date" id="modalExpiry" />
+        <select id="modalStatus"><option>Active</option><option>Suspended</option><option>Expired</option></select>
+        <label for="modalIssue" data-i18n="issueDate">Issue</label><input type="date" id="modalIssue" />
+        <label for="modalExpiry" data-i18n="expiryDate">Expiry</label><input type="date" id="modalExpiry" />
       </div>
       <div class="modal-actions">
         <button class="btn-secondary" id="modalCancelBtn" data-i18n="cancel">Cancel</button>
@@ -154,239 +120,25 @@
     </div>
   </div>
 
-  <!-- ===== App Script (waits for DOM ready) ===== -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { getFirestore, collection, onSnapshot, doc, setDoc, getDoc, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  <!-- ✅ Auto-refresh translation on change -->
+  <script>
+    const i18n = window.i18next;
+    const jqueryI18next = window.jqueryI18next;
+    const $ = window.$;
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const $ = window.$;
-      const i18n = window.i18next;
-      const jqueryI18next = window.jqueryI18next;
+    const resources = {
+      en:{translation:{dashboard:"Dashboard",verificationPortal:"Verification",addLicense:"Add License",userManagement:"User Management",verificationRequests:"Verification Requests",analytics:"Analytics",logout:"Logout",totalLicenses:"Total Licenses",activeLicenses:"Active",suspended:"Suspended",expired:"Expired",licensesList:"Licenses",licenseNumber:"License #",fullName:"Full Name",class:"Class",issueDate:"Issue",expiryDate:"Expiry",status:"Status",action:"Action",loading:"Loading...",export:"Export",searchLicenses:"Search licenses...",editLicense:"Edit License",cancel:"Cancel",saveChanges:"Save / Update",active:"Active",delete:"Delete",confirmDelete:"Delete this license?"}},
+      fr:{translation:{dashboard:"Tableau de bord",verificationPortal:"Vérification",addLicense:"Ajouter un permis",userManagement:"Gestion des utilisateurs",verificationRequests:"Demandes de vérification",analytics:"Analytique",logout:"Déconnexion",totalLicenses:"Nombre total de permis",activeLicenses:"Actifs",suspended:"Suspendus",expired:"Expirés",licensesList:"Permis",licenseNumber:"N° de permis",fullName:"Nom complet",class:"Catégorie",issueDate:"Émission",expiryDate:"Expiration",status:"Statut",action:"Action",loading:"Chargement...",export:"Exporter",searchLicenses:"Rechercher des permis…",editLicense:"Modifier le permis",cancel:"Annuler",saveChanges:"Enregistrer / Mettre à jour",active:"Actif",delete:"Supprimer",confirmDelete:"Supprimer ce permis ?"}},
+      ja:{translation:{dashboard:"ダッシュボード",verificationPortal:"照合",addLicense:"免許を追加",userManagement:"ユーザー管理",verificationRequests:"照合リクエスト",analytics:"分析",logout:"ログアウト",totalLicenses:"総免許数",activeLicenses:"有効",suspended:"停止中",expired:"期限切れ",licensesList:"免許一覧",licenseNumber:"免許番号",fullName:"氏名",class:"区分",issueDate:"発行",expiryDate:"有効期限",status:"ステータス",action:"操作",loading:"読み込み中…",export:"エクスポート",searchLicenses:"免許を検索…",editLicense:"免許を編集",cancel:"キャンセル",saveChanges:"保存 / 更新",active:"有効",delete:"削除",confirmDelete:"この免許を削除しますか？"}}
+    };
 
-      /* ========= Firebase ========= */
-      const app = initializeApp({
-        apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
-        authDomain: "gdlvs-2348e.firebaseapp.com",
-        projectId: "gdlvs-2348e",
-        storageBucket: "gdlvs-2348e.appspot.com",
-        messagingSenderId: "358715790318",
-        appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
-      });
-      const auth = getAuth(app);
-      const db = getFirestore(app);
+    i18n.use(i18nextBrowserLanguageDetector).init({resources, fallbackLng:"en"}, () => {
+      jqueryI18next.init(i18n, $, { useOptionsAttr:true });
+      $("body").localize();
+    });
 
-      /* ========= i18n ========= */
-      const resources = {
-        en:{translation:{editLicense:"Edit License",delete:"Delete",confirmDelete:"Delete this license?",dashboard:"Dashboard",verificationPortal:"Verification",addLicense:"Add License",userManagement:"User Management",verificationRequests:"Verification Requests",analytics:"Analytics",logout:"Logout",totalLicenses:"Total Licenses",activeLicenses:"Active",suspended:"Suspended",expired:"Expired",licenseNumber:"License #",fullName:"Full Name",class:"Class",issueDate:"Issue",expiryDate:"Expiry",status:"Status",action:"Action",loading:"Loading...",export:"Export",searchLicenses:"Search licenses...",cancel:"Cancel",saveChanges:"Save / Update"}},
-        fr:{translation:{editLicense:"Modifier le permis",delete:"Supprimer",confirmDelete:"Supprimer ce permis ?",dashboard:"Tableau de bord",verificationPortal:"Vérification",addLicense:"Ajouter un permis",userManagement:"Gestion des utilisateurs",verificationRequests:"Demandes de vérification",analytics:"Analytique",logout:"Déconnexion",totalLicenses:"Nombre total de permis",activeLicenses:"Actifs",suspended:"Suspendus",expired:"Expirés",licenseNumber:"N° de permis",fullName:"Nom complet",class:"Catégorie",issueDate:"Émission",expiryDate:"Expiration",status:"Statut",action:"Action",loading:"Chargement...",export:"Exporter",searchLicenses:"Rechercher des permis…",cancel:"Annuler",saveChanges:"Enregistrer / Mettre à jour"}},
-        ja:{translation:{editLicense:"免許を編集",delete:"削除",confirmDelete:"この免許を削除しますか？",dashboard:"ダッシュボード",verificationPortal:"照合",addLicense:"免許を追加",userManagement:"ユーザー管理",verificationRequests:"照合リクエスト",analytics:"分析",logout:"ログアウト",totalLicenses:"総免許数",activeLicenses:"有効",suspended:"停止中",expired:"期限切れ",licenseNumber:"免許番号",fullName:"氏名",class:"区分",issueDate:"発行",expiryDate:"有効期限",status:"ステータス",action:"操作",loading:"読み込み中…",export:"エクスポート",searchLicenses:"免許を検索…",cancel:"キャンセル",saveChanges:"保存 / 更新"}}
-      };
-
-      i18n.use(i18nextBrowserLanguageDetector).init({ resources, fallbackLng: "en" }, () => {
-        jqueryI18next.init(i18n, $, { useOptionsAttr: true });
-        $("body").localize();
-      });
-
-      // Instant language switch (no reload)
-      document.getElementById("languageSwitcher").addEventListener("change", function () {
-        i18n.changeLanguage(this.value, () => {
-          $("body").localize();
-          // Also re-render the table with translated button labels
-          renderTableFromCache();
-        });
-      });
-
-      /* ========= Auth & role ========= */
-      onAuthStateChanged(auth, async (user) => {
-        if (!user) { location.href = "index.html"; return; }
-        try {
-          const roleSnap = await getDoc(doc(db, "roles", user.email));
-          const role = roleSnap.exists() ? roleSnap.data().role : "verifier";
-          const adminOnly = document.getElementById("navVerificationRequests");
-          if (adminOnly) adminOnly.style.display = (role === "admin") ? "block" : "none";
-        } catch (e) {
-          console.warn("Role fetch error:", e);
-        }
-      });
-
-      document.getElementById("logoutBtn").addEventListener("click", () => {
-        signOut(auth).then(() => location.href = "index.html");
-      });
-
-      /* ========= Table (cache + render) ========= */
-      const tbody = document.querySelector("#licensesTable tbody");
-      let licensesCache = [];  // array of license objects
-
-      function countsFromCache() {
-        let total = licensesCache.length, active = 0, suspended = 0, expired = 0;
-        licensesCache.forEach(d => {
-          const s = String(d.status || "").toLowerCase();
-          if (s.startsWith("act")) active++;
-          else if (s.startsWith("sus")) suspended++;
-          else if (s.startsWith("exp")) expired++;
-        });
-        return { total, active, suspended, expired };
-      }
-
-      function renderTableFromCache() {
-        tbody.innerHTML = "";
-        if (licensesCache.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="7">${i18n.t("loading")}</td></tr>`;
-        } else {
-          licensesCache.forEach(d => {
-            const id = d.licenseNumber || d.id || "";
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-              <td>${id}</td>
-              <td>${d.fullName || ""}</td>
-              <td>${d.class || ""}</td>
-              <td>${d.issueDate || ""}</td>
-              <td>${d.expiryDate || ""}</td>
-              <td>${d.status || ""}</td>
-              <td style="white-space:nowrap">
-                <button class="btn-inline" data-action="update" data-id="${id}">
-                  <i class="fas fa-pen"></i> ${i18n.t("editLicense")}
-                </button>
-                <button class="btn-inline btn-danger" data-action="delete" data-id="${id}">
-                  <i class="fas fa-trash"></i> ${i18n.t("delete")}
-                </button>
-              </td>`;
-            tbody.appendChild(tr);
-          });
-        }
-        const { total, active, suspended, expired } = countsFromCache();
-        document.getElementById("totalLicenses").textContent = total;
-        document.getElementById("activeLicenses").textContent = active;
-        document.getElementById("suspendedLicenses").textContent = suspended;
-        document.getElementById("expiredLicenses").textContent = expired;
-        applySearchFilter(currentSearchTerm); // keep filtering after re-render
-      }
-
-      const qLic = query(collection(db, "licenses"), orderBy("licenseNumber"));
-      onSnapshot(qLic, (snapshot) => {
-        licensesCache = [];
-        snapshot.forEach(docSnap => {
-          const d = docSnap.data();
-          licensesCache.push({
-            id: docSnap.id,
-            licenseNumber: d.licenseNumber || docSnap.id,
-            fullName: d.fullName || "",
-            class: d.class || "",
-            issueDate: d.issueDate || "",
-            expiryDate: d.expiryDate || "",
-            status: d.status || ""
-          });
-        });
-        renderTableFromCache();
-      });
-
-      /* ========= Row actions ========= */
-      tbody.addEventListener("click", async (e) => {
-        const editBtn = e.target.closest("button[data-action='update']");
-        const delBtn  = e.target.closest("button[data-action='delete']");
-        if (editBtn) {
-          const id = editBtn.getAttribute("data-id");
-          try {
-            const snap = await getDoc(doc(db, "licenses", id));
-            const d = snap.exists() ? snap.data() : { licenseNumber: id };
-            openModal({ id, ...d });
-          } catch (err) { alert("❌ " + err.message); }
-        }
-        if (delBtn) {
-          const id = delBtn.getAttribute("data-id");
-          if (confirm(i18n.t("confirmDelete"))) {
-            try { await deleteDoc(doc(db, "licenses", id)); }
-            catch (err) { alert("❌ " + err.message); }
-          }
-        }
-      });
-
-      /* ========= Search ========= */
-      let currentSearchTerm = "";
-      function applySearchFilter(term) {
-        const t = term.toLowerCase();
-        document.querySelectorAll("#licensesTable tbody tr").forEach(row => {
-          row.style.display = row.textContent.toLowerCase().includes(t) ? "" : "none";
-        });
-      }
-      document.getElementById("licenseSearch").addEventListener("input", (e) => {
-        currentSearchTerm = e.target.value;
-        applySearchFilter(currentSearchTerm);
-      });
-
-      /* ========= Export CSV ========= */
-      document.getElementById("exportLicenses").addEventListener("click", () => {
-        const rows = document.querySelectorAll("#licensesTable tr");
-        const csv = [];
-        rows.forEach(r => {
-          const cols = r.querySelectorAll("th,td");
-          const row = Array.from(cols).map(c => `"${c.innerText.replace(/"/g, '""')}"`).join(",");
-          csv.push(row);
-        });
-        const blob = new Blob([csv.join("\n")], { type: "text/csv" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "licenses_export.csv";
-        a.click();
-      });
-
-      /* ========= Modal helpers ========= */
-      const overlay = document.getElementById("editModalOverlay");
-      const closeBtn = document.getElementById("modalCloseBtn");
-      const cancelBtn = document.getElementById("modalCancelBtn");
-      const saveBtn   = document.getElementById("modalSaveBtn");
-      const fields = {
-        id: document.getElementById("modalLicenseId"),
-        licenseNumber: document.getElementById("modalLicenseNumber"),
-        fullName: document.getElementById("modalFullName"),
-        klass: document.getElementById("modalClass"),
-        status: document.getElementById("modalStatus"),
-        issue: document.getElementById("modalIssue"),
-        expiry: document.getElementById("modalExpiry")
-      };
-
-      function openModal(d){
-        fields.id.value = d.licenseNumber || d.id || "";
-        fields.licenseNumber.value = d.licenseNumber || d.id || "";
-        fields.fullName.value = d.fullName || "";
-        fields.klass.value = d.class || "A";
-        fields.status.value = d.status || "Active";
-        fields.issue.value = (d.issueDate || "").slice(0,10);
-        fields.expiry.value = (d.expiryDate || "").slice(0,10);
-        overlay.classList.add("show");
-        overlay.setAttribute("aria-hidden","false");
-      }
-      function closeModal(){
-        overlay.classList.remove("show");
-        overlay.setAttribute("aria-hidden","true");
-      }
-      closeBtn.addEventListener("click", closeModal);
-      cancelBtn.addEventListener("click", closeModal);
-      overlay.addEventListener("click", (e) => { if (e.target === overlay) closeModal(); });
-
-      // Save / Update (handles license number change without duplication)
-      saveBtn.addEventListener("click", async () => {
-        const newId = fields.licenseNumber.value.trim();
-        const oldId = fields.id.value.trim();
-        if (!newId) { alert("Missing license number"); return; }
-        const payload = {
-          licenseNumber: newId,
-          fullName: fields.fullName.value.trim(),
-          class: fields.klass.value,
-          status: fields.status.value,
-          issueDate: fields.issue.value,
-          expiryDate: fields.expiry.value
-        };
-        try {
-          if (newId !== oldId && oldId) {
-            await deleteDoc(doc(db, "licenses", oldId));
-          }
-          await setDoc(doc(db, "licenses", newId), payload, { merge: true });
-          closeModal();
-        } catch (err) { alert("❌ " + err.message); }
-      });
+    document.getElementById("languageSwitcher").addEventListener("change", function(){
+      i18n.changeLanguage(this.value, () => $("body").localize());
     });
   </script>
 </body>
