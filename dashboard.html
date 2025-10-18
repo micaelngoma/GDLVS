@@ -34,8 +34,14 @@
     table{width:100%;border-collapse:collapse;margin-top:10px;table-layout:fixed}
     th,td{border:1px solid #eee;padding:8px;background:#fff;text-align:left;word-wrap:break-word}
     th{background:#f2f2f2}
-    th:nth-child(1){width:10%}   /* License # */
-    th:nth-child(7){width:12%}   /* Action */
+    /* balanced column widths */
+    th:nth-child(1){width:10%}
+    th:nth-child(2){width:20%}
+    th:nth-child(3){width:10%}
+    th:nth-child(4){width:15%}
+    th:nth-child(5){width:15%}
+    th:nth-child(6){width:10%}
+    th:nth-child(7){width:10%}
     td:nth-child(7){white-space:nowrap}
     .btn-inline{padding:5px 8px;border-radius:6px;border:0;cursor:pointer;color:#fff;background:#2980b9}
     .btn-danger{background:#e74c3c}
@@ -93,7 +99,7 @@
     </section>
   </main>
 
-  <!-- Firebase + i18n scripts -->
+  <!-- Firebase + JS -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
@@ -116,36 +122,32 @@
     const i18n = window.i18next;
     const $ = window.$;
     const jqueryI18next = window.jqueryI18next;
-
     const resources = {
       en:{translation:{dashboard:"Dashboard",verificationPortal:"Verification",addLicense:"Add License",userManagement:"User Management",verificationRequests:"Verification Requests",analytics:"Analytics",logout:"Logout",totalLicenses:"Total Licenses",activeLicenses:"Active",suspended:"Suspended",expired:"Expired",licenseNumber:"License #",fullName:"Full Name",class:"Class",issueDate:"Issue",expiryDate:"Expiry",status:"Status",action:"Action",loading:"Loading...",export:"Export",searchLicenses:"Search licenses...",delete:"Delete",editLicense:"Edit License"}},
       fr:{translation:{dashboard:"Tableau de bord",verificationPortal:"Vérification",addLicense:"Ajouter un permis",userManagement:"Gestion des utilisateurs",verificationRequests:"Demandes de vérification",analytics:"Analytique",logout:"Déconnexion",totalLicenses:"Nombre total de permis",activeLicenses:"Actifs",suspended:"Suspendus",expired:"Expirés",licenseNumber:"N° de permis",fullName:"Nom complet",class:"Catégorie",issueDate:"Émission",expiryDate:"Expiration",status:"Statut",action:"Action",loading:"Chargement...",export:"Exporter",searchLicenses:"Rechercher des permis…",delete:"Supprimer",editLicense:"Modifier le permis"}},
       ja:{translation:{dashboard:"ダッシュボード",verificationPortal:"照合",addLicense:"免許を追加",userManagement:"ユーザー管理",verificationRequests:"照合リクエスト",analytics:"分析",logout:"ログアウト",totalLicenses:"総免許数",activeLicenses:"有効",suspended:"停止中",expired:"期限切れ",licenseNumber:"免許番号",fullName:"氏名",class:"区分",issueDate:"発行",expiryDate:"有効期限",status:"ステータス",action:"操作",loading:"読み込み中…",export:"エクスポート",searchLicenses:"免許を検索…",delete:"削除",editLicense:"免許を編集"}}
     };
-
-    i18n.use(i18nextBrowserLanguageDetector).init({resources, fallbackLng:"en"}, ()=>{
-      jqueryI18next.init(i18n, $, {useOptionsAttr:true});
-      $("body").localize();
-    });
-
-    document.getElementById("languageSwitcher").addEventListener("change",function(){
-      i18n.changeLanguage(this.value,()=> $("body").localize());
-    });
+    i18n.use(i18nextBrowserLanguageDetector).init({resources,fallbackLng:"en"},()=>{jqueryI18next.init(i18n,$,{useOptionsAttr:true});$("body").localize();});
+    document.getElementById("languageSwitcher").addEventListener("change",function(){i18n.changeLanguage(this.value,()=>$("body").localize());});
 
     /* ===== Auth ===== */
-    onAuthStateChanged(auth, user=>{
-      if(!user){location.href="index.html";}
-    });
-    document.getElementById("logoutBtn").addEventListener("click",()=> signOut(auth).then(()=>location.href="index.html"));
+    onAuthStateChanged(auth,user=>{if(!user)location.href="index.html";});
+    document.getElementById("logoutBtn").addEventListener("click",()=>signOut(auth).then(()=>location.href="index.html"));
 
-    /* ===== Firestore table ===== */
-    const tbody = document.querySelector("#licensesTable tbody");
-    const qLic = query(collection(db,"licenses"), orderBy("licenseNumber"));
-    onSnapshot(qLic, (snapshot)=>{
+    /* ===== Firestore Table + Counters ===== */
+    const tbody=document.querySelector("#licensesTable tbody");
+    const qLic=query(collection(db,"licenses"),orderBy("licenseNumber"));
+    onSnapshot(qLic,snapshot=>{
+      let total=0,active=0,suspended=0,expired=0;
       tbody.innerHTML="";
       if(snapshot.empty){tbody.innerHTML=`<tr><td colspan='7'>No licenses found.</td></tr>`;return;}
       snapshot.forEach(docSnap=>{
         const d=docSnap.data();
+        total++;
+        const st=(d.status||"").toLowerCase();
+        if(st.includes("active"))active++;
+        else if(st.includes("suspend"))suspended++;
+        else if(st.includes("expire"))expired++;
         const tr=document.createElement("tr");
         tr.innerHTML=`
           <td>${d.licenseNumber||docSnap.id}</td>
@@ -160,29 +162,31 @@
           </td>`;
         tbody.appendChild(tr);
       });
+      document.getElementById("totalLicenses").textContent=total;
+      document.getElementById("activeLicenses").textContent=active;
+      document.getElementById("suspendedLicenses").textContent=suspended;
+      document.getElementById("expiredLicenses").textContent=expired;
     });
 
     /* ===== Search ===== */
-    document.getElementById("licenseSearch").addEventListener("input", e=>{
-      const term = e.target.value.toLowerCase();
-      document.querySelectorAll("#licensesTable tbody tr").forEach(row=>{
-        row.style.display = row.textContent.toLowerCase().includes(term) ? "" : "none";
-      });
+    document.getElementById("licenseSearch").addEventListener("input",e=>{
+      const term=e.target.value.toLowerCase();
+      document.querySelectorAll("#licensesTable tbody tr").forEach(r=>r.style.display=r.textContent.toLowerCase().includes(term)?"":"none");
     });
 
     /* ===== Export ===== */
-    document.getElementById("exportLicenses").addEventListener("click", ()=>{
-      const rows = document.querySelectorAll("#licensesTable tr");
-      const csv = [];
+    document.getElementById("exportLicenses").addEventListener("click",()=>{
+      const rows=document.querySelectorAll("#licensesTable tr");
+      const csv=[];
       rows.forEach(r=>{
-        const cols = r.querySelectorAll("th,td");
-        const row = Array.from(cols).map(c=> `"${c.innerText.replace(/"/g,'""')}"`).join(",");
+        const cols=r.querySelectorAll("th,td");
+        const row=Array.from(cols).map(c=>`"${c.innerText.replace(/"/g,'""')}"`).join(",");
         csv.push(row);
       });
-      const blob = new Blob([csv.join("\n")],{type:"text/csv"});
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "licenses_export.csv";
+      const blob=new Blob([csv.join("\n")],{type:"text/csv"});
+      const a=document.createElement("a");
+      a.href=URL.createObjectURL(blob);
+      a.download="licenses_export.csv";
       a.click();
     });
   </script>
