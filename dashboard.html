@@ -57,18 +57,12 @@
     .card.total{background:#2980b9}.card.active{background:#27ae60}.card.suspended{background:#f1c40f;color:#333}.card.expired{background:#e74c3c}
 
     /* Search + Export */
-    .search-export{
-      display:flex;gap:10px;align-items:center;margin-top:10px;
-    }
+    .search-export{display:flex;gap:10px;align-items:center;margin-top:10px;}
     .search-export input{padding:6px;border:1px solid #ccc;border-radius:6px;flex:1;}
     .search-export button{padding:6px 10px;border-radius:6px;border:0;color:#fff;background:#2980b9;cursor:pointer}
 
     /* ===== Scrollable Table ===== */
-    .table-container{
-      max-height:60vh;
-      overflow-y:auto;
-      margin-top:190px;
-    }
+    .table-container{max-height:60vh;overflow-y:auto;margin-top:190px;}
     table{width:100%;border-collapse:collapse;table-layout:fixed}
     th,td{border:1px solid #eee;padding:8px;background:#fff;text-align:left;word-wrap:break-word}
     th{background:#f2f2f2;position:sticky;top:0;z-index:5}
@@ -155,7 +149,7 @@
     </section>
   </main>
 
-  <!-- Modal and Firebase JS (unchanged, from your last version) -->
+  <!-- ===== Modal ===== -->
   <div class="modal-overlay" id="editModalOverlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
       <header>
@@ -164,23 +158,18 @@
       </header>
       <div class="modal-body">
         <input type="hidden" id="modalLicenseId" />
-        <label for="modalLicenseNumber" data-i18n="licenseNumber">License #</label>
+        <label data-i18n="licenseNumber">License #</label>
         <input type="text" id="modalLicenseNumber" />
-        <label for="modalFullName" data-i18n="fullName">Full Name</label>
+        <label data-i18n="fullName">Full Name</label>
         <input type="text" id="modalFullName" />
-        <label for="modalClass" data-i18n="class">Class</label>
-        <select id="modalClass">
-          <option>Class A</option><option>Class B</option><option>Class C</option>
-          <option>Class D</option><option>Class E</option><option>Class F</option>
-        </select>
-        <label for="modalIssue" data-i18n="issueDate">Issue</label>
+        <label data-i18n="class">Class</label>
+        <select id="modalClass"><option>Class A</option><option>Class B</option><option>Class C</option><option>Class D</option><option>Class E</option><option>Class F</option></select>
+        <label data-i18n="issueDate">Issue</label>
         <input type="date" id="modalIssue" />
-        <label for="modalExpiry" data-i18n="expiryDate">Expiry</label>
+        <label data-i18n="expiryDate">Expiry</label>
         <input type="date" id="modalExpiry" />
-        <label for="modalStatus" data-i18n="status">Status</label>
-        <select id="modalStatus">
-          <option>Active</option><option>Suspended</option><option>Expired</option>
-        </select>
+        <label data-i18n="status">Status</label>
+        <select id="modalStatus"><option>Active</option><option>Suspended</option><option>Expired</option></select>
       </div>
       <div class="modal-actions">
         <button class="btn-secondary" id="modalCancelBtn" data-i18n="cancel">Cancel</button>
@@ -189,7 +178,182 @@
     </div>
   </div>
 
-  <!-- (All JavaScript logic for Firebase, Edit/Delete, Search, Export, i18n, Auth remain unchanged) -->
-  <!-- Use your last confirmed working JS from previous version -->
+  <!-- ===== Firebase + Logic ===== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
+      authDomain: "gdlvs-2348e.firebaseapp.com",
+      projectId: "gdlvs-2348e",
+      storageBucket: "gdlvs-2348e.appspot.com",
+      messagingSenderId: "358715790318",
+      appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    /* ===== i18n ===== */
+    const i18n = window.i18next;
+    const $ = window.$;
+    const jqueryI18next = window.jqueryI18next;
+    const resources = {
+      en:{translation:{dashboard:"Dashboard",verificationPortal:"Verification",addLicense:"Add License",userManagement:"User Management",verificationRequests:"Verification Requests",analytics:"Analytics",logout:"Logout",totalLicenses:"Total Licenses",activeLicenses:"Active",suspended:"Suspended",expired:"Expired",licenseNumber:"License #",fullName:"Full Name",class:"Class",issueDate:"Issue",expiryDate:"Expiry",status:"Status",action:"Action",loading:"Loading...",export:"Export",searchLicenses:"Search licenses...",editLicense:"Edit License",cancel:"Cancel",saveChanges:"Save / Update",delete:"Delete",confirmDelete:"Delete this license?"}},
+      fr:{translation:{dashboard:"Tableau de bord",verificationPortal:"Vérification",addLicense:"Ajouter un permis",userManagement:"Gestion des utilisateurs",verificationRequests:"Demandes de vérification",analytics:"Analytique",logout:"Déconnexion",totalLicenses:"Nombre total de permis",activeLicenses:"Actifs",suspended:"Suspendus",expired:"Expirés",licenseNumber:"N° de permis",fullName:"Nom complet",class:"Catégorie",issueDate:"Émission",expiryDate:"Expiration",status:"Statut",action:"Action",loading:"Chargement...",export:"Exporter",searchLicenses:"Rechercher des permis…",editLicense:"Modifier le permis",cancel:"Annuler",saveChanges:"Enregistrer / Mettre à jour",delete:"Supprimer",confirmDelete:"Supprimer ce permis ?"}},
+      ja:{translation:{dashboard:"ダッシュボード",verificationPortal:"照合",addLicense:"免許を追加",userManagement:"ユーザー管理",verificationRequests:"照合リクエスト",analytics:"分析",logout:"ログアウト",totalLicenses:"総免許数",activeLicenses:"有効",suspended:"停止中",expired:"期限切れ",licenseNumber:"免許番号",fullName:"氏名",class:"区分",issueDate:"発行",expiryDate:"有効期限",status:"ステータス",action:"操作",loading:"読み込み中…",export:"エクスポート",searchLicenses:"免許を検索…",editLicense:"免許を編集",cancel:"キャンセル",saveChanges:"保存 / 更新",delete:"削除",confirmDelete:"この免許を削除しますか？"}}
+    };
+    i18n.use(i18nextBrowserLanguageDetector).init({resources,fallbackLng:"en"},()=>{jqueryI18next.init(i18n,$,{useOptionsAttr:true});$("body").localize();});
+    document.getElementById("languageSwitcher").addEventListener("change",function(){i18n.changeLanguage(this.value,()=>$("body").localize());});
+
+    /* ===== Auth ===== */
+    onAuthStateChanged(auth,async user=>{
+      if(!user){location.href="index.html";return;}
+      const roleSnap=await getDoc(doc(db,"roles",user.email));
+      const role=roleSnap.exists()?roleSnap.data().role:"verifier";
+      const adminOnly=document.getElementById("navVerificationRequests");
+      if(adminOnly)adminOnly.style.display=(role==="admin")?"block":"none";
+    });
+    document.getElementById("logoutBtn").addEventListener("click",()=>signOut(auth).then(()=>location.href="index.html"));
+
+    /* ===== Table + Counters ===== */
+    const tbody=document.querySelector("#licensesTable tbody");
+    const qLic=query(collection(db,"licenses"),orderBy("licenseNumber"));
+    onSnapshot(qLic,snapshot=>{
+      let total=0,active=0,suspended=0,expired=0;
+      tbody.innerHTML="";
+      if(snapshot.empty){tbody.innerHTML=`<tr><td colspan='7'>No licenses
+      if(snapshot.empty){
+        tbody.innerHTML = `<tr><td colspan='7' data-i18n="loading">No licenses found</td></tr>`;
+        $("body").localize();
+        return;
+      }
+
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        total++;
+        if (data.status === "Active") active++;
+        if (data.status === "Suspended") suspended++;
+        if (data.status === "Expired") expired++;
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${data.licenseNumber || ""}</td>
+          <td>${data.fullName || ""}</td>
+          <td>${data.class || ""}</td>
+          <td>${data.issue || ""}</td>
+          <td>${data.expiry || ""}</td>
+          <td>${data.status || ""}</td>
+          <td>
+            <button class="btn-inline edit-btn" data-id="${docSnap.id}"><i class="fas fa-pen"></i></button>
+            <button class="btn-inline btn-danger delete-btn" data-id="${docSnap.id}"><i class="fas fa-trash"></i></button>
+          </td>`;
+        tbody.appendChild(row);
+      });
+
+      document.getElementById("totalLicenses").textContent = total;
+      document.getElementById("activeLicenses").textContent = active;
+      document.getElementById("suspendedLicenses").textContent = suspended;
+      document.getElementById("expiredLicenses").textContent = expired;
+      $("body").localize();
+    });
+
+    /* ===== Edit License Modal ===== */
+    const modalOverlay = document.getElementById("editModalOverlay");
+    const modalClose = document.getElementById("modalCloseBtn");
+    const modalCancel = document.getElementById("modalCancelBtn");
+    const modalSave = document.getElementById("modalSaveBtn");
+
+    function openModal(id, data) {
+      modalOverlay.classList.add("show");
+      document.getElementById("modalLicenseId").value = id;
+      document.getElementById("modalLicenseNumber").value = data.licenseNumber || "";
+      document.getElementById("modalFullName").value = data.fullName || "";
+      document.getElementById("modalClass").value = data.class || "Class A";
+      document.getElementById("modalIssue").value = data.issue || "";
+      document.getElementById("modalExpiry").value = data.expiry || "";
+      document.getElementById("modalStatus").value = data.status || "Active";
+    }
+
+    function closeModal() {
+      modalOverlay.classList.remove("show");
+    }
+
+    modalClose.addEventListener("click", closeModal);
+    modalCancel.addEventListener("click", closeModal);
+
+    // Delegate click events on table for edit/delete
+    tbody.addEventListener("click", async (e) => {
+      const editBtn = e.target.closest(".edit-btn");
+      const delBtn = e.target.closest(".delete-btn");
+      if (editBtn) {
+        const id = editBtn.dataset.id;
+        const docRef = doc(db, "licenses", id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          openModal(id, docSnap.data());
+        }
+      }
+      if (delBtn) {
+        const id = delBtn.dataset.id;
+        if (confirm(i18n.t("confirmDelete"))) {
+          await deleteDoc(doc(db, "licenses", id));
+        }
+      }
+    });
+
+    // Save/Update license
+    modalSave.addEventListener("click", async () => {
+      const id = document.getElementById("modalLicenseId").value;
+      const updatedData = {
+        licenseNumber: document.getElementById("modalLicenseNumber").value.trim(),
+        fullName: document.getElementById("modalFullName").value.trim(),
+        class: document.getElementById("modalClass").value,
+        issue: document.getElementById("modalIssue").value,
+        expiry: document.getElementById("modalExpiry").value,
+        status: document.getElementById("modalStatus").value
+      };
+      if (!id) return;
+      await setDoc(doc(db, "licenses", id), updatedData, { merge: true });
+      closeModal();
+    });
+
+    /* ===== Search Function ===== */
+    document.getElementById("licenseSearch").addEventListener("keyup", function () {
+      const filter = this.value.toLowerCase();
+      const rows = tbody.getElementsByTagName("tr");
+      for (let i = 0; i < rows.length; i++) {
+        const text = rows[i].textContent.toLowerCase();
+        rows[i].style.display = text.includes(filter) ? "" : "none";
+      }
+    });
+
+    /* ===== Export CSV ===== */
+    document.getElementById("exportLicenses").addEventListener("click", () => {
+      const rows = [["License #", "Full Name", "Class", "Issue", "Expiry", "Status"]];
+      const trs = tbody.querySelectorAll("tr");
+      trs.forEach(tr => {
+        const cols = tr.querySelectorAll("td");
+        if (cols.length === 7) {
+          rows.push([
+            cols[0].innerText,
+            cols[1].innerText,
+            cols[2].innerText,
+            cols[3].innerText,
+            cols[4].innerText,
+            cols[5].innerText
+          ]);
+        }
+      });
+      let csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+      const link = document.createElement("a");
+      link.setAttribute("href", encodeURI(csvContent));
+      link.setAttribute("download", "licenses.csv");
+      link.click();
+    });
+  </script>
 </body>
 </html>
