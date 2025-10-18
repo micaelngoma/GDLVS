@@ -168,7 +168,9 @@
   <!-- Firebase + Firestore -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, orderBy, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { 
+      getFirestore, collection, onSnapshot, updateDoc, doc 
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
     // Firebase setup
@@ -189,22 +191,33 @@
 
     const tbody = document.querySelector("#accessTable tbody");
 
-    // Function to load data (using getDocs)
-    async function loadRequests() {
-      tbody.innerHTML = `<tr><td colspan="7">Loading...</td></tr>`;
+    // === Real-time listener (auto-refresh) ===
+    onSnapshot(collection(db, "access_requests"), snapshot => {
       try {
-        const qAccess = query(collection(db, "access_requests"), orderBy("createdAt", "desc"));
-        const snapshot = await getDocs(qAccess);
-
         tbody.innerHTML = "";
         if (snapshot.empty) {
           tbody.innerHTML = `<tr><td colspan="7">No access requests found.</td></tr>`;
           return;
         }
 
+        // Convert docs into array for optional sorting
+        const data = [];
         snapshot.forEach(docSnap => {
           const d = docSnap.data();
-          const id = docSnap.id;
+          d._id = docSnap.id;
+          data.push(d);
+        });
+
+        // Sort by createdAt if it exists
+        data.sort((a, b) => {
+          const aTime = a.createdAt?.seconds || 0;
+          const bTime = b.createdAt?.seconds || 0;
+          return bTime - aTime;
+        });
+
+        // Populate table
+        data.forEach(d => {
+          const id = d._id;
           const status = (d.status || "pending").toLowerCase();
           const date = d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleString() : "—";
           const tr = document.createElement("tr");
@@ -224,19 +237,19 @@
                   <i class="fas fa-times"></i> Reject
                 </button>
               ` : `<button class="btn-inline" disabled>Done</button>`}
-            </td>
-          `;
+            </td>`;
           tbody.appendChild(tr);
         });
       } catch (err) {
-        console.error("Error loading requests:", err);
+        console.error("Error rendering snapshot:", err);
         tbody.innerHTML = `<tr><td colspan="7" style="color:red;">Error loading data</td></tr>`;
       }
-    }
+    }, err => {
+      console.error("Realtime listener error:", err);
+      tbody.innerHTML = `<tr><td colspan="7" style="color:red;">Error loading data</td></tr>`;
+    });
 
-    loadRequests();
-
-    // Approve / Reject logic
+    // === Approve / Reject logic ===
     tbody.addEventListener("click", async e => {
       const btn = e.target.closest("button[data-action]");
       if (!btn) return;
@@ -250,13 +263,12 @@
       try {
         await updateDoc(doc(db, "access_requests", id), { status: newStatus });
         alert(`✅ Request ${newStatus}`);
-        loadRequests(); // refresh after update
       } catch (err) {
         alert("❌ Error updating request: " + err.message);
       }
     });
 
-    // Search filter
+    // === Search filter ===
     document.getElementById("searchInput").addEventListener("input", e => {
       const term = e.target.value.toLowerCase();
       document.querySelectorAll("#accessTable tbody tr").forEach(row => {
