@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
-  <!-- i18n + jQuery (UMD) -->
+  <!-- i18n + jQuery -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
@@ -24,20 +24,21 @@
     nav{background:#1e2d3c;color:#fff;padding:10px 14px;display:flex;gap:16px;position:fixed;top:56px;left:0;right:0;z-index:999}
     nav a{color:#fff;text-decoration:none;font-weight:bold;transition:all 0.25s ease-in-out}
     nav a.active{border-bottom:2px solid #f1c40f;padding-bottom:3px}
-    nav a:hover{border-bottom:2px solid #f1c40f;padding-bottom:3px;box-shadow:0 2px 6px rgba(241,196,15,0.7);transition:all 0.25s ease-in-out}
+    nav a:hover{border-bottom:2px solid #f1c40f;padding-bottom:3px;box-shadow:0 2px 6px rgba(241,196,15,0.7)}
 
     .container{max-width:95vw;margin:120px auto 0;background:rgba(255,255,255,0.9);padding:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
     .dashboard-cards{display:flex;gap:15px;flex-wrap:wrap;margin-bottom:20px}
-    .card{flex:1;min-width:220px;padding:16px;border-radius:10px;color:#fff;text-align:center}
+    .card{flex:1;min-width:220px;padding:14px;border-radius:10px;color:#fff;text-align:center}
     .card.total{background:#2980b9}.card.active{background:#27ae60}.card.suspended{background:#f1c40f;color:#333}.card.expired{background:#e74c3c}
 
-    /* === Original table layout restored === */
-    .verification-table-wrapper{max-height:60vh;overflow-y:auto;overflow-x:auto;border-radius:8px;margin-top:10px}
-    table{width:100%;border-collapse:separate;border-spacing:0 6px;margin-top:10px}
-    th,td{border:1px solid #eee;padding:10px 14px;text-align:left;background:#fff;vertical-align:middle;word-break:break-word}
+    /* Compact table layout */
+    .verification-table-wrapper{max-height:60vh;overflow:auto;border-radius:8px;margin-top:10px}
+    table{width:100%;border-collapse:separate;border-spacing:0 4px;margin-top:6px;font-size:0.92rem}
+    th,td{border:1px solid #eee;padding:6px 10px;text-align:left;background:#fff;vertical-align:middle}
     th{background:#f2f2f2;font-weight:bold}
+    td button{font-size:0.85rem}
 
-    .btn-inline{padding:6px 10px;border-radius:8px;border:0;cursor:pointer;color:#fff;background:#2980b9}
+    .btn-inline{padding:5px 8px;border-radius:6px;border:0;cursor:pointer;color:#fff;background:#2980b9}
     .btn-inline:hover{opacity:0.95}
     .btn-danger{background:#e74c3c}
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:center;justify-content:center;z-index:2000}
@@ -83,9 +84,9 @@
       <div class="card expired"><h3 data-i18n="expired">Expired</h3><h2 id="expiredLicenses">0</h2></div>
     </section>
 
-    <section class="panel">
-      <div class="table-controls" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <input id="licenseSearch" type="text" data-i18n="[placeholder]searchLicenses" placeholder="Search licenses..." style="max-width:320px;border:1px solid #dcdcdc;border-radius:8px;padding:8px;background:#fff;width:100%">
+    <section>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <input id="licenseSearch" type="text" data-i18n="[placeholder]searchLicenses" placeholder="Search licenses..." style="max-width:300px;border:1px solid #ccc;border-radius:6px;padding:6px 8px;background:#fff;">
         <button class="btn-inline" id="exportLicenses"><i class="fas fa-file-export"></i> <span data-i18n="export">Export</span></button>
       </div>
       <div class="verification-table-wrapper">
@@ -97,6 +98,7 @@
     </section>
   </main>
 
+  <!-- ===== Modal for Editing ===== -->
   <div class="modal-overlay" id="editModalOverlay" aria-hidden="true">
     <div class="modal">
       <header>
@@ -125,38 +127,100 @@
 
   <!-- ===== JavaScript ===== -->
   <script type="module">
-    const i18next = window.i18next;
-    const jqueryI18next = window.jqueryI18next;
-    const $ = window.$;
-
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
     import { getFirestore, collection, onSnapshot, doc, setDoc, getDoc, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    const firebaseConfig = {
+    const app = initializeApp({
       apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
       authDomain: "gdlvs-2348e.firebaseapp.com",
       projectId: "gdlvs-2348e",
       storageBucket: "gdlvs-2348e.appspot.com",
       messagingSenderId: "358715790318",
       appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
-    };
-    const app = initializeApp(firebaseConfig);
+    });
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    /* ===== Translation ===== */
     const i18nResources = {
-      en:{translation:{editLicense:"Edit License",delete:"Delete",confirmDelete:"Delete this license?",dashboard:"Dashboard",verificationPortal:"Verification",addLicense:"Add License",userManagement:"User Management",verificationRequests:"Verification Requests",analytics:"Analytics",logout:"Logout",totalLicenses:"Total Licenses",activeLicenses:"Active",suspended:"Suspended",expired:"Expired",licensesList:"Licenses",licenseNumber:"License #",fullName:"Full Name",class:"Class",issueDate:"Issue",expiryDate:"Expiry",status:"Status",action:"Action",loading:"Loading...",export:"Export",searchLicenses:"Search licenses...",cancel:"Cancel",saveChanges:"Save / Update"}},
-      fr:{translation:{editLicense:"Modifier le permis",delete:"Supprimer",confirmDelete:"Supprimer ce permis ?",dashboard:"Tableau de bord",verificationPortal:"Vérification",addLicense:"Ajouter un permis",userManagement:"Gestion des utilisateurs",verificationRequests:"Demandes de vérification",analytics:"Analytique",logout:"Déconnexion",totalLicenses:"Nombre total de permis",activeLicenses:"Actifs",suspended:"Suspendus",expired:"Expirés",licensesList:"Permis",licenseNumber:"N° de permis",fullName:"Nom complet",class:"Catégorie",issueDate:"Émission",expiryDate:"Expiration",status:"Statut",action:"Action",loading:"Chargement...",export:"Exporter",searchLicenses:"Rechercher des permis…",cancel:"Annuler",saveChanges:"Enregistrer / Mettre à jour"}},
-      ja:{translation:{editLicense:"免許を編集",delete:"削除",confirmDelete:"この免許を削除しますか？",dashboard:"ダッシュボード",verificationPortal:"照合",addLicense:"免許を追加",userManagement:"ユーザー管理",verificationRequests:"照合リクエスト",analytics:"分析",logout:"ログアウト",totalLicenses:"総免許数",activeLicenses:"有効",suspended:"停止中",expired:"期限切れ",licensesList:"免許一覧",licenseNumber:"免許番号",fullName:"氏名",class:"区分",issueDate:"発行",expiryDate:"有効期限",status:"ステータス",action:"操作",loading:"読み込み中…",export:"エクスポート",searchLicenses:"免許を検索…",cancel:"キャンセル",saveChanges:"保存 / 更新"}}
+      en:{translation:{editLicense:"Edit License",delete:"Delete",confirmDelete:"Delete this license?",dashboard:"Dashboard",verificationPortal:"Verification",addLicense:"Add License",userManagement:"User Management",verificationRequests:"Verification Requests",analytics:"Analytics",logout:"Logout",totalLicenses:"Total Licenses",activeLicenses:"Active",suspended:"Suspended",expired:"Expired",licenseNumber:"License #",fullName:"Full Name",class:"Class",issueDate:"Issue",expiryDate:"Expiry",status:"Status",action:"Action",loading:"Loading...",export:"Export",searchLicenses:"Search licenses...",cancel:"Cancel",saveChanges:"Save / Update"}},
+      fr:{translation:{editLicense:"Modifier le permis",delete:"Supprimer",confirmDelete:"Supprimer ce permis ?",dashboard:"Tableau de bord",verificationPortal:"Vérification",addLicense:"Ajouter un permis",userManagement:"Gestion des utilisateurs",verificationRequests:"Demandes de vérification",analytics:"Analytique",logout:"Déconnexion",totalLicenses:"Nombre total de permis",activeLicenses:"Actifs",suspended:"Suspendus",expired:"Expirés",licenseNumber:"N° de permis",fullName:"Nom complet",class:"Catégorie",issueDate:"Émission",expiryDate:"Expiration",status:"Statut",action:"Action",loading:"Chargement...",export:"Exporter",searchLicenses:"Rechercher des permis…",cancel:"Annuler",saveChanges:"Enregistrer / Mettre à jour"}},
+      ja:{translation:{editLicense:"免許を編集",delete:"削除",confirmDelete:"この免許を削除しますか？",dashboard:"ダッシュボード",verificationPortal:"照合",addLicense:"免許を追加",userManagement:"ユーザー管理",verificationRequests:"照合リクエスト",analytics:"分析",logout:"ログアウト",totalLicenses:"総免許数",activeLicenses:"有効",suspended:"停止中",expired:"期限切れ",licenseNumber:"免許番号",fullName:"氏名",class:"区分",issueDate:"発行",expiryDate:"有効期限",status:"ステータス",action:"操作",loading:"読み込み中…",export:"エクスポート",searchLicenses:"免許を検索…",cancel:"キャンセル",saveChanges:"保存 / 更新"}}
     };
 
-    i18next.use(i18nextBrowserLanguageDetector).init({resources:i18nResources,fallbackLng:"en"},()=>{jqueryI18next.init(i18next,$,{useOptionsAttr:true});$("body").localize();});
-    document.getElementById("languageSwitcher").addEventListener("change",function(){i18next.changeLanguage(this.value,()=>$("body").localize());});
+    i18next.use(i18nextBrowserLanguageDetector).init({resources:i18nResources,fallbackLng:"en"},()=>{
+      window.$("body").localize();
+    });
 
-    onAuthStateChanged(auth,async user=>{if(!user){location.href="index.html";return;}const roleSnap=await getDoc(doc(db,"roles",user.email));const role=roleSnap.exists()?roleSnap.data().role:"verifier";const adminOnly=document.getElementById("navVerificationRequests");if(adminOnly)adminOnly.style.display=(role==="admin")?"block":"none";});
+    // 🔄 Instant Language Switch
+    document.getElementById("languageSwitcher").addEventListener("change",function(){
+      i18next.changeLanguage(this.value,()=>{
+        $("body").localize();
+      });
+    });
+
+    /* ===== Auth ===== */
+    onAuthStateChanged(auth,async user=>{
+      if(!user){location.href="index.html";return;}
+      const roleSnap=await getDoc(doc(db,"roles",user.email));
+      const role=roleSnap.exists()?roleSnap.data().role:"verifier";
+      document.getElementById("navVerificationRequests").style.display=(role==="admin")?"block":"none";
+    });
+
     document.getElementById("logoutBtn").addEventListener("click",()=>signOut(auth).then(()=>location.href="index.html"));
 
+    /* ===== License Table ===== */
+    const tbody=document.querySelector("#licensesTable tbody");
+    const qLic=query(collection(db,"licenses"),orderBy("licenseNumber"));
+
+    onSnapshot(qLic,snapshot=>{
+      tbody.innerHTML="";
+      let total=0,active=0,suspended=0,expired=0;
+      if(snapshot.empty){tbody.innerHTML=`<tr><td colspan="7">${i18next.t("loading")}</td></tr>`;return;}
+      snapshot.forEach(docSnap=>{
+        const d=docSnap.data();total++;
+        const s=(d.status||"").toLowerCase();
+        if(s.startsWith("act"))active++;else if(s.startsWith("sus"))suspended++;else if(s.startsWith("exp"))expired++;
+        const id=d.licenseNumber||docSnap.id;
+        const tr=document.createElement("tr");
+        tr.innerHTML=`
+          <td>${id}</td><td>${d.fullName||""}</td><td>${d.class||""}</td><td>${d.issueDate||""}</td>
+          <td>${d.expiryDate||""}</td><td>${d.status||""}</td>
+          <td><button class="btn-inline" data-action="update" data-id="${id}">
+            <i class="fas fa-pen"></i> ${i18next.t("editLicense")}</button>
+          <button class="btn-inline btn-danger" data-action="delete" data-id="${id}">
+            <i class="fas fa-trash"></i> ${i18next.t("delete")}</button></td>`;
+        tbody.appendChild(tr);
+      });
+      $("#totalLicenses").text(total);
+      $("#activeLicenses").text(active);
+      $("#suspendedLicenses").text(suspended);
+      $("#expiredLicenses").text(expired);
+    });
+
+    /* ===== Table Actions ===== */
+    tbody.addEventListener("click",async e=>{
+      const editBtn=e.target.closest("button[data-action='update']");
+      const delBtn=e.target.closest("button[data-action='delete']");
+      if(editBtn){
+        const id=editBtn.getAttribute("data-id");
+        const snap=await getDoc(doc(db,"licenses",id));
+        const d=snap.exists()?snap.data():{licenseNumber:id};
+        openModal({id,...d
+        });
+        openModal({id,...d});
+      }
+      if(delBtn){
+        const id=delBtn.getAttribute("data-id");
+        if(confirm(i18next.t("confirmDelete"))){
+          try{await deleteDoc(doc(db,"licenses",id));}
+          catch(err){alert("❌ "+err.message);}
+        }
+      }
+    });
+
+    /* ===== Modal Handling ===== */
     const overlay=document.getElementById("editModalOverlay");
     const closeBtn=document.getElementById("modalCloseBtn");
     const cancelBtn=document.getElementById("modalCancelBtn");
@@ -171,75 +235,43 @@
       expiry:document.getElementById("modalExpiry")
     };
 
-    function openModal(d){fields.id.value=d.licenseNumber||d.id||"";fields.licenseNumber.value=d.licenseNumber||d.id||"";fields.fullName.value=d.fullName||"";fields.klass.value=d.class||"A";fields.status.value=d.status||"Active";fields.issue.value=(d.issueDate||"").slice(0,10);fields.expiry.value=(d.expiryDate||"").slice(0,10);overlay.classList.add("show");overlay.setAttribute("aria-hidden","false");}
-    function closeModal(){overlay.classList.remove("show");overlay.setAttribute("aria-hidden","true");}
-    closeBtn.addEventListener("click",closeModal);cancelBtn.addEventListener("click",closeModal);overlay.addEventListener("click",e=>{if(e.target===overlay)closeModal();});
+    function openModal(d){
+      fields.id.value=d.licenseNumber||d.id||"";
+      fields.licenseNumber.value=d.licenseNumber||d.id||"";
+      fields.fullName.value=d.fullName||"";
+      fields.klass.value=d.class||"A";
+      fields.status.value=d.status||"Active";
+      fields.issue.value=(d.issueDate||"").slice(0,10);
+      fields.expiry.value=(d.expiryDate||"").slice(0,10);
+      overlay.classList.add("show");
+      overlay.setAttribute("aria-hidden","false");
+    }
+    function closeModal(){
+      overlay.classList.remove("show");
+      overlay.setAttribute("aria-hidden","true");
+    }
+    closeBtn.addEventListener("click",closeModal);
+    cancelBtn.addEventListener("click",closeModal);
+    overlay.addEventListener("click",e=>{if(e.target===overlay)closeModal();});
 
-    saveBtn.addEventListener("click",async()=>{const newId=fields.licenseNumber.value.trim();const oldId=fields.id.value.trim();if(!newId){alert("Missing license number");return;}const payload={licenseNumber:newId,fullName:fields.fullName.value.trim(),class:fields.klass.value,status:fields.status.value,issueDate:fields.issue.value,expiryDate:fields.expiry.value};try{if(newId!==oldId&&oldId){await deleteDoc(doc(db,"licenses",oldId));}await setDoc(doc(db,"licenses",newId),payload,{merge:true});closeModal();}
-      catch(err){alert("❌ "+err.message);}
-    });
-
-    /* ===== Real-time Table ===== */
-    const tbody=document.querySelector("#licensesTable tbody");
-    const qLic=query(collection(db,"licenses"),orderBy("licenseNumber"));
-    onSnapshot(qLic,snapshot=>{
-      let total=0,active=0,suspended=0,expired=0;
-      tbody.innerHTML="";
-      if(snapshot.empty){
-        tbody.innerHTML=`<tr><td colspan="7">${i18next.t("loading")}</td></tr>`;
-      }else{
-        snapshot.forEach(docSnap=>{
-          const d=docSnap.data();
-          total++;
-          const s=(d.status||"").toLowerCase();
-          if(s.startsWith("act"))active++;
-          else if(s.startsWith("sus"))suspended++;
-          else if(s.startsWith("exp"))expired++;
-          const id=d.licenseNumber||docSnap.id;
-          const tr=document.createElement("tr");
-          tr.innerHTML=`
-            <td>${id}</td>
-            <td>${d.fullName||""}</td>
-            <td>${d.class||""}</td>
-            <td>${d.issueDate||""}</td>
-            <td>${d.expiryDate||""}</td>
-            <td>${d.status||""}</td>
-            <td style="white-space:nowrap">
-              <button class="btn-inline" data-action="update" data-id="${id}">
-                <i class="fas fa-pen"></i> ${i18next.t("editLicense")}
-              </button>
-              <button class="btn-inline btn-danger" data-action="delete" data-id="${id}">
-                <i class="fas fa-trash"></i> ${i18next.t("delete")}
-              </button>
-            </td>`;
-          tbody.appendChild(tr);
-        });
-      }
-      document.getElementById("totalLicenses").textContent=total;
-      document.getElementById("activeLicenses").textContent=active;
-      document.getElementById("suspendedLicenses").textContent=suspended;
-      document.getElementById("expiredLicenses").textContent=expired;
-    });
-
-    /* ===== Table Actions ===== */
-    tbody.addEventListener("click",async e=>{
-      const editBtn=e.target.closest("button[data-action='update']");
-      const delBtn=e.target.closest("button[data-action='delete']");
-      if(editBtn){
-        const id=editBtn.getAttribute("data-id");
-        try{
-          const snap=await getDoc(doc(db,"licenses",id));
-          const data=snap.exists()?snap.data():{licenseNumber:id};
-          openModal({id,...data});
-        }catch(err){alert("❌ "+err.message);}
-      }
-      if(delBtn){
-        const id=delBtn.getAttribute("data-id");
-        if(confirm(i18next.t("confirmDelete"))){
-          try{await deleteDoc(doc(db,"licenses",id));}
-          catch(err){alert("❌ "+err.message);}
-        }
-      }
+    /* ===== Save / Update ===== */
+    saveBtn.addEventListener("click",async()=>{
+      const newId=fields.licenseNumber.value.trim();
+      const oldId=fields.id.value.trim();
+      if(!newId){alert("Missing license number");return;}
+      const payload={
+        licenseNumber:newId,
+        fullName:fields.fullName.value.trim(),
+        class:fields.klass.value,
+        status:fields.status.value,
+        issueDate:fields.issue.value,
+        expiryDate:fields.expiry.value
+      };
+      try{
+        if(newId!==oldId&&oldId){await deleteDoc(doc(db,"licenses",oldId));}
+        await setDoc(doc(db,"licenses",newId),payload,{merge:true});
+        closeModal();
+      }catch(err){alert("❌ "+err.message);}
     });
 
     /* ===== Search ===== */
