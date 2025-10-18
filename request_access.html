@@ -73,6 +73,15 @@
       box-shadow: 0 2px 8px rgba(0,0,0,.2);
     }
 
+    .search-bar {
+      width: 50%;
+      display: block;
+      padding: 10px;
+      margin: 0 auto 15px auto;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -111,61 +120,64 @@
     }
     .btn-danger { background: #e74c3c; }
     .btn-success { background: #27ae60; }
+    .btn-delete { background: #555; }
   </style>
 </head>
 <body>
   <div class="background-image"></div>
 
   <header>
-    <h1><i class="fas fa-user-check"></i> Access Requests</h1>
+    <h1><i class="fas fa-user-check"></i> <span data-i18n="pageTitle">Access Requests</span></h1>
     <div class="controls">
       <select id="languageSwitcher">
         <option value="en">🇬🇧 English</option>
         <option value="fr">🇫🇷 Français</option>
         <option value="ja">🇯🇵 日本語</option>
       </select>
-      <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></button>
     </div>
   </header>
 
   <nav>
-    <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
-    <a href="verify.html"><i class="fas fa-search"></i> Verification</a>
-    <a href="add_licenses.html"><i class="fas fa-id-card"></i> Add License</a>
-    <a href="users.html"><i class="fas fa-users-cog"></i> Users</a>
-    <a href="verification_requests.html"><i class="fas fa-inbox"></i> Verification Requests</a>
-    <a href="analytics.html"><i class="fas fa-chart-bar"></i> Analytics</a>
-    <a href="request_access_list.html" class="active"><i class="fas fa-user-check"></i> Access Requests</a>
+    <a href="dashboard.html" data-i18n="dashboard"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="verify.html" data-i18n="verification"><i class="fas fa-search"></i> Verification</a>
+    <a href="add_licenses.html" data-i18n="addLicense"><i class="fas fa-id-card"></i> Add License</a>
+    <a href="users.html" data-i18n="users"><i class="fas fa-users-cog"></i> Users</a>
+    <a href="verification_requests.html" data-i18n="verRequests"><i class="fas fa-inbox"></i> Verification Requests</a>
+    <a href="request_access.html" class="active" data-i18n="accessRequests"><i class="fas fa-user-check"></i> Access Requests</a>
+    <a href="analytics.html" data-i18n="analytics"><i class="fas fa-chart-bar"></i> Analytics</a>
   </nav>
 
   <main class="container">
-    <h2><i class="fas fa-table"></i> Access Request Records</h2>
-    <input type="text" id="searchInput" placeholder="Search by name, email, or organization..." style="width:100%;padding:10px;margin-bottom:10px;border-radius:8px;border:1px solid #ccc;">
+    <h2><i class="fas fa-table"></i> <span data-i18n="recordsTitle">Access Request Records</span></h2>
+    <input type="text" id="searchInput" class="search-bar" placeholder="Search by name, email, or organization..." data-i18n="[placeholder]searchPlaceholder">
 
     <table id="accessTable">
       <thead>
         <tr>
-          <th>Full Name</th>
-          <th>Email</th>
-          <th>Organization</th>
-          <th>Phone</th>
-          <th>Purpose</th>
-          <th>Status</th>
-          <th>Action</th>
+          <th data-i18n="name">Full Name</th>
+          <th data-i18n="email">Email</th>
+          <th data-i18n="org">Organization</th>
+          <th data-i18n="phone">Phone</th>
+          <th data-i18n="purpose">Purpose</th>
+          <th data-i18n="status">Status</th>
+          <th data-i18n="action">Action</th>
         </tr>
       </thead>
       <tbody>
-        <tr><td colspan="7">Loading...</td></tr>
+        <tr><td colspan="7" data-i18n="loading">Loading...</td></tr>
       </tbody>
     </table>
   </main>
 
+  <!-- Firebase + i18next -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import i18next from "https://cdn.jsdelivr.net/npm/i18next@23.10.1/+esm";
+    import jqueryI18next from "https://cdn.jsdelivr.net/npm/jquery-i18next@1.2.1/+esm";
 
-    // Firebase setup
     const firebaseConfig = {
       apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
       authDomain: "gdlvs-2348e.firebaseapp.com",
@@ -184,80 +196,99 @@
 
     const tbody = document.querySelector("#accessTable tbody");
 
-    // ✅ Listen to correct collection: "requests"
+    // === Real-time listener for requests ===
     onSnapshot(collection(db, "requests"), snapshot => {
-      try {
-        tbody.innerHTML = "";
-        if (snapshot.empty) {
-          tbody.innerHTML = `<tr><td colspan="7">No access requests found.</td></tr>`;
-          return;
-        }
-
-        const data = [];
-        snapshot.forEach(docSnap => {
-          const d = docSnap.data() || {};
-          data.push({ id: docSnap.id, ...d });
-        });
-
-        // Sort by createdAt if exists
-        data.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-
-        data.forEach(d => {
-          const id = d.id;
-          const status = (d.status || "pending").toLowerCase();
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${d.fullName || ""}</td>
-            <td>${d.email || ""}</td>
-            <td>${d.organization || ""}</td>
-            <td>${d.phone || ""}</td>
-            <td>${d.purpose || ""}</td>
-            <td class="status ${status}">${status}</td>
-            <td>
-              ${status === "pending" ? `
-                <button class="btn-inline btn-success" data-id="${id}" data-action="approve">
-                  <i class="fas fa-check"></i> Approve
-                </button>
-                <button class="btn-inline btn-danger" data-id="${id}" data-action="reject">
-                  <i class="fas fa-times"></i> Reject
-                </button>
-              ` : `<button class="btn-inline" disabled>Done</button>`}
-            </td>`;
-          tbody.appendChild(tr);
-        });
-
-        console.log(`✅ Loaded ${data.length} requests`);
-      } catch (err) {
-        console.error("🔥 Error rendering requests:", err);
-        tbody.innerHTML = `<tr><td colspan="7" style="color:red;">Error loading data</td></tr>`;
+      tbody.innerHTML = "";
+      if (snapshot.empty) {
+        tbody.innerHTML = `<tr><td colspan="7">No access requests found.</td></tr>`;
+        return;
       }
-    }, err => {
-      console.error("🔥 Firestore listener error:", err);
-      tbody.innerHTML = `<tr><td colspan="7" style="color:red;">Error loading data</td></tr>`;
+      const data = [];
+      snapshot.forEach(d => data.push({ id: d.id, ...d.data() }));
+      data.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+
+      data.forEach(d => {
+        const id = d.id;
+        const status = (d.status || "pending").toLowerCase();
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${d.fullName || ""}</td>
+          <td>${d.email || ""}</td>
+          <td>${d.organization || ""}</td>
+          <td>${d.phone || ""}</td>
+          <td>${d.purpose || ""}</td>
+          <td class="status ${status}">${status}</td>
+          <td>
+            <button class="btn-inline btn-success" data-id="${id}" data-action="toggle">
+              ${status === "approved" ? '<i class="fas fa-times"></i> Reject' : '<i class="fas fa-check"></i> Approve'}
+            </button>
+            <button class="btn-inline btn-delete" data-id="${id}" data-action="delete">
+              <i class="fas fa-trash"></i> Delete
+            </button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
     });
 
-    // Approve / Reject buttons
+    // === Action buttons (approve/reject/delete) ===
     tbody.addEventListener("click", async e => {
       const btn = e.target.closest("button[data-action]");
       if (!btn) return;
-      const id = btn.getAttribute("data-id");
-      const action = btn.getAttribute("data-action");
-      const newStatus = action === "approve" ? "approved" : "rejected";
-      if (!confirm(`Are you sure you want to ${newStatus} this request?`)) return;
-      try {
+      const id = btn.dataset.id;
+      const action = btn.dataset.action;
+      if (action === "delete") {
+        if (!confirm("Delete this request permanently?")) return;
+        await deleteDoc(doc(db, "requests", id));
+        alert("🗑️ Request deleted.");
+        return;
+      }
+      if (action === "toggle") {
+        const current = btn.innerText.includes("Reject") ? "approved" : "rejected";
+        const newStatus = current === "approved" ? "rejected" : "approved";
         await updateDoc(doc(db, "requests", id), { status: newStatus });
-        alert(`✅ Request ${newStatus}`);
-      } catch (err) {
-        alert("❌ Error updating request: " + err.message);
+        alert(`✅ Request marked as ${newStatus}.`);
       }
     });
 
-    // Search bar
+    // === Search ===
     document.getElementById("searchInput").addEventListener("input", e => {
       const term = e.target.value.toLowerCase();
       document.querySelectorAll("#accessTable tbody tr").forEach(row => {
         row.style.display = row.textContent.toLowerCase().includes(term) ? "" : "none";
       });
+    });
+
+    // === i18n setup ===
+    const resources = {
+      en: { translation: {
+        pageTitle: "Access Requests", logout: "Logout", dashboard: "Dashboard", verification: "Verification", 
+        addLicense: "Add License", users: "Users", verRequests: "Verification Requests", analytics: "Analytics", 
+        accessRequests: "Access Requests", recordsTitle: "Access Request Records",
+        searchPlaceholder: "Search by name, email, or organization...", name: "Full Name", email: "Email",
+        org: "Organization", phone: "Phone", purpose: "Purpose", status: "Status", action: "Action", loading: "Loading..."
+      }},
+      fr: { translation: {
+        pageTitle: "Demandes d'accès", logout: "Déconnexion", dashboard: "Tableau de bord", verification: "Vérification", 
+        addLicense: "Ajouter un permis", users: "Utilisateurs", verRequests: "Demandes de vérification", analytics: "Analytique", 
+        accessRequests: "Demandes d'accès", recordsTitle: "Enregistrements des demandes d'accès",
+        searchPlaceholder: "Rechercher par nom, e-mail ou organisation...", name: "Nom complet", email: "E-mail",
+        org: "Organisation", phone: "Téléphone", purpose: "But", status: "Statut", action: "Action", loading: "Chargement..."
+      }},
+      ja: { translation: {
+        pageTitle: "アクセスリクエスト", logout: "ログアウト", dashboard: "ダッシュボード", verification: "照会", 
+        addLicense: "免許を追加", users: "ユーザー", verRequests: "照会リクエスト", analytics: "分析", 
+        accessRequests: "アクセスリクエスト", recordsTitle: "アクセスリクエスト記録",
+        searchPlaceholder: "名前、メール、または組織で検索...", name: "氏名", email: "メール", org: "組織",
+        phone: "電話", purpose: "目的", status: "状態", action: "操作", loading: "読み込み中..."
+      }}
+    };
+
+    await i18next.init({ resources, lng: "en", fallbackLng: "en" });
+    jqueryI18next.init(i18next, $);
+    $("body").localize();
+
+    document.getElementById("languageSwitcher").addEventListener("change", e => {
+      i18next.changeLanguage(e.target.value, () => $("body").localize());
     });
   </script>
 </body>
