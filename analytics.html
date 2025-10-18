@@ -10,7 +10,7 @@
   <!-- Charts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-  <!-- Firebase + i18n -->
+  <!-- jQuery + i18n -->
   <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
@@ -27,77 +27,234 @@
       --warn:#f1c40f;
       --info:#2980b9;
     }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Arial,sans-serif;background:#f6f8fb;color:#333}
-    header{position:fixed;top:0;left:0;right:0;z-index:1000;background:var(--brand-dark);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:10px 14px;}
-    header h1{margin:0;font-size:1.1rem;display:flex;align-items:center;gap:8px;}
-    .controls{display:flex;gap:8px;align-items:center}
-    .controls select,.controls button{padding:6px 10px;border-radius:8px;border:0;font-size:.9rem}
-    .controls select{background:#fff;color:#000}
-    .controls button{background:var(--brand-dark-2);color:#fff;cursor:pointer}
-    nav{position:fixed;top:52px;left:0;right:0;background:#fff;padding:10px 14px;display:flex;gap:16px;border-bottom:1px solid #eaeaea;z-index:999}
-    nav a{color:var(--brand-dark);font-weight:bold;text-decoration:none}
-    nav a.active{border-bottom:2px solid var(--brand-dark)}
-    .container{max-width:1200px;margin:130px auto;padding:0 16px}
-    .dashboard-cards{display:flex;flex-wrap:wrap;gap:15px;margin:15px 0 25px;}
-    .card{flex:1;min-width:200px;border-radius:12px;padding:16px;text-align:center;color:#fff;box-shadow:var(--card-shadow)}
-    .card.total{background:var(--info)}.card.active{background:var(--success)}.card.pending{background:var(--warn)}.card.danger{background:var(--danger)}
-    section.panel{background:var(--panel-bg);border-radius:10px;box-shadow:var(--card-shadow);padding:20px;margin-top:20px;}
-    table{width:100%;border-collapse:collapse;margin-top:10px}
-    th,td{border:1px solid #eee;padding:8px;text-align:left;background:#fff}
-    th{background:#f2f2f2}
-    .chart-row{display:flex;flex-wrap:wrap;gap:20px;margin-top:20px;}
-    .chart-box{flex:1;min-width:300px;max-width:48%;background:var(--panel-bg);border-radius:10px;box-shadow:var(--card-shadow);padding:20px;}
+
+    * {box-sizing:border-box;}
+
+    body {
+      margin:0;
+      font-family:Arial, sans-serif;
+      background:#f6f8fb;
+      color:#333;
+      min-height:100vh;
+    }
+
+    header {
+      position:fixed;
+      top:0;
+      left:0;
+      right:0;
+      z-index:1000;
+      background:rgba(42,63,84,0.95);
+      color:#fff;
+      padding:10px 14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      box-shadow:var(--card-shadow);
+      backdrop-filter:blur(8px);
+    }
+    header h1 {
+      margin:0;
+      font-size:1.1rem;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .controls {
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+    .controls select,
+    .controls button {
+      padding:6px 10px;
+      border-radius:8px;
+      border:0;
+      font-size:.9rem;
+    }
+    .controls select {
+      background:#fff;
+      color:#000;
+    }
+    .controls button {
+      background:var(--brand-dark-2);
+      color:#fff;
+      cursor:pointer;
+    }
+    .controls button:hover {background:#16222d;}
+
+    nav {
+      position:fixed;
+      top:52px;
+      left:0;
+      right:0;
+      z-index:999;
+      background:rgba(255,255,255,0.9);
+      border-bottom:1px solid #eaeaea;
+      padding:10px 14px;
+      display:flex;
+      gap:16px;
+      flex-wrap:wrap;
+      backdrop-filter:blur(6px);
+    }
+    nav a {
+      color:var(--brand-dark);
+      text-decoration:none;
+      font-weight:bold;
+      transition:.2s;
+    }
+    nav a:hover {color:var(--brand-dark-2);}
+    nav a.active {
+      border-bottom:2px solid var(--brand-dark);
+      padding-bottom:3px;
+    }
+
+    .container {
+      max-width:1200px;
+      margin:130px auto 25px;
+      padding:0 16px;
+    }
+
+    .dashboard-cards {
+      display:flex;
+      justify-content:space-between;
+      gap:15px;
+      flex-wrap:wrap;
+      margin:15px 0 25px;
+    }
+    .card {
+      flex:1;
+      min-width:200px;
+      border-radius:12px;
+      padding:16px;
+      text-align:center;
+      box-shadow:var(--card-shadow);
+      color:#fff;
+    }
+    .card i {display:block;margin-bottom:6px;font-size:1.3rem;}
+    .card.total {background:var(--info);}
+    .card.active {background:var(--success);}
+    .card.pending {background:var(--warn);}
+    .card.danger {background:var(--danger);}
+    .card h3 {margin:8px 0 0;color:#fff;}
+
+    section.panel {
+      background:var(--panel-bg);
+      border-radius:10px;
+      box-shadow:var(--card-shadow);
+      padding:20px;
+      margin-top:20px;
+      backdrop-filter:blur(6px);
+    }
+    h2, h3 {color:var(--brand-dark);margin-top:0;}
+    table {
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0 6px;
+      margin-top:10px;
+    }
+    th, td {
+      background:#fff;
+      border:1px solid #eee;
+      padding:10px 12px;
+      text-align:left;
+    }
+    th {background:#f2f2f2;}
+
+    .chart-row {
+      display:flex;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      gap:20px;
+      margin-top:20px;
+    }
+    .chart-box {
+      flex:1;
+      min-width:300px;
+      max-width:48%;
+      background:var(--panel-bg);
+      border-radius:10px;
+      box-shadow:var(--card-shadow);
+      padding:20px;
+    }
+    canvas {
+      display:block;
+      margin:0 auto;
+      max-width:100%;
+      height:auto;
+    }
+    #resultChart {max-height:350px;}
+    #countryChart {max-height:350px;}
+
+    @media(max-width:900px){
+      .dashboard-cards {flex-direction:column;align-items:center;}
+      .card {max-width:90%;min-width:250px;}
+      .chart-row {flex-direction:column;}
+      .chart-box {max-width:100%;}
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {background:#1a1d22;color:#eaeaea;}
+      header {background:rgba(30,45,60,0.9);}
+      nav {background:rgba(40,55,70,0.7);}
+      section.panel, .chart-box {background:rgba(255,255,255,0.07);color:#f0f0f0;}
+      th,td {background:rgba(255,255,255,0.07);color:#fff;}
+      .card h3 {color:#fff;}
+    }
   </style>
 </head>
 <body>
   <header>
-    <h1><i class="fa-solid fa-chart-line"></i> GDLVS Analytics</h1>
+    <h1><i class="fa-solid fa-chart-line"></i> <span data-i18n="analyticsTitle">GDLVS Analytics</span></h1>
     <div class="controls">
       <select id="languageSwitcher">
         <option value="en">🇬🇧 English</option>
         <option value="fr">🇫🇷 Français</option>
         <option value="ja">🇯🇵 日本語</option>
       </select>
-      <button id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</button>
+      <button id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="signOut">Sign Out</span></button>
     </div>
   </header>
 
   <nav>
-    <a href="dashboard.html"><i class="fa-solid fa-house"></i> Dashboard</a>
-    <a href="verify.html"><i class="fa-solid fa-search"></i> Verification</a>
-    <a href="add_licenses.html"><i class="fa-solid fa-id-card"></i> Add License</a>
-    <a href="users.html"><i class="fa-solid fa-users"></i> Users</a>
-    <a href="verification_requests.html"><i class="fa-solid fa-inbox"></i> Access Requests</a>
-    <a class="active" href="analytics.html"><i class="fa-solid fa-chart-bar"></i> Analytics</a>
+    <a href="dashboard.html"><i class="fa-solid fa-house"></i> <span data-i18n="dashboard">Dashboard</span></a>
+    <a href="verify.html"><i class="fa-solid fa-search"></i> <span data-i18n="verification">Verification</span></a>
+    <a href="add_licenses.html"><i class="fa-solid fa-id-card"></i> <span data-i18n="addLicense">Add License</span></a>
+    <a href="users.html"><i class="fa-solid fa-users"></i> <span data-i18n="users">Users</span></a>
+    <a href="verification_requests.html"><i class="fa-solid fa-inbox"></i> <span data-i18n="requests">Access Requests</span></a>
+    <a class="active" href="analytics.html"><i class="fa-solid fa-chart-bar"></i> <span data-i18n="analytics">Analytics</span></a>
   </nav>
 
   <main class="container">
-    <h2><i class="fa-solid fa-database"></i> System Overview</h2>
+    <h2><i class="fa-solid fa-database"></i> <span data-i18n="systemOverview">System Overview</span></h2>
     <div class="dashboard-cards">
-      <div class="card total"><i class="fa-solid fa-id-card"></i><h3>Licenses: <span id="totalLicenses">0</span></h3></div>
-      <div class="card active"><i class="fa-solid fa-magnifying-glass"></i><h3>Verifications: <span id="totalVerifications">0</span></h3></div>
-      <div class="card pending"><i class="fa-solid fa-user-clock"></i><h3>Pending Users: <span id="pendingUsers">0</span></h3></div>
-      <div class="card danger"><i class="fa-solid fa-envelope"></i><h3>Pending Requests: <span id="pendingRequests">0</span></h3></div>
-      <div class="card total"><i class="fa-solid fa-globe"></i><h3>Countries: <span id="countriesCount">0</span></h3></div>
+      <div class="card total"><i class="fa-solid fa-id-card"></i><h3><span data-i18n="licenses">Licenses</span>: <span id="totalLicenses">0</span></h3></div>
+      <div class="card active"><i class="fa-solid fa-magnifying-glass"></i><h3><span data-i18n="verifications">Verifications</span>: <span id="totalVerifications">0</span></h3></div>
+      <div class="card pending"><i class="fa-solid fa-user-clock"></i><h3><span data-i18n="pendingUsers">Pending Users</span>: <span id="pendingUsers">0</span></h3></div>
+      <div class="card danger"><i class="fa-solid fa-envelope"></i><h3><span data-i18n="pendingRequests">Pending Requests</span>: <span id="pendingRequests">0</span></h3></div>
+      <div class="card total"><i class="fa-solid fa-globe"></i><h3><span data-i18n="countries">Countries</span>: <span id="countriesCount">0</span></h3></div>
     </div>
 
     <div class="chart-row">
       <div class="chart-box">
-        <h3><i class="fa-solid fa-chart-pie"></i> Verification Performance</h3>
+        <h3><i class="fa-solid fa-chart-pie"></i> <span data-i18n="verificationPerformance">Verification Performance</span></h3>
         <canvas id="resultChart"></canvas>
       </div>
       <div class="chart-box">
-        <h3><i class="fa-solid fa-chart-bar"></i> Top Countries</h3>
+        <h3><i class="fa-solid fa-chart-bar"></i> <span data-i18n="topCountries">Top Countries</span></h3>
         <canvas id="countryChart"></canvas>
       </div>
     </div>
 
     <section class="panel">
-      <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Verifications</h3>
+      <h3><i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="recentVerifications">Recent Verifications</span></h3>
       <table>
-        <thead><tr><th>License #</th><th>Organization</th><th>Country</th><th>Result</th><th>Date</th></tr></thead>
-        <tbody id="verificationLogs"><tr><td colspan="5">Loading...</td></tr></tbody>
+        <thead>
+          <tr>
+            <th>License #</th><th>Organization</th><th>Country</th><th>Result</th><th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="verificationLogs"><tr><td colspan="5" data-i18n="loading">Loading...</td></tr></tbody>
       </table>
     </section>
   </main>
@@ -119,91 +276,70 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    onAuthStateChanged(auth, u => { if (!u) location.href = "index.html"; });
-    document.getElementById("logoutBtn").onclick = () => signOut(auth).then(() => location.href = "index.html");
+    onAuthStateChanged(auth,u=>{if(!u)location.href='index.html'});
+    document.getElementById("logoutBtn").onclick=()=>signOut(auth).then(()=>location.href='index.html');
 
-    const totalLicensesEl = document.getElementById("totalLicenses");
-    const totalVerificationsEl = document.getElementById("totalVerifications");
-    const pendingUsersEl = document.getElementById("pendingUsers");
-    const pendingRequestsEl = document.getElementById("pendingRequests");
-    const countriesCountEl = document.getElementById("countriesCount");
-    const logsBody = document.getElementById("verificationLogs");
+    const totalLicensesEl=document.getElementById("totalLicenses");
+    const totalVerificationsEl=document.getElementById("totalVerifications");
+    const pendingUsersEl=document.getElementById("pendingUsers");
+    const pendingRequestsEl=document.getElementById("pendingRequests");
+    const countriesCountEl=document.getElementById("countriesCount");
+    const logsBody=document.getElementById("verificationLogs");
+    let resultChart,countryChart;
 
-    let resultChart, countryChart;
+    (async function loadAnalytics(){
+      const licensesSnap=await getDocs(collection(db,"licenses"));
+      totalLicensesEl.textContent=licensesSnap.size;
 
-    async function loadAnalytics() {
-      // --- 1. Licenses Count
-      const licensesSnap = await getDocs(collection(db, "licenses"));
-      totalLicensesEl.textContent = licensesSnap.size;
+      const usersSnap=await getDocs(collection(db,"users"));
+      let pendingU=0;
+      usersSnap.forEach(d=>{if((d.data().status||"").toLowerCase()==="pending")pendingU++});
+      pendingUsersEl.textContent=pendingU;
 
-      // --- 2. Pending Users
-      const usersSnap = await getDocs(collection(db, "users"));
-      let pendingU = 0;
-      usersSnap.forEach(d => {
-        const st = (d.data().status || "").toLowerCase();
-        if (st === "pending" || st === "inactive") pendingU++;
+      const reqSnap=await getDocs(collection(db,"requests"));
+      let pendingR=0;
+      reqSnap.forEach(d=>{if((d.data().status||"").toLowerCase()==="pending")pendingR++});
+      pendingRequestsEl.textContent=pendingR;
+
+      const verSnap=await getDocs(query(collection(db,"verifications"),orderBy("verifiedAt","desc")));
+      let total=0,ok=0,fail=0;
+      const countries={};
+      logsBody.innerHTML="";
+      verSnap.forEach(doc=>{
+        const v=doc.data();total++;
+        const res=(v.result||"").toLowerCase();
+        if(res.includes("not")||res.includes("fail"))fail++;else ok++;
+        const c=(v.country||"Unknown").trim();
+        const org=v.requestingOrg||v.organization||v.verifierOrg||"—";
+        countries[c]=(countries[c]||0)+1;
+        logsBody.innerHTML+=`<tr><td>${v.licenseNumber||""}</td><td>${org}</td><td>${c}</td><td>${v.result||""}</td><td>${v.verifiedAt?new Date(v.verifiedAt.seconds*1000).toLocaleString():""}</td></tr>`;
       });
-      pendingUsersEl.textContent = pendingU;
+      totalVerificationsEl.textContent=total;
+      countriesCountEl.textContent=Object.keys(countries).length;
 
-      // --- 3. Pending Access Requests
-      const reqSnap = await getDocs(collection(db, "verification_requests"));
-      let pendingR = 0;
-      reqSnap.forEach(d => {
-        const s = (d.data().status || "").toLowerCase();
-        if (s === "pending" || s === "awaiting") pendingR++;
+      const ctx=document.getElementById("resultChart");
+      if(resultChart)resultChart.destroy();
+      resultChart=new Chart(ctx,{
+        type:"pie",
+        data:{labels:["Successful","Failed"],datasets:[{data:[ok,fail],backgroundColor:["#27ae60","#e74c3c"]}]},
+        options:{plugins:{legend:{position:"bottom"}}}
       });
-      pendingRequestsEl.textContent = pendingR;
-
-      // --- 4. Verifications
-      const verSnap = await getDocs(query(collection(db, "verifications"), orderBy("verifiedAt", "desc")));
-      let total = 0, ok = 0, fail = 0;
-      const countries = {};
-      logsBody.innerHTML = "";
-      verSnap.forEach(doc => {
-        const v = doc.data();
-        total++;
-        const result = (v.result || "").toLowerCase();
-        if (result.includes("fail") || result.includes("invalid") || result.includes("not")) fail++;
-        else ok++;
-        const c = (v.country || "Unknown").trim();
-        const org = v.organization || v.verifierOrg || "—";
-        countries[c] = (countries[c] || 0) + 1;
-        logsBody.innerHTML += `
-          <tr>
-            <td>${v.licenseNumber || ""}</td>
-            <td>${org}</td>
-            <td>${c}</td>
-            <td>${v.result || ""}</td>
-            <td>${v.verifiedAt ? new Date(v.verifiedAt.seconds * 1000).toLocaleString() : ""}</td>
-          </tr>`;
+      const ctx2=document.getElementById("countryChart");
+      if(countryChart)countryChart.destroy();
+      const top5=Object.entries(countries).sort((a,b)=>b[1]-a[1]).slice(0,5);
+      countryChart=new Chart(ctx2,{
+        type:"bar",
+        data:{labels:top5.map(e=>e[0]),datasets:[{label:"Verifications",data:top5.map(e=>e[1]),backgroundColor:"#2980b9"}]},
+        options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
       });
+    })();
 
-      totalVerificationsEl.textContent = total;
-      countriesCountEl.textContent = Object.keys(countries).length;
+    const i18nResources={en:{translation:{analyticsTitle:"GDLVS Analytics",signOut:"Sign Out",dashboard:"Dashboard",verification:"Verification",addLicense:"Add License",users:"Users",requests:"Access Requests",analytics:"Analytics",systemOverview:"System Overview",licenses:"Licenses",verifications:"Verifications",pendingUsers:"Pending Users",pendingRequests:"Pending Requests",countries:"Countries",verificationPerformance:"Verification Performance",topCountries:"Top Countries",recentVerifications:"Recent Verifications",loading:"Loading..."}},fr:{translation:{analyticsTitle:"Analyse GDLVS",signOut:"Déconnexion",dashboard:"Tableau de bord",verification:"Vérification",addLicense:"Ajouter un permis",users:"Utilisateurs",requests:"Demandes d’accès",analytics:"Analytique",systemOverview:"Aperçu du système",licenses:"Permis",verifications:"Vérifications",pendingUsers:"Utilisateurs en attente",pendingRequests:"Demandes en attente",countries:"Pays",verificationPerformance:"Performance de vérification",topCountries:"Meilleurs pays",recentVerifications:"Vérifications récentes",loading:"Chargement..."}},ja:{translation:{analyticsTitle:"GDLVS 分析",signOut:"ログアウト",dashboard:"ダッシュボード",verification:"照会",addLicense:"免許を追加",users:"ユーザー",requests:"アクセスリクエスト",analytics:"分析",systemOverview:"システム概要",licenses:"免許",verifications:"照会件数",pendingUsers:"保留中のユーザー",pendingRequests:"保留中のリクエスト",countries:"国",verificationPerformance:"照会パフォーマンス",topCountries:"上位の国",recentVerifications:"最近の照会",loading:"読み込み中..."}}};
 
-      // --- 5. Charts
-      if (resultChart) resultChart.destroy();
-      resultChart = new Chart(document.getElementById("resultChart"), {
-        type: "doughnut",
-        data: {
-          labels: ["Successful", "Failed"],
-          datasets: [{ data: [ok, fail], backgroundColor: ["#27ae60", "#e74c3c"] }]
-        },
-        options: { plugins: { legend: { position: "bottom" } } }
-      });
-
-      if (countryChart) countryChart.destroy();
-      const top5 = Object.entries(countries).sort((a,b)=>b[1]-a[1]).slice(0,5);
-      countryChart = new Chart(document.getElementById("countryChart"), {
-        type: "bar",
-        data: {
-          labels: top5.map(e => e[0]),
-          datasets: [{ label: "Verifications", data: top5.map(e => e[1]), backgroundColor: "#2980b9" }]
-        },
-        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-      });
-    }
-    loadAnalytics();
+    i18next.use(i18nextBrowserLanguageDetector).init({resources:i18nResources,fallbackLng:"en"},()=>{jqueryI18next.init(i18next,$,{useOptionsAttr:true});$("body").localize();});
+    document.getElementById("languageSwitcher").addEventListener("change",function(){i18next.changeLanguage(this.value,()=>{$("body").localize();});});
   </script>
 </body>
 </html>
+
+
