@@ -15,14 +15,12 @@
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
   <style>
-    /* ===== Background ===== */
     .background-image{
       position:fixed;inset:0;
       background:url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') no-repeat center center fixed;
       background-size:cover;z-index:-1;filter:brightness(0.9)
     }
 
-    /* ===== Theme ===== */
     :root{
       --brand-dark:#2a3f54; --brand-dark-2:#1e2d3c;
       --text:#333; --muted:#666;
@@ -34,7 +32,6 @@
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:Arial, sans-serif;color:var(--text);background:#f6f8fb;min-height:100vh}
 
-    /* ===== Fixed Header / Nav (dark blue with blur) ===== */
     header{
       background:var(--brand-dark);color:#fff;padding:10px 14px;
       display:flex;justify-content:space-between;align-items:center;
@@ -58,7 +55,6 @@
     nav a:hover{color:#f1c40f}
     nav a.active{border-bottom:2px solid #f1c40f;padding-bottom:3px}
 
-    /* ===== Containers / Panels ===== */
     body{padding-top:130px}
     .container{
       max-width:95vw;margin:25px auto;background:var(--panel-bg);
@@ -67,14 +63,12 @@
     }
     .panel{background:var(--panel-bg);border-radius:10px;box-shadow:var(--card-shadow);padding:18px;margin:18px 0}
 
-    /* ===== Cards ===== */
     .dashboard-cards{display:flex;gap:15px;flex-wrap:wrap;margin:12px 0 18px}
     .dashboard-cards .card{flex:1;min-width:220px;padding:16px;border-radius:10px;color:#fff;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.2);transition:transform .2s}
     .dashboard-cards .card:hover{transform:translateY(-4px)}
     .card.total{background:#2980b9}.card.active{background:#27ae60}.card.suspended{background:#f1c40f;color:#333}.card.expired{background:#e74c3c}
     .card h3{margin:6px 0}.card h2{margin:0;font-size:1.6rem;font-weight:700}
 
-    /* ===== Table ===== */
     .table-controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
     .btn-export{background:#2980b9;color:#fff;border:0;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:.9rem}
     .btn-export:hover{background:#1f6392}
@@ -89,7 +83,6 @@
     .btn-inline:hover{opacity:.95}
     .btn-danger{background:var(--danger)}
 
-    /* ===== Modal ===== */
     .modal-overlay{position:fixed;inset:0;background:var(--overlay);display:none;align-items:center;justify-content:center;z-index:2000}
     .modal-overlay.show{display:flex}
     .modal{width:min(520px,90vw);background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);overflow:hidden}
@@ -101,7 +94,6 @@
     .btn-primary{background:var(--success);color:#fff;border:0;border-radius:8px;padding:8px 12px;cursor:pointer}
     .btn-secondary{background:#95a5a6;color:#fff;border:0;border-radius:8px;padding:8px 12px;cursor:pointer}
 
-    /* ===== Responsive ===== */
     @media(max-width:768px){
       header{flex-direction:column;align-items:flex-start;padding:8px 10px;height:auto}
       nav{top:80px;flex-wrap:wrap;justify-content:flex-start;padding:8px 10px}
@@ -113,7 +105,6 @@
 <body>
   <div class="background-image"></div>
 
-  <!-- Header -->
   <header>
     <h1><i class="fas fa-id-card"></i> <span data-i18n="dashboard">Dashboard</span></h1>
     <div class="controls">
@@ -126,7 +117,6 @@
     </div>
   </header>
 
-  <!-- Nav -->
   <nav>
     <a href="dashboard.html" class="active"><i class="fas fa-home"></i> <span data-i18n="dashboard">Dashboard</span></a>
     <a href="verify.html"><i class="fas fa-search"></i> <span data-i18n="verificationPortal">Verification</span></a>
@@ -137,15 +127,13 @@
   </nav>
 
   <main class="container">
-    <!-- Cards -->
     <section class="dashboard-cards">
       <div class="card total"><div>👤</div><h3 data-i18n="totalLicenses">Total Licenses</h3><h2 id="totalLicenses">0</h2></div>
       <div class="card active"><div>✅</div><h3 data-i18n="activeLicenses">Active</h3><h2 id="activeLicenses">0</h2></div>
       <div class="card suspended"><div>⚠️</div><h3 data-i18n="suspended">Suspended</h3><h2 id="suspendedLicenses">0</h2></div>
-      <div class="card expired"><div>⛔</div><h3 data-i18n="expired">Expired</h3><h2 id="expiredLicenses">0</h2></div>
+      <div class="card expired"><div>⛔</div><h3 data-i18n="expired">Expired</h2><h2 id="expiredLicenses">0</h2></div>
     </section>
 
-    <!-- Licenses Table -->
     <section class="panel">
       <h2><i class="fas fa-id-badge"></i> <span data-i18n="licensesList">Licenses</span></h2>
       <div class="table-controls">
@@ -175,7 +163,6 @@
     <small class="muted">GDLVS</small>
   </footer>
 
-  <!-- ===== Edit Modal ===== -->
   <div class="modal-overlay" id="editModalOverlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
       <header>
@@ -214,7 +201,6 @@
     </div>
   </div>
 
-  <!-- ===== Firebase + App Logic ===== -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
@@ -232,6 +218,46 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    /* ===== i18n (Language Switching) ===== */
+    const i18nResources = {
+      en:{translation:{dashboard:"Dashboard",verificationPortal:"Verification",addLicense:"Add License",userManagement:"User Management",verificationRequests:"Verification Requests",analytics:"Analytics",logout:"Logout",totalLicenses:"Total Licenses",activeLicenses:"Active",suspended:"Suspended",expired:"Expired",licensesList:"Licenses",licenseNumber:"License #",fullName:"Full Name",class:"Class",issueDate:"Issue",expiryDate:"Expiry",status:"Status",action:"Action",loading:"Loading...",export:"Export",searchLicenses:"Search licenses...",editLicense:"Edit License",cancel:"Cancel",saveChanges:"Save / Update",active:"Active",delete:"Delete",confirmDelete:"Delete this license?"}},
+      fr:{translation:{dashboard:"Tableau de bord",verificationPortal:"Vérification",addLicense:"Ajouter un permis",userManagement:"Gestion des utilisateurs",verificationRequests:"Demandes de vérification",analytics:"Analytique",logout:"Déconnexion",totalLicenses:"Nombre total de permis",activeLicenses:"Actifs",suspended:"Suspendus",expired:"Expirés",licensesList:"Permis",licenseNumber:"N° de permis",fullName:"Nom complet",class:"Catégorie",issueDate:"Émission",expiryDate:"Expiration",status:"Statut",action:"Action",loading:"Chargement...",export:"Exporter",searchLicenses:"Rechercher des permis…",editLicense:"Modifier le permis",cancel:"Annuler",saveChanges:"Enregistrer / Mettre à jour",active:"Actif",delete:"Supprimer",confirmDelete:"Supprimer ce permis ?"}},
+      ja:{translation:{dashboard:"ダッシュボード",verificationPortal:"照合",addLicense:"免許を追加",userManagement:"ユーザー管理",verificationRequests:"照合リクエスト",analytics:"分析",logout:"ログアウト",totalLicenses:"総免許数",activeLicenses:"有効",suspended:"停止中",expired:"期限切れ",licensesList:"免許一覧",licenseNumber:"免許番号",fullName:"氏名",class:"区分",issueDate:"発行",expiryDate:"有効期限",status:"ステータス",action:"操作",loading:"読み込み中…",export:"エクスポート",searchLicenses:"免許を検索…",editLicense:"免許を編集",cancel:"キャン
+ャンセル",saveChanges:"保存 / 更新",active:"有効",delete:"削除",confirmDelete:"この免許を削除しますか？"}}
+    };
+
+    i18next.use(i18nextBrowserLanguageDetector).init(
+      { resources: i18nResources, fallbackLng: "en" },
+      () => {
+        if (typeof jqueryI18next !== "undefined") {
+          jqueryI18next.init(i18next, $, { useOptionsAttr: true });
+          $("body").localize();
+        }
+      }
+    );
+
+    document.getElementById("languageSwitcher").addEventListener("change", function() {
+      i18next.changeLanguage(this.value, () => $("body").localize());
+    });
+
+    /* ===== Auth Gate ===== */
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+      const roleSnap = await getDoc(doc(db, "roles", user.email));
+      const role = roleSnap.exists() ? roleSnap.data().role : "verifier";
+      const adminOnly = document.getElementById("navVerificationRequests");
+      if (adminOnly) adminOnly.style.display = (role === "admin") ? "block" : "none";
+    });
+
+    /* ===== Logout ===== */
+    document.getElementById("logoutBtn").addEventListener("click", () =>
+      signOut(auth).then(() => location.href = "index.html")
+    );
+
+    /* ===== Modal helpers ===== */
     const overlay = document.getElementById("editModalOverlay");
     const closeBtn = document.getElementById("modalCloseBtn");
     const cancelBtn = document.getElementById("modalCancelBtn");
@@ -246,44 +272,44 @@
       expiry: document.getElementById("modalExpiry")
     };
 
-    function openModal(d){
+    function openModal(d) {
       fields.id.value = d.id || "";
       fields.licenseNumber.value = d.licenseNumber || d.id || "";
       fields.fullName.value = d.fullName || "";
       fields.klass.value = d.class || "Class A";
       fields.status.value = d.status || "Active";
-      fields.issue.value = (d.issueDate || "").slice(0,10);
-      fields.expiry.value = (d.expiryDate || "").slice(0,10);
+      fields.issue.value = (d.issueDate || "").slice(0, 10);
+      fields.expiry.value = (d.expiryDate || "").slice(0, 10);
       overlay.classList.add("show");
-      overlay.setAttribute("aria-hidden","false");
+      overlay.setAttribute("aria-hidden", "false");
     }
 
-    function closeModal(){
+    function closeModal() {
       overlay.classList.remove("show");
-      overlay.setAttribute("aria-hidden","true");
+      overlay.setAttribute("aria-hidden", "true");
     }
+
     closeBtn.addEventListener("click", closeModal);
     cancelBtn.addEventListener("click", closeModal);
-    overlay.addEventListener("click", (e)=>{ if(e.target===overlay) closeModal(); });
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) closeModal();
+    });
 
-    saveBtn.addEventListener("click", async ()=>{
+    saveBtn.addEventListener("click", async () => {
       const id = fields.licenseNumber.value.trim();
-      if(!id){ alert("Missing license number"); return; }
+      if (!id) { alert("Missing license number"); return; }
       const payload = {
         licenseNumber: id,
         fullName: fields.fullName.value.trim(),
         class: fields.klass.value,
         status: fields.status.value,
         issueDate: fields.issue.value,
-        expiryDate: fields.expiry
         expiryDate: fields.expiry.value
       };
       try {
         await setDoc(doc(db, "licenses", id), payload, { merge: true });
         closeModal();
-      } catch (err) {
-        alert("❌ " + err.message);
-      }
+      } catch (err) { alert("❌ " + err.message); }
     });
 
     /* ===== Licenses: realtime table + counters ===== */
@@ -339,18 +365,13 @@
           const snap = await getDoc(doc(db, "licenses", id));
           const data = snap.exists() ? snap.data() : { licenseNumber: id };
           openModal({ id, ...data });
-        } catch (err) {
-          alert("❌ " + err.message);
-        }
+        } catch (err) { alert("❌ " + err.message); }
       }
       if (delBtn) {
         const id = delBtn.getAttribute("data-id");
         if (confirm(i18next.t("confirmDelete"))) {
-          try {
-            await deleteDoc(doc(db, "licenses", id));
-          } catch (err) {
-            alert("❌ " + err.message);
-          }
+          try { await deleteDoc(doc(db, "licenses", id)); }
+          catch (err) { alert("❌ " + err.message); }
         }
       }
     });
@@ -379,23 +400,6 @@
       a.href = URL.createObjectURL(blob);
       a.download = "licenses_export.csv";
       a.click();
-    });
-
-    /* ===== Auth and Logout ===== */
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "index.html";
-        return;
-      }
-      const roleSnap = await getDoc(doc(db, "roles", user.email));
-      const role = roleSnap.exists() ? roleSnap.data().role : "verifier";
-      const adminOnly = document.getElementById("navVerificationRequests");
-      if (adminOnly) adminOnly.style.display = (role === "admin") ? "block" : "none";
-    });
-
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      signOut(auth).then(() => location.href = "index.html");
     });
   </script>
 </body>
