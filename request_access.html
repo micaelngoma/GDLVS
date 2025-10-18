@@ -349,3 +349,8 @@
     $("body").localize();
     document.getElementById("languageSwitcher").addEventListener("change", e => {
       i18
+      i18next.changeLanguage(e.target.value, () => $("body").localize());
+    });
+  </script>
+</body>
+</html>
