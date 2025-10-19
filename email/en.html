@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GDLVS Access Request Confirmation</title>
+  <link rel="icon" href="../assets/favicon.png" />
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; background-color: #f6f8fa; color: #333; padding: 20px; line-height: 1.6; }
+    .container { max-width: 620px; margin: 0 auto; background-color: #fff; border-radius: 10px; padding: 30px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    h2 { color: #004aad; text-align: center; }
+    .info { margin: 20px 0; font-size: 15px; }
+    .footer { font-size: 12px; text-align: center; margin-top: 30px; color: #777; }
+    .highlight { color: #004aad; font-weight: bold; }
+    hr { margin: 30px 0; border: 0; border-top: 1px solid #ddd; }
+    .langbar { text-align: center; margin-bottom: 20px; }
+    .langbar a { color: #004aad; font-weight: bold; text-decoration: none; margin: 0 5px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="langbar">🌐 
+      <a href="./en">English</a> | 
+      <a href="./fr">Français</a> | 
+      <a href="./jp">日本語</a>
+    </div>
+
+    <h2>✅ GDLVS Access Request Received</h2>
+    <p>Dear <strong>{{name}}</strong>,</p>
+    <p>
+      Thank you for submitting your access request to the
+      <strong>Gabon Driver’s License Verification System (GDLVS)</strong>.
+      Your request has been successfully received and is now under review.
+      You will receive a follow-up email within the next <strong>72 hours</strong>
+      once processed by the administrator.
+    </p>
+    <div class="info">
+      <p><strong>📧 Email:</strong> {{email}}</p>
+      <p><strong>🏢 Organization:</strong> {{organization}}</p>
+      <p><strong>📞 Phone:</strong> {{phone}}</p>
+      <p><strong>📝 Purpose:</strong> {{purpose}}</p>
+    </div>
+    <p>A copy of this email has also been sent to the system administrator.</p>
+    <hr />
+    <p class="footer">
+      — GDLVS Administration —<br />
+      <a href="https://micaelngoma.github.io/GDLVS" class="highlight">https://micaelngoma.github.io/GDLVS</a><br />
+      <span>Do not reply to this automated message.</span>
+    </p>
+  </div>
+</body>
+</html>
