@@ -2,14 +2,15 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Confirmation de la Demande d’Accès – GDLVS</title>
+  <title>Confirmation de la Demande d’Accès au GDLVS</title>
   <style>
-    body { font-family: Arial, Helvetica, sans-serif; background-color:#f6f8fa; color:#333; padding:20px; line-height:1.6; }
+    body { font-family: Arial, Helvetica, sans-serif; background:#f6f8fa; color:#333; padding:20px; line-height:1.6; }
     .container { max-width:620px; margin:0 auto; background:#fff; border-radius:12px; padding:30px; box-shadow:0 3px 8px rgba(0,0,0,0.08); }
     .langbar { text-align:center; margin-bottom:15px; font-size:14px; }
     .langbar a { color:#004aad; font-weight:600; text-decoration:none; margin:0 6px; }
     .langbar a:hover { text-decoration:underline; }
-    h2 { color:#004aad; text-align:center; }
+    .logo { text-align:center; margin-bottom:15px; }
+    h2 { color:#004aad; text-align:center; margin-top:5px; }
     .info { margin:20px 0; font-size:15px; }
     .footer { font-size:12px; text-align:center; margin-top:30px; color:#777; }
     .highlight { color:#004aad; font-weight:bold; }
@@ -24,13 +25,17 @@
       <a href="./jp.html">日本語</a>
     </div>
 
+    <div class="logo">
+      <img src="https://github.com/micaelngoma/GDLVS/raw/main/GDLVS%20Logo.png" alt="GDLVS Logo" style="height:80px;width:auto;">
+    </div>
+
     <h2>✅ Confirmation de la Demande d’Accès au GDLVS</h2>
 
     <p>Cher <strong>{{name}}</strong>,</p>
     <p>
       Merci d’avoir soumis votre demande d’accès au 
-      <strong>Système de Vérification du Permis de Conduire du Gabon (GDLVS)</strong>.
-      Votre demande a bien été reçue et est actuellement en cours d’examen.
+      <strong>Système de Vérification du Permis de Conduire du Gabon (GDLVS)</strong>.<br>
+      Votre demande a bien été reçue et est en cours d’examen.<br>
       Vous recevrez un e-mail de suivi dans les <strong>72 prochaines heures</strong> 
       après traitement par l’administrateur.
     </p>
@@ -51,5 +56,15 @@
       Ne répondez pas à ce message automatique.
     </p>
   </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    document.body.innerHTML = document.body.innerHTML
+      .replace(/{{name}}/g, params.get("name") || "—")
+      .replace(/{{email}}/g, params.get("email") || "—")
+      .replace(/{{organization}}/g, params.get("organization") || "—")
+      .replace(/{{phone}}/g, params.get("phone") || "—")
+      .replace(/{{purpose}}/g, params.get("purpose") || "—");
+  </script>
 </body>
 </html>
