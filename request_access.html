@@ -352,57 +352,6 @@
       i18next.changeLanguage(e.target.value, () => $("body").localize());
     });
   </script>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script>
-  // Initialize EmailJS
-  emailjs.init("TfmaZEvxtz2MNUb70"); // your real public key
-
-  // Function to update request status
-  async function updateRequestStatus(docId, newStatus, requestData) {
-    const db = firebase.firestore();
-    try {
-      // Step 1: Update Firestore
-      await db.collection("requests").doc(docId).update({
-        status: newStatus,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      });
-
-      console.log("✅ Status updated to:", newStatus);
-
-      // Step 2: Send email when approved
-      if (newStatus === "approved") {
-        console.log("📧 Sending approval email...");
-
-        await emailjs.send("service_ddq3kka", "template_access_approved", {
-          name: requestData.fullName,
-          email: requestData.email,
-          organization: requestData.organization,
-          phone: requestData.phone,
-          purpose: requestData.purpose
-        });
-
-        alert(`✅ Approval email sent to ${requestData.email}`);
-      }
-
-      // Optional: Send rejection email if rejected
-      else if (newStatus === "rejected") {
-        await emailjs.send("service_ddq3kka", "template_access_rejected", {
-          name: requestData.fullName,
-          email: requestData.email,
-          organization: requestData.organization,
-          phone: requestData.phone,
-          purpose: requestData.purpose
-        });
-
-        alert(`🚫 Rejection email sent to ${requestData.email}`);
-      }
-
-    } catch (error) {
-      console.error("❌ Error updating request:", error);
-      alert("An error occurred while updating the request. See console for details.");
-    }
-  }
-</script>
 
 </body>
 </html>
