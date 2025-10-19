@@ -352,5 +352,41 @@
       i18next.changeLanguage(e.target.value, () => $("body").localize());
     });
   </script>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script>
+  emailjs.init("TfmaZEvxtz2MNUb70"); // ✅ your EmailJS public key
+
+  // Function to update status
+  async function updateRequestStatus(docId, newStatus, requestData) {
+    const db = firebase.firestore();
+    try {
+      await db.collection("requests").doc(docId).update({
+        status: newStatus,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+
+      // ✅ If approved, send email notification
+      if (newStatus === "approved") {
+        await emailjs.send("service_ddq3kka", "template_access_approved", {
+          name: requestData.fullName,
+          email: requestData.email,
+          organization: requestData.organization,
+          phone: requestData.phone,
+          purpose: requestData.purpose
+        });
+        alert(`✅ Approval email sent to ${requestData.email}`);
+      } else {
+        alert(`Request updated to "${newStatus.toUpperCase()}"`);
+      }
+
+    } catch (error) {
+      console.error("❌ Error updating status:", error);
+      alert("Failed to update request status. Please try again.");
+    }
+  }
+</script>
+
+
 </body>
 </html>
