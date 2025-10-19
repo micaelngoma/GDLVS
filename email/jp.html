@@ -2,50 +2,54 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>アクセス申請確認</title>
-  <link rel="icon" href="../assets/favicon.png" />
+  <title>アクセス申請確認 – GDLVS</title>
   <style>
-    body { font-family: Arial, Helvetica, sans-serif; background-color: #f6f8fa; color: #333; padding: 20px; line-height: 1.6; }
-    .container { max-width: 620px; margin: 0 auto; background-color: #fff; border-radius: 10px; padding: 30px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    h2 { color: #004aad; text-align: center; }
-    .info { margin: 20px 0; font-size: 15px; }
-    .footer { font-size: 12px; text-align: center; margin-top: 30px; color: #777; }
-    .highlight { color: #004aad; font-weight: bold; }
-    hr { margin: 30px 0; border: 0; border-top: 1px solid #ddd; }
-    .langbar { text-align: center; margin-bottom: 20px; }
-    .langbar a { color: #004aad; font-weight: bold; text-decoration: none; margin: 0 5px; }
+    body { font-family: Arial, Helvetica, sans-serif; background-color:#f6f8fa; color:#333; padding:20px; line-height:1.6; }
+    .container { max-width:620px; margin:0 auto; background:#fff; border-radius:12px; padding:30px; box-shadow:0 3px 8px rgba(0,0,0,0.08); }
+    .langbar { text-align:center; margin-bottom:15px; font-size:14px; }
+    .langbar a { color:#004aad; font-weight:600; text-decoration:none; margin:0 6px; }
+    .langbar a:hover { text-decoration:underline; }
+    h2 { color:#004aad; text-align:center; }
+    .info { margin:20px 0; font-size:15px; }
+    .footer { font-size:12px; text-align:center; margin-top:30px; color:#777; }
+    .highlight { color:#004aad; font-weight:bold; }
+    hr { margin:30px 0; border:0; border-top:1px solid #ddd; }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="langbar">🌐 
-      <a href="./en">English</a> | 
-      <a href="./fr">Français</a> | 
-      <a href="./jp">日本語</a>
+    <div class="langbar">
+      🌐 <a href="./en.html">English</a> | 
+      <a href="./fr.html">Français</a> | 
+      <a href="./jp.html">日本語</a>
     </div>
 
     <h2>✅ GDLVS アクセス申請確認</h2>
+
     <p><strong>{{name}}</strong> 様,</p>
     <p>
       ガボン運転免許証認証システム
       <strong>(GDLVS: Gabon Driver’s License Verification System)</strong> への
-      アクセス申請をいただきありがとうございます。
-      あなたの申請は正常に受信され、現在審査中です。
-      システム管理者による確認後、<strong>72時間以内</strong> に
+      アクセス申請をいただきありがとうございます。<br>
+      あなたの申請は正常に受信され、現在審査中です。<br>
+      システム管理者による確認後、<strong>72 時間以内</strong> に
       フォローアップのメールをお送りします。
     </p>
+
     <div class="info">
-      <p><strong>📧 メール:</strong> {{email}}</p>
-      <p><strong>🏢 組織:</strong> {{organization}}</p>
-      <p><strong>📞 電話番号:</strong> {{phone}}</p>
-      <p><strong>📝 目的:</strong> {{purpose}}</p>
+      <p>📧 <strong>メール:</strong> {{email}}</p>
+      <p>🏢 <strong>組織:</strong> {{organization}}</p>
+      <p>📞 <strong>電話番号:</strong> {{phone}}</p>
+      <p>📝 <strong>目的:</strong> {{purpose}}</p>
     </div>
+
     <p>このメッセージのコピーはシステム管理者にも送信されています。</p>
+
     <hr />
     <p class="footer">
       — GDLVS 管理部門 —<br />
       <a href="https://micaelngoma.github.io/GDLVS" class="highlight">https://micaelngoma.github.io/GDLVS</a><br />
-      <span>この自動メッセージには返信しないでください。</span>
+      この自動メッセージには返信しないでください。
     </p>
   </div>
 </body>
