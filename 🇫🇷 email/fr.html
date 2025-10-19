@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Confirmation de la Demande d’Accès</title>
+  <link rel="icon" href="../assets/favicon.png" />
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; background-color: #f6f8fa; color: #333; padding: 20px; line-height: 1.6; }
+    .container { max-width: 620px; margin: 0 auto; background-color: #fff; border-radius: 10px; padding: 30px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    h2 { color: #004aad; text-align: center; }
+    .info { margin: 20px 0; font-size: 15px; }
+    .footer { font-size: 12px; text-align: center; margin-top: 30px; color: #777; }
+    .highlight { color: #004aad; font-weight: bold; }
+    hr { margin: 30px 0; border: 0; border-top: 1px solid #ddd; }
+    .langbar { text-align: center; margin-bottom: 20px; }
+    .langbar a { color: #004aad; font-weight: bold; text-decoration: none; margin: 0 5px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="langbar">🌐 
+      <a href="./en">English</a> | 
+      <a href="./fr">Français</a> | 
+      <a href="./jp">日本語</a>
+    </div>
+
+    <h2>✅ Confirmation de la Demande d’Accès au GDLVS</h2>
+    <p>Cher <strong>{{name}}</strong>,</p>
+    <p>
+      Merci d’avoir soumis votre demande d’accès au
+      <strong>Système de Vérification du Permis de Conduire du Gabon (GDLVS)</strong>.
+      Votre demande a bien été reçue et est en cours d’examen.
+      Vous recevrez un retour dans les <strong>72 prochaines heures</strong>
+      après évaluation par l’administrateur du système.
+    </p>
+    <div class="info">
+      <p><strong>📧 Email :</strong> {{email}}</p>
+      <p><strong>🏢 Organisation :</strong> {{organization}}</p>
+      <p><strong>📞 Téléphone :</strong> {{phone}}</p>
+      <p><strong>📝 Objet :</strong> {{purpose}}</p>
+    </div>
+    <p>Une copie de cet e-mail a également été envoyée à l’administrateur du système.</p>
+    <hr />
+    <p class="footer">
+      — Administration GDLVS —<br />
+      <a href="https://micaelngoma.github.io/GDLVS" class="highlight">https://micaelngoma.github.io/GDLVS</a><br />
+      <span>Ne répondez pas à ce message automatique.</span>
+    </p>
+  </div>
+</body>
+</html>
