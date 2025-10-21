@@ -5,162 +5,35 @@
   <title>GDLVS - Access Requests</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      color: #333;
-      margin: 0;
-      background: #f6f8fb;
-    }
-    .background-image {
-      position: fixed; inset: 0;
-      background: url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') center/cover no-repeat;
-      z-index: -1; filter: brightness(0.9);
-    }
-    header {
-      background: #2a3f54;
-      color: #fff;
-      padding: 10px 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: fixed; top: 0; left: 0; right: 0;
-      z-index: 1000;
-    }
-    header h1 { margin: 0; font-size: 1.1rem; display: flex; gap: 8px; align-items: center; }
-    .controls { display: flex; gap: 8px; align-items: center; }
-    .controls select, .controls button {
-      padding: 6px 10px;
-      border-radius: 8px;
-      border: 0;
-      font-size: .9rem;
-    }
-    .controls select { background: #fff; color: #000; }
-    .controls button { background: #1e2d3c; color: #fff; cursor: pointer; }
-
-    nav {
-      background: #1e2d3c;
-      color: #fff;
-      padding: 10px 14px;
-      display: flex;
-      gap: 16px;
-      position: fixed; top: 56px; left: 0; right: 0;
-      z-index: 999;
-    }
-    nav a {
-      color: #fff;
-      text-decoration: none;
-      font-weight: bold;
-      transition: all 0.25s ease-in-out;
-    }
-    nav a.active {
-      border-bottom: 2px solid #f1c40f;
-      padding-bottom: 3px;
-    }
-    nav a:hover {
-      border-bottom: 2px solid #f1c40f;
-      padding-bottom: 3px;
-      box-shadow: 0 2px 6px rgba(241,196,15,0.7);
-    }
-
-    main.container {
-      max-width: 95vw;
-      margin: 120px auto 0;
-      background: rgba(255,255,255,0.95);
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.2);
-    }
-
-    .search-bar {
-      width: 50%;
-      display: block;
-      padding: 10px;
-      margin: 0 auto 15px auto;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      table-layout: fixed;
-    }
-    th, td {
-      border: 1px solid #eee;
-      padding: 8px;
-      background: #fff;
-      text-align: left;
-      word-wrap: break-word;
-    }
-    th { background: #f2f2f2; }
-    th:nth-child(1){width:13%}
-    th:nth-child(2){width:17%}
-    th:nth-child(3){width:15%}
-    th:nth-child(4){width:12%}
-    th:nth-child(5){width:20%}
-    th:nth-child(6){width:10%}
-    th:nth-child(7){width:13%}
-
-    .status { font-weight: bold; text-transform: capitalize; }
-    .status.pending { color: #f1c40f; }
-    .status.approved { color: #27ae60; }
-    .status.rejected { color: #e74c3c; }
-
-    .btn-inline {
-      padding: 5px 8px;
-      border-radius: 6px;
-      border: 0;
-      cursor: pointer;
-      color: #fff;
-      background: #2980b9;
-      margin: 2px;
-    }
-    .btn-danger { background: #e74c3c; }
-    .btn-success { background: #27ae60; }
-    .btn-pending { background: #f1c40f; color: #000; }
-    .btn-delete { background: #555; }
-
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(4px);
-      animation: fadeIn 0.3s ease;
-      z-index: 2000;
-    }
-    .modal {
-      background: #fff;
-      border-radius: 10px;
-      padding: 25px;
-      text-align: center;
-      width: 340px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-      animation: popIn 0.25s ease;
-    }
-    .modal h3 { margin-top: 0; color: #2a3f54; }
-    .modal p { color: #555; margin-bottom: 20px; }
-    .modal-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-    }
-    .modal button {
-      padding: 8px 14px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .confirm { background: #27ae60; color: #fff; }
-    .cancel { background: #ccc; }
-    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-    @keyframes popIn { from {transform: scale(0.8); opacity: 0;} to {transform: scale(1); opacity:1;} }
+    body {font-family: Arial, sans-serif; color:#333; margin:0; background:#f6f8fb;}
+    .background-image{position:fixed;inset:0;background:url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') center/cover no-repeat;z-index:-1;filter:brightness(0.9);}
+    header{background:#2a3f54;color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;position:fixed;top:0;left:0;right:0;z-index:1000;}
+    header h1{margin:0;font-size:1.1rem;display:flex;gap:8px;align-items:center;}
+    .controls{display:flex;gap:8px;align-items:center;}
+    .controls select,.controls button{padding:6px 10px;border-radius:8px;border:0;font-size:.9rem;}
+    .controls select{background:#fff;color:#000;}
+    .controls button{background:#1e2d3c;color:#fff;cursor:pointer;}
+    nav{background:#1e2d3c;color:#fff;padding:10px 14px;display:flex;gap:16px;position:fixed;top:56px;left:0;right:0;z-index:999;}
+    nav a{color:#fff;text-decoration:none;font-weight:bold;transition:all 0.25s ease-in-out;}
+    nav a.active,nav a:hover{border-bottom:2px solid #f1c40f;padding-bottom:3px;box-shadow:0 2px 6px rgba(241,196,15,0.7);}
+    main.container{max-width:95vw;margin:120px auto 0;background:rgba(255,255,255,0.95);padding:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+    .search-bar{width:50%;display:block;padding:10px;margin:0 auto 15px;border-radius:8px;border:1px solid #ccc;}
+    table{width:100%;border-collapse:collapse;margin-top:10px;table-layout:fixed;}
+    th,td{border:1px solid #eee;padding:8px;background:#fff;text-align:left;word-wrap:break-word;}
+    th{background:#f2f2f2;}
+    th:nth-child(1){width:13%}th:nth-child(2){width:17%}th:nth-child(3){width:15%}th:nth-child(4){width:12%}th:nth-child(5){width:20%}th:nth-child(6){width:10%}th:nth-child(7){width:13%}
+    .status{font-weight:bold;text-transform:capitalize;}
+    .status.pending{color:#f1c40f;} .status.approved{color:#27ae60;} .status.rejected{color:#e74c3c;}
+    .btn-inline{padding:5px 8px;border-radius:6px;border:0;cursor:pointer;color:#fff;background:#2980b9;margin:2px;}
+    .btn-danger{background:#e74c3c;} .btn-success{background:#27ae60;} .btn-pending{background:#f1c40f;color:#000;} .btn-delete{background:#555;}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);animation:fadeIn .3s ease;z-index:2000;}
+    .modal{background:#fff;border-radius:10px;padding:25px;text-align:center;width:340px;box-shadow:0 2px 10px rgba(0,0,0,0.3);animation:popIn .25s ease;}
+    .modal h3{margin-top:0;color:#2a3f54;} .modal p{color:#555;margin-bottom:20px;}
+    .modal-buttons{display:flex;justify-content:center;gap:10px;}
+    .modal button{padding:8px 14px;border:none;border-radius:6px;cursor:pointer;font-weight:bold;}
+    .confirm{background:#27ae60;color:#fff;} .cancel{background:#ccc;}
+    @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}@keyframes popIn{from{transform:scale(0.8);opacity:0;}to{transform:scale(1);opacity:1;}}
   </style>
 </head>
 <body>
@@ -191,7 +64,6 @@
   <main class="container">
     <h2><i class="fas fa-table"></i> <span data-i18n="recordsTitle">Access Request Records</span></h2>
     <input type="text" id="searchInput" class="search-bar" placeholder="Search..." data-i18n="[placeholder]searchPlaceholder">
-
     <table id="accessTable">
       <thead>
         <tr>
@@ -204,9 +76,7 @@
           <th data-i18n="action">Action</th>
         </tr>
       </thead>
-      <tbody>
-        <tr><td colspan="7" data-i18n="loading">Loading...</td></tr>
-      </tbody>
+      <tbody><tr><td colspan="7" data-i18n="loading">Loading...</td></tr></tbody>
     </table>
   </main>
 
@@ -227,141 +97,93 @@
       messagingSenderId: "358715790318",
       appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
     };
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
+    onAuthStateChanged(auth, u => { if (!u) location.href="index.html"; });
+    document.getElementById("logoutBtn").onclick=()=>signOut(auth).then(()=>location.href="index.html");
 
-    onAuthStateChanged(auth, user => { if (!user) location.href = "index.html"; });
-    document.getElementById("logoutBtn").onclick = () => signOut(auth).then(() => location.href = "index.html");
+    const tbody=document.querySelector("#accessTable tbody");
+    const modalContainer=document.getElementById("modalContainer");
 
-    const tbody = document.querySelector("#accessTable tbody");
-    const modalContainer = document.getElementById("modalContainer");
-
-    function showModal(title, message, confirmAction) {
-      modalContainer.innerHTML = `
-        <div class="modal-overlay">
-          <div class="modal">
-            <h3>${title}</h3>
-            <p>${message}</p>
-            <div class="modal-buttons">
-              <button class="confirm">${i18next.t('confirm')}</button>
-              <button class="cancel">${i18next.t('cancel')}</button>
-            </div>
-          </div>
-        </div>`;
-      modalContainer.style.display = "block";
-      modalContainer.querySelector(".cancel").onclick = () => modalContainer.style.display = "none";
-      modalContainer.querySelector(".confirm").onclick = async () => {
-        await confirmAction();
-        modalContainer.style.display = "none";
-      };
+    function showModal(title,message,confirmAction){
+      modalContainer.innerHTML=`<div class="modal-overlay"><div class="modal">
+      <h3>${title}</h3><p>${message}</p><div class="modal-buttons">
+      <button class="confirm">${i18next.t('confirm')}</button><button class="cancel">${i18next.t('cancel')}</button>
+      </div></div></div>`;
+      modalContainer.style.display="block";
+      modalContainer.querySelector(".cancel").onclick=()=>modalContainer.style.display="none";
+      modalContainer.querySelector(".confirm").onclick=async()=>{await confirmAction();modalContainer.style.display="none";};
     }
 
-    onSnapshot(collection(db, "requests"), snapshot => {
-      tbody.innerHTML = "";
-      if (snapshot.empty) {
-        tbody.innerHTML = `<tr><td colspan="7">${i18next.t('noData')}</td></tr>`;
-        return;
-      }
-      const data = [];
-      snapshot.forEach(d => data.push({ id: d.id, ...d.data() }));
-      data.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-      data.forEach(d => {
-        const status = (d.status || "pending").toLowerCase();
-        const id = d.id;
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${d.fullName || ""}</td>
-          <td>${d.email || ""}</td>
-          <td>${d.organization || ""}</td>
-          <td>${d.phone || ""}</td>
-          <td>${d.purpose || ""}</td>
-          <td class="status ${status}">${status}</td>
-          <td>
-            <button class="btn-inline btn-success" data-action="approved" data-id="${id}">${i18next.t('approve')}</button>
-            <button class="btn-inline btn-danger" data-action="rejected" data-id="${id}">${i18next.t('reject')}</button>
-            <button class="btn-inline btn-pending" data-action="pending" data-id="${id}">${i18next.t('pending')}</button>
-            <button class="btn-inline btn-delete" data-action="delete" data-id="${id}">${i18next.t('delete')}</button>
-          </td>`;
-        tbody.appendChild(tr);
+    onSnapshot(collection(db,"requests"),snap=>{
+      tbody.innerHTML="";
+      if(snap.empty){tbody.innerHTML=`<tr><td colspan="7">${i18next.t('noData')}</td></tr>`;return;}
+      const data=[];snap.forEach(d=>data.push({id:d.id,...d.data()}));
+      data.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+      data.forEach(d=>{
+        const s=(d.status||"pending").toLowerCase(),id=d.id;
+        const tr=document.createElement("tr");
+        tr.innerHTML=`<td>${d.fullName||""}</td><td>${d.email||""}</td>
+        <td>${d.organization||""}</td><td>${d.phone||""}</td><td>${d.purpose||""}</td>
+        <td class="status ${s}">${s}</td>
+        <td>
+        <button class="btn-inline btn-success" data-action="approved" data-id="${id}">${i18next.t('approve')}</button>
+        <button class="btn-inline btn-danger" data-action="rejected" data-id="${id}">${i18next.t('reject')}</button>
+        <button class="btn-inline btn-pending" data-action="pending" data-id="${id}">${i18next.t('pending')}</button>
+        <button class="btn-inline btn-delete" data-action="delete" data-id="${id}">${i18next.t('delete')}</button>
+        </td>`;tbody.appendChild(tr);
       });
     });
 
-    tbody.addEventListener("click", async e => {
-      const btn = e.target.closest("button[data-action]");
-      if (!btn) return;
-      const id = btn.dataset.id;
-      const action = btn.dataset.action;
-
-      if (action === "delete") {
-        showModal(i18next.t('deleteTitle'), i18next.t('deleteMsg'), async () => {
-          await deleteDoc(doc(db, "requests", id));
-        });
-      } else {
-        const newStatus = action;
-        showModal(i18next.t('updateTitle'), `${i18next.t('confirmStatus')} ${newStatus}?`, async () => {
-          await updateDoc(doc(db, "requests", id), { status: newStatus });
-        });
+    tbody.addEventListener("click",async e=>{
+      const b=e.target.closest("button[data-action]");if(!b)return;
+      const id=b.dataset.id,action=b.dataset.action;
+      if(action==="delete"){
+        showModal(i18next.t('deleteTitle'),i18next.t('deleteMsg'),async()=>await deleteDoc(doc(db,"requests",id)));
+      }else{
+        showModal(i18next.t('updateTitle'),`${i18next.t('confirmStatus')} ${action}?`,async()=>await updateDoc(doc(db,"requests",id),{status:action}));
       }
     });
 
-    document.getElementById("searchInput").addEventListener("input", e => {
-      const term = e.target.value.toLowerCase();
-      document.querySelectorAll("#accessTable tbody tr").forEach(row => {
-        row.style.display = row.textContent.toLowerCase().includes(term) ? "" : "none";
-      });
+    document.getElementById("searchInput").addEventListener("input",e=>{
+      const t=e.target.value.toLowerCase();
+      document.querySelectorAll("#accessTable tbody tr").forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(t)?"":"none";});
     });
 
-    // === i18n ===
-    const resources = {
-      en: { translation: {
-        pageTitle: "Access Requests", logout: "Logout", dashboard: "Dashboard", verification: "Verification",
-        addLicense: "Add License", users: "Users", verRequests: "Verification Requests", analytics: "Analytics",
-        accessRequests: "Access Requests", recordsTitle: "Access Request Records",
-        searchPlaceholder: "Search...", name: "Full Name", email: "Email", org: "Organization", phone: "Phone",
-        purpose: "Purpose", status: "Status", action: "Action", approve: "Approve", reject: "Reject", pending: "Pending",
-        delete: "Delete", deleteTitle: "Delete Request", deleteMsg: "Are you sure you want to permanently delete this request?",
-        updateTitle: "Update Request", confirmStatus: "Confirm change to", confirm: "Confirm", cancel: "Cancel",
-        noData: "No requests found", loading: "Loading..."
-      }},
-      fr: { translation: {
-        pageTitle: "Demandes d'accès", logout: "Déconnexion", dashboard: "Tableau de bord", verification: "Vérification",
-        addLicense: "Ajouter un permis", users: "Utilisateurs", verRequests: "Demandes de vérification", analytics: "Analytique",
-        accessRequests: "Demandes d'accès", recordsTitle: "Enregistrements des demandes d'accès",
-        searchPlaceholder: "Rechercher...", name: "Nom complet", email: "E-mail", org: "Organisation", phone: "Téléphone",
-        purpose: "But", status: "Statut", action: "Action", approve: "Approuver", reject: "Rejeter", pending: "En attente",
-        delete: "Supprimer", deleteTitle: "Supprimer la demande", deleteMsg: "Voulez-vous vraiment supprimer cette demande ?",
-        updateTitle: "Mettre à jour la demande", confirmStatus: "Confirmer le changement en", confirm: "Confirmer",
-        cancel: "Annuler", noData: "Aucune demande trouvée", loading: "Chargement..."
-      }},
-      ja: { translation: {
-        pageTitle: "アクセスリクエスト", logout: "ログアウト", dashboard: "ダッシュボード", verification: "照会",
-        addLicense: "免許を追加", users: "ユーザー", verRequests: "照会リクエスト", analytics: "分析",
-        accessRequests: "アクセスリクエスト", recordsTitle: "アクセスリクエスト記録",
-        searchPlaceholder: "検索...", name: "氏名", email: "メール", org: "組織", phone: "電話",
-        purpose: "目的", status: "状態", action: "操作", approve: "承認", reject: "拒否", pending: "保留",
-        delete: "削除", deleteTitle: "リクエスト削除", deleteMsg: "このリクエストを完全に削除しますか？",
-        updateTitle: "リクエスト更新", confirmStatus: "ステータスを変更しますか：", confirm: "確認", cancel: "キャンセル",
-        noData: "リクエストが見つかりません", loading: "読み込み中..."
-      }}
-    };
+    const resources={en:{translation:{pageTitle:"Access Requests",logout:"Logout",dashboard:"Dashboard",verification:"Verification",
+    addLicense:"Add License",users:"Users",verRequests:"Verification Requests",analytics:"Analytics",accessRequests:"Access Requests",
+    recordsTitle:"Access Request Records",searchPlaceholder:"Search...",name:"Full Name",email:"Email",org:"Organization",phone:"Phone",
+    purpose:"Purpose",status:"Status",action:"Action",approve:"Approve",reject:"Reject",pending:"Pending",delete:"Delete",
+    deleteTitle:"Delete Request",deleteMsg:"Are you sure you want to permanently delete this request?",updateTitle:"Update Request",
+    confirmStatus:"Confirm change to",confirm:"Confirm",cancel:"Cancel",noData:"No requests found",loading:"Loading..."}},
+    fr:{translation:{pageTitle:"Demandes d'accès",logout:"Déconnexion",dashboard:"Tableau de bord",verification:"Vérification",
+    addLicense:"Ajouter un permis",users:"Utilisateurs",verRequests:"Demandes de vérification",analytics:"Analytique",
+    accessRequests:"Demandes d'accès",recordsTitle:"Enregistrements des demandes d'accès",searchPlaceholder:"Rechercher...",
+    name:"Nom complet",email:"E-mail",org:"Organisation",phone:"Téléphone",purpose:"But",status:"Statut",action:"Action",
+    approve:"Approuver",reject:"Rejeter",pending:"En attente",delete:"Supprimer",deleteTitle:"Supprimer la demande",
+    deleteMsg:"Voulez-vous vraiment supprimer cette demande ?",updateTitle:"Mettre à jour la demande",
+    confirmStatus:"Confirmer le changement en",confirm:"Confirmer",cancel:"Annuler",noData:"Aucune demande trouvée",loading:"Chargement..."}},
+    ja:{translation:{pageTitle:"アクセスリクエスト",logout:"ログアウト",dashboard:"ダッシュボード",verification:"照会",
+    addLicense:"免許を追加",users:"ユーザー",verRequests:"照会リクエスト",analytics:"分析",accessRequests:"アクセスリクエスト",
+    recordsTitle:"アクセスリクエスト記録",searchPlaceholder:"検索...",name:"氏名",email:"メール",org:"組織",phone:"電話",
+    purpose:"目的",status:"状態",action:"操作",approve:"承認",reject:"拒否",pending:"保留",delete:"削除",deleteTitle:"リクエスト削除",
+    deleteMsg:"このリクエストを完全に削除しますか？",updateTitle:"リクエスト更新",confirmStatus:"ステータスを変更しますか：",
+    confirm:"確認",cancel:"キャンセル",noData:"リクエストが見つかりません",loading:"読み込み中..."}}};
 
-    i18next.init({ resources, lng: "en", fallbackLng: "en" }).then(() => {
-      jqueryI18next.init(i18next, $);
-      $("body").localize();
-
-      document.getElementById("languageSwitcher").addEventListener("change", e => {
-        const lang = e.target.value;
-        i18next.changeLanguage(lang).then(() => {
-          $("body").localize();
-          document.querySelector("#searchInput").placeholder = i18next.t("searchPlaceholder");
-          document.querySelectorAll(".btn-success").forEach(b => b.textContent = i18next.t("approve"));
-          document.querySelectorAll(".btn-danger").forEach(b => b.textContent = i18next.t("reject"));
-          document.querySelectorAll(".btn-pending").forEach(b => b.textContent = i18next.t("pending"));
-          document.querySelectorAll(".btn-delete").forEach(b => b.textContent = i18next.t("delete"));
-          console.log("🌐 Language switched to:", lang);
-        });
+    i18next.init({resources,lng:"en",fallbackLng:"en"}).then(()=>{
+      jqueryI18next.init(i18next,$);$("body").localize();
+      const refreshText=()=>{
+        $("body").localize();
+        document.querySelector("#searchInput").placeholder=i18next.t("searchPlaceholder");
+        document.querySelectorAll(".btn-success").forEach(b=>b.textContent=i18next.t("approve"));
+        document.querySelectorAll(".btn-danger").forEach(b=>b.textContent=i18next.t("reject"));
+        document.querySelectorAll(".btn-pending").forEach(b=>b.textContent=i18next.t("pending"));
+        document.querySelectorAll(".btn-delete").forEach(b=>b.textContent=i18next.t("delete"));
+        document.querySelectorAll("th[data-i18n]").forEach(el=>el.textContent=i18next.t(el.dataset.i18n));
+      };
+      document.getElementById("languageSwitcher").addEventListener("change",e=>{
+        i18next.changeLanguage(e.target.value).then(refreshText);
       });
     });
   </script>
