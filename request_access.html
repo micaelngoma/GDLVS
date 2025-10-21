@@ -321,7 +321,8 @@
         searchPlaceholder: "Search...", name: "Full Name", email: "Email", org: "Organization", phone: "Phone",
         purpose: "Purpose", status: "Status", action: "Action", approve: "Approve", reject: "Reject", pending: "Pending",
         delete: "Delete", deleteTitle: "Delete Request", deleteMsg: "Are you sure you want to permanently delete this request?",
-        updateTitle: "Update Request", confirmStatus: "Confirm change to", confirm: "Confirm", cancel: "Cancel", noData: "No requests found", loading: "Loading..."
+        updateTitle: "Update Request", confirmStatus: "Confirm change to", confirm: "Confirm", cancel: "Cancel",
+        noData: "No requests found", loading: "Loading..."
       }},
       fr: { translation: {
         pageTitle: "Demandes d'accès", logout: "Déconnexion", dashboard: "Tableau de bord", verification: "Vérification",
@@ -345,24 +346,16 @@
       }}
     };
 
-    await i18next.init({ resources, lng: "en", fallbackLng: "en" });
-    jqueryI18next.init(i18next, $);
-    $("body").localize();
+    i18next.init({ resources, lng: "en", fallbackLng: "en" }).then(() => {
+      jqueryI18next.init(i18next, $);
+      $("body").localize();
 
-    // ✅ Fix: Language switcher with live re-localization
-    document.getElementById("languageSwitcher").addEventListener("change", e => {
-      const lang = e.target.value;
-      i18next.changeLanguage(lang, ()
-      const lang = e.target.value;
-      i18next.changeLanguage(lang, () => {
-        $("body").localize();
-        console.log("🌐 Language switched to:", lang);
-
-        // ✅ Re-localize modal and table button labels dynamically
-        document.querySelectorAll(".btn-inline.btn-success").forEach(b => b.textContent = i18next.t("approve"));
-        document.querySelectorAll(".btn-inline.btn-danger").forEach(b => b.textContent = i18next.t("reject"));
-        document.querySelectorAll(".btn-inline.btn-pending").forEach(b => b.textContent = i18next.t("pending"));
-        document.querySelectorAll(".btn-inline.btn-delete").forEach(b => b.textContent = i18next.t("delete"));
+      document.getElementById("languageSwitcher").addEventListener("change", e => {
+        const lang = e.target.value;
+        i18next.changeLanguage(lang).then(() => {
+          $("body").localize();
+          console.log("🌐 Language switched to:", lang);
+        });
       });
     });
   </script>
