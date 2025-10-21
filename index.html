@@ -2,89 +2,156 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>GDLVS - Access Requests</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <title>GDLVS - Login & Access Request</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <!-- ✅ UMD Version (same as index.html) -->
-  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+  <!-- i18n + jQuery -->
   <script src="https://unpkg.com/i18next@21.6.3/dist/umd/i18next.min.js"></script>
   <script src="https://unpkg.com/i18next-browser-languagedetector@6.1.2/i18nextBrowserLanguageDetector.min.js"></script>
+  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/jquery-i18next@1.2.1/dist/umd/jquery-i18next.min.js"></script>
 
-  <!-- Firebase SDK v8 (same pattern as your login page) -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    (function(){
+      emailjs.init("TfmaZEvxtz2MNUb70"); // ✅ Your EmailJS public key
+    })();
+  </script>
 
   <style>
-    body{font-family:Arial,sans-serif;color:#333;margin:0;background:#f6f8fb;}
-    .background-image{position:fixed;inset:0;background:url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') center/cover no-repeat;z-index:-1;filter:brightness(0.9);}
-    header{background:#2a3f54;color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;position:fixed;top:0;left:0;right:0;z-index:1000;}
-    header h1{margin:0;font-size:1.1rem;display:flex;gap:8px;align-items:center;}
-    .controls{display:flex;gap:8px;align-items:center;}
-    .controls select,.controls button{padding:6px 10px;border-radius:8px;border:0;font-size:.9rem;}
-    .controls select{background:#fff;color:#000;}
-    .controls button{background:#1e2d3c;color:#fff;cursor:pointer;}
-    nav{background:#1e2d3c;color:#fff;padding:10px 14px;display:flex;gap:16px;position:fixed;top:56px;left:0;right:0;z-index:999;}
-    nav a{color:#fff;text-decoration:none;font-weight:bold;transition:all 0.25s ease-in-out;}
-    nav a.active,nav a:hover{border-bottom:2px solid #f1c40f;padding-bottom:3px;box-shadow:0 2px 6px rgba(241,196,15,0.7);}
-    main.container{max-width:95vw;margin:120px auto 0;background:rgba(255,255,255,0.95);padding:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.2);}
-    .search-bar{width:50%;display:block;padding:10px;margin:0 auto 15px;border-radius:8px;border:1px solid #ccc;}
-    table{width:100%;border-collapse:collapse;margin-top:10px;table-layout:fixed;}
-    th,td{border:1px solid #eee;padding:8px;background:#fff;text-align:left;word-wrap:break-word;}
-    th{background:#f2f2f2;}
-    .status{font-weight:bold;text-transform:capitalize;}
-    .status.pending{color:#f1c40f;} .status.approved{color:#27ae60;} .status.rejected{color:#e74c3c;}
-    .btn-inline{padding:5px 8px;border-radius:6px;border:0;cursor:pointer;color:#fff;background:#2980b9;margin:2px;}
-    .btn-danger{background:#e74c3c;} .btn-success{background:#27ae60;} .btn-pending{background:#f1c40f;color:#000;} .btn-delete{background:#555;}
+    :root {
+      --brand-dark:#2a3f54;
+      --brand-dark-2:#1e2d3c;
+      --blue:#007bff;
+      --text:#333;
+      --muted:#666;
+      --shadow:0 2px 6px rgba(0,0,0,.2);
+      --success:#27ae60;
+      --danger:#e74c3c;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:Arial,sans-serif;
+      background:#f6f8fb;
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+    }
+
+    /* === Background Image === */
+    .background-image{
+      position:fixed;
+      inset:0;
+      background:url('https://raw.githubusercontent.com/micaelngoma/GDLVS/main/Gabon%20Forest.jpg') no-repeat center center fixed;
+      background-size:cover;
+      z-index:-1;
+      filter:brightness(0.9);
+    }
+
+    /* === Unified Box Styling === */
+    .welcome-section,
+    .login-container,
+    .container {
+      width:90%;
+      max-width:980px;
+      margin:40px auto 20px;
+      padding:30px 28px;
+      background:rgba(255,255,255,0.88);
+      border-radius:12px;
+      box-shadow:var(--shadow);
+      text-align:center;
+      transition:all .3s ease;
+    }
+
+    /* === Welcome Section === */
+    .car-hero{font-size:72px;color:var(--brand-dark);}
+    .welcome-section h1{color:var(--brand-dark);margin:10px 0;}
+    .welcome-text{max-width:860px;margin:0 auto;font-size:1.05rem;}
+
+    /* === Form Elements === */
+    input,textarea,button,select{
+      width:100%;
+      padding:10px;
+      margin:8px 0;
+      border:1px solid #dcdcdc;
+      border-radius:8px;
+      font-size:.98rem;
+      background:rgba(255,255,255,0.95);
+    }
+    textarea{resize:vertical;min-height:100px;}
+    button{
+      background:var(--brand-dark);
+      color:#fff;
+      cursor:pointer;
+      transition:.2s;
+      font-weight:bold;
+    }
+    button:hover{background:var(--brand-dark-2);}
+    a{color:var(--blue);font-weight:bold;text-decoration:none;}
+    a:hover{text-decoration:underline;}
+    .muted{color:var(--muted);font-size:.95rem;}
+    #msg{margin-top:10px;font-weight:bold;}
+
+    /* === Footer === */
+    footer{text-align:center;margin:20px 0 40px;}
+    #languageSwitcher{width:auto;padding:6px 10px;border-radius:8px;}
   </style>
 </head>
 
 <body>
   <div class="background-image"></div>
 
-  <header>
-    <h1><i class="fas fa-user-check"></i> <span data-i18n="pageTitle">Access Requests</span></h1>
-    <div class="controls">
-      <select id="languageSwitcher">
-        <option value="en">🇬🇧 English</option>
-        <option value="fr">🇫🇷 Français</option>
-        <option value="ja">🇯🇵 日本語</option>
-      </select>
-      <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></button>
+  <!-- === Welcome Banner === -->
+  <section class="welcome-section">
+    <img src="https://github.com/micaelngoma/GDLVS/raw/main/GDLVS%20Logo.png" 
+         alt="GDLVS Logo" 
+         style="height:180px;width:auto;display:inline-block;">
+    <h1 data-i18n="welcomeTitle">Welcome</h1>
+    <p class="welcome-text" data-i18n="welcomeMessage">
+      Welcome to the <strong>Gabon Driver’s License Verification System (GDLVS)</strong> — 
+      a secure platform designed to verify the authenticity of Gabonese driver’s license IDs.
+    </p>
+  </section>
+
+  <!-- === Login Section (Dynamic) === -->
+  <div class="login-container" id="mainContainer">
+    <div id="loginPage">
+      <h2><i class="fas fa-id-card"></i> <span data-i18n="login">Login</span></h2>
+      <form id="loginForm" onsubmit="loginUser(event)">
+        <input type="email" id="email" required data-i18n="[placeholder]emailPlaceholder" placeholder="Email" />
+        <input type="password" id="password" required data-i18n="[placeholder]passwordPlaceholder" placeholder="Password" />
+        <button type="submit"><i class="fas fa-sign-in-alt"></i> <span data-i18n="loginBtn">Login</span></button>
+      </form>
+      <div class="links-row">
+        <a href="#" onclick="resetPassword()" data-i18n="forgotPassword">Forgot Password?</a>
+      </div>
+      <div id="msg" class="muted"></div>
+      <p class="muted">
+        <span data-i18n="noAccount">Don’t have an account?</span>
+        <a href="#" onclick="showRequestAccess()" data-i18n="requestAccessHere">Request access here</a>
+      </p>
     </div>
-  </header>
+  </div>
 
-  <nav>
-    <a href="dashboard.html" data-i18n="dashboard"><i class="fas fa-home"></i> Dashboard</a>
-    <a href="verify.html" data-i18n="verification"><i class="fas fa-search"></i> Verification</a>
-    <a href="add_licenses.html" data-i18n="addLicense"><i class="fas fa-id-card"></i> Add License</a>
-    <a href="users.html" data-i18n="users"><i class="fas fa-users-cog"></i> Users</a>
-    <a href="verification_requests.html" data-i18n="verRequests"><i class="fas fa-inbox"></i> Verification Requests</a>
-    <a href="request_access.html" class="active" data-i18n="accessRequests"><i class="fas fa-user-check"></i> Access Requests</a>
-    <a href="analytics.html" data-i18n="analytics"><i class="fas fa-chart-bar"></i> Analytics</a>
-  </nav>
+  <footer>
+    <label for="languageSwitcher"><i class="fas fa-globe"></i></label>
+    <select id="languageSwitcher">
+      <option value="en">🇬🇧 English</option>
+      <option value="fr">🇫🇷 Français</option>
+      <option value="ja">🇯🇵 日本語</option>
+    </select>
+  </footer>
 
-  <main class="container">
-    <h2><i class="fas fa-table"></i> <span data-i18n="recordsTitle">Access Request Records</span></h2>
-    <input type="text" id="searchInput" class="search-bar" placeholder="Search..." data-i18n="[placeholder]searchPlaceholder">
-    <table id="accessTable">
-      <thead>
-        <tr>
-          <th data-i18n="name">Full Name</th>
-          <th data-i18n="email">Email</th>
-          <th data-i18n="org">Organization</th>
-          <th data-i18n="phone">Phone</th>
-          <th data-i18n="purpose">Purpose</th>
-          <th data-i18n="status">Status</th>
-          <th data-i18n="action">Action</th>
-        </tr>
-      </thead>
-      <tbody><tr><td colspan="7" data-i18n="loading">Loading...</td></tr></tbody>
-    </table>
-  </main>
-
+  <!-- === Script Section === -->
   <script>
     /* === Firebase Init === */
     const firebaseConfig = {
@@ -96,87 +163,160 @@
       appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
     };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
     const auth = firebase.auth();
+    const db = firebase.firestore();
 
-    /* === Auth Redirect === */
-    auth.onAuthStateChanged(user => { if (!user) location.href = "index.html"; });
-    document.getElementById("logoutBtn").onclick = () => auth.signOut().then(() => location.href="index.html");
-
-    /* === i18n Translations === */
+    /* === Translations === */
     const i18nResources = {
       en:{translation:{
-        pageTitle:"Access Requests",logout:"Logout",dashboard:"Dashboard",verification:"Verification",
-        addLicense:"Add License",users:"Users",verRequests:"Verification Requests",analytics:"Analytics",
-        accessRequests:"Access Requests",recordsTitle:"Access Request Records",
-        searchPlaceholder:"Search...",name:"Full Name",email:"Email",org:"Organization",phone:"Phone",
-        purpose:"Purpose",status:"Status",action:"Action",approve:"Approve",reject:"Reject",pending:"Pending",
-        delete:"Delete",loading:"Loading..."
+        welcomeTitle:"Welcome",
+        welcomeMessage:"Welcome to the Gabon Driver’s License Verification System (GDLVS) — a secure platform designed to verify the authenticity of Gabonese driver’s license IDs.",
+        login:"Login",loginBtn:"Login",emailPlaceholder:"Email",passwordPlaceholder:"Password",
+        forgotPassword:"Forgot Password?",noAccount:"Don’t have an account?",requestAccessHere:"Request access here",
+        verifyEmailFirst:"Please verify your email before logging in.",
+        adminWelcome:"Welcome Admin!",loginSuccess:"Login successful!",
+        requestAccess:"Request Access",submitRequest:"Submit Request",
+        approvalNotice:"Your request will be reviewed by the administrator.",
+        fullNamePlaceholder:"Full Name",emailPlaceholder:"Email",organizationPlaceholder:"Organization / Agency",
+        phonePlaceholder:"Phone Number",purposePlaceholder:"Purpose of access...",
+        backToLogin:"← Back to Login"
       }},
       fr:{translation:{
-        pageTitle:"Demandes d'accès",logout:"Déconnexion",dashboard:"Tableau de bord",verification:"Vérification",
-        addLicense:"Ajouter un permis",users:"Utilisateurs",verRequests:"Demandes de vérification",analytics:"Analytique",
-        accessRequests:"Demandes d'accès",recordsTitle:"Enregistrements des demandes d'accès",
-        searchPlaceholder:"Rechercher...",name:"Nom complet",email:"E-mail",org:"Organisation",phone:"Téléphone",
-        purpose:"But",status:"Statut",action:"Action",approve:"Approuver",reject:"Rejeter",pending:"En attente",
-        delete:"Supprimer",loading:"Chargement..."
+        welcomeTitle:"Bienvenue",welcomeMessage:"Bienvenue sur le Système Gabonais de Vérification des Permis de Conduire (GDLVS).",
+        login:"Connexion",loginBtn:"Connexion",emailPlaceholder:"Adresse e-mail",passwordPlaceholder:"Mot de passe",
+        forgotPassword:"Mot de passe oublié ?",noAccount:"Pas de compte ?",requestAccessHere:"Demander un accès ici",
+        verifyEmailFirst:"Veuillez d’abord vérifier votre e-mail.",adminWelcome:"Bienvenue Administrateur!",loginSuccess:"Connexion réussie!",
+        requestAccess:"Demande d’accès",submitRequest:"Soumettre la demande",
+        approvalNotice:"Votre demande sera examinée par l’administrateur.",
+        fullNamePlaceholder:"Nom complet",organizationPlaceholder:"Organisation / Agence",
+        phonePlaceholder:"Numéro de téléphone",purposePlaceholder:"But de l'accès...",
+        backToLogin:"← Retour à la connexion"
       }},
       ja:{translation:{
-        pageTitle:"アクセスリクエスト",logout:"ログアウト",dashboard:"ダッシュボード",verification:"照会",
-        addLicense:"免許を追加",users:"ユーザー",verRequests:"照会リクエスト",analytics:"分析",
-        accessRequests:"アクセスリクエスト",recordsTitle:"アクセスリクエスト記録",
-        searchPlaceholder:"検索...",name:"氏名",email:"メール",org:"組織",phone:"電話",
-        purpose:"目的",status:"状態",action:"操作",approve:"承認",reject:"拒否",pending:"保留",
-        delete:"削除",loading:"読み込み中..."
+        welcomeTitle:"ようこそ",welcomeMessage:"ガボン運転免許証認証システム (GDLVS) へようこそ。ガボンの運転免許証の真正性を確認する安全なプラットフォームです。",
+        login:"ログイン",loginBtn:"ログイン",emailPlaceholder:"メールアドレス",passwordPlaceholder:"パスワード",
+        forgotPassword:"パスワードをお忘れですか？",noAccount:"アカウントをお持ちでない場合",requestAccessHere:"アクセスをリクエストする",
+        verifyEmailFirst:"ログインする前にメールを確認してください。",adminWelcome:"管理者としてようこそ!",loginSuccess:"ログイン成功!",
+        requestAccess:"アクセス申請",submitRequest:"申請を送信",
+        approvalNotice:"管理者が申請内容を確認します。",
+        fullNamePlaceholder:"氏名",organizationPlaceholder:"組織 / 機関",
+        phonePlaceholder:"電話番号",purposePlaceholder:"アクセス目的...",
+        backToLogin:"← ログインに戻る"
       }}
     };
 
     i18next.use(i18nextBrowserLanguageDetector).init(
       {resources:i18nResources,fallbackLng:"en"},
-      () => { jqueryI18next.init(i18next,$,{useOptionsAttr:true}); $("body").localize(); }
+      ()=>{jqueryI18next.init(i18next,$,{useOptionsAttr:true});$("body").localize();}
     );
 
     /* === Language Switcher === */
     document.getElementById("languageSwitcher").addEventListener("change", function(){
-      const lang=this.value;
-      i18next.changeLanguage(lang, ()=>{ $("body").localize(); });
-    });
-
-    /* === Firestore Realtime Load === */
-    const tbody=document.querySelector("#accessTable tbody");
-    db.collection("requests").orderBy("createdAt","desc").onSnapshot(snap=>{
-      tbody.innerHTML="";
-      if(snap.empty){
-        tbody.innerHTML=`<tr><td colspan="7" data-i18n="noData">No requests found</td></tr>`;
+      const selectedLang = this.value;
+      i18next.changeLanguage(selectedLang, () => {
+        console.log("🌐 Language switched to:", selectedLang);
         $("body").localize();
-        return;
-      }
-      snap.forEach(doc=>{
-        const d=doc.data(),status=(d.status||"pending").toLowerCase();
-        tbody.innerHTML+=`
-          <tr>
-            <td>${d.fullName||""}</td>
-            <td>${d.email||""}</td>
-            <td>${d.organization||""}</td>
-            <td>${d.phone||""}</td>
-            <td>${d.purpose||""}</td>
-            <td class="status ${status}">${status}</td>
-            <td>
-              <button class="btn-inline btn-success" data-i18n="approve">${i18next.t("approve")}</button>
-              <button class="btn-inline btn-danger" data-i18n="reject">${i18next.t("reject")}</button>
-              <button class="btn-inline btn-pending" data-i18n="pending">${i18next.t("pending")}</button>
-              <button class="btn-inline btn-delete" data-i18n="delete">${i18next.t("delete")}</button>
-            </td>
-          </tr>`;
+        // ✅ if user is on request page, re-localize that section
+        if (document.getElementById("requestContainer")) $("body").localize();
       });
-      $("body").localize();
     });
 
-    /* === Search Filter === */
-    document.getElementById("searchInput").addEventListener("input",e=>{
-      const t=e.target.value.toLowerCase();
-      document.querySelectorAll("#accessTable tbody tr").forEach(r=>r.style.display=r.textContent.toLowerCase().includes(t)?"":"none");
-    });
+    /* === Helpers === */
+    function showMsg(t,ok=false){const m=document.getElementById("msg");m.textContent=t;m.style.color=ok?"green":"red";}
+
+    /* === Login === */
+    async function loginUser(e){
+      e.preventDefault();
+      const email=document.getElementById("email").value.trim();
+      const password=document.getElementById("password").value;
+      try{
+        const cred=await auth.signInWithEmailAndPassword(email,password);
+        if(!cred.user.emailVerified){await cred.user.sendEmailVerification();showMsg(i18next.t("verifyEmailFirst"));await auth.signOut();return;}
+        const roleDoc=await db.collection("roles").doc(email).get();
+        const role=roleDoc.exists?roleDoc.data().role:"verifier";
+        showMsg(i18next.t(role==="admin"?"adminWelcome":"loginSuccess"),true);
+        setTimeout(()=>window.location.href=role==="admin"?"dashboard.html":"verify.html",700);
+      }catch(err){showMsg("❌ "+err.message);}
+    }
+
+    /* === Password Reset === */
+    async function resetPassword(){
+      const email=document.getElementById("email")?.value.trim()||prompt("Enter your email:");
+      if(!email) return;
+      try{await auth.sendPasswordResetEmail(email);alert("Password reset email sent!");}
+      catch(err){alert("Error: "+err.message);}
+    }
+
+    /* === Request Access (Firestore + EmailJS) === */
+    function showRequestAccess(){
+      const html = `
+        <div class="container" id="requestContainer">
+          <h2><i class="fas fa-user-plus"></i> <span data-i18n="requestAccess">${i18next.t("requestAccess")}</span></h2>
+          <form id="requestForm" onsubmit="submitAccessRequest(event)">
+            <input type="text" id="requestFullName" required data-i18n="[placeholder]fullNamePlaceholder" placeholder="${i18next.t("fullNamePlaceholder")}" />
+            <input type="email" id="requestEmail" required data-i18n="[placeholder]emailPlaceholder" placeholder="${i18next.t("emailPlaceholder")}" />
+            <input type="text" id="organization" required data-i18n="[placeholder]organizationPlaceholder" placeholder="${i18next.t("organizationPlaceholder")}" />
+            <input type="tel" id="phone" required data-i18n="[placeholder]phonePlaceholder" placeholder="${i18next.t("phonePlaceholder")}" />
+            <textarea id="purpose" required rows="4" data-i18n="[placeholder]purposePlaceholder" placeholder="${i18next.t("purposePlaceholder")}"></textarea>
+            <button type="submit"><i class="fas fa-paper-plane"></i> <span data-i18n="submitRequest">${i18next.t("submitRequest")}</span></button>
+          </form>
+          <div id="msg"></div>
+          <p class="muted" data-i18n="approvalNotice">${i18next.t("approvalNotice")}</p>
+          <p class="muted"><a href="#" onclick="showLoginPage()" data-i18n="backToLogin">${i18next.t("backToLogin")}</a></p>
+        </div>`;
+      document.getElementById("mainContainer").innerHTML = html;
+      $("body").localize();
+      console.log("🔄 Request access page localized in:", i18next.language);
+    }
+
+    async function submitAccessRequest(event) {
+      event.preventDefault();
+      const fullName = document.getElementById("requestFullName").value.trim();
+      const email = document.getElementById("requestEmail").value.trim();
+      const organization = document.getElementById("organization").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const purpose = document.getElementById("purpose").value.trim();
+      const msgBox = document.getElementById("msg");
+
+      msgBox.innerHTML = "⏳ Submitting your request...";
+      msgBox.style.color = "#004aad";
+
+      try {
+        await db.collection("requests").add({
+          fullName,
+          email,
+          organization,
+          phone,
+          purpose,
+          status: "pending",
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+
+        await emailjs.send("service_ddq3kka", "template_inl3jsv", {
+          name: fullName,
+          email: email,
+          organization: organization,
+          phone: phone,
+          purpose: purpose
+        });
+
+        msgBox.innerHTML = "✅ Your request has been submitted successfully! You'll receive a confirmation email within 72 hours.";
+        msgBox.style.color = "green";
+        document.getElementById("requestForm").reset();
+      } catch (error) {
+        console.error("❌ Error submitting request:", error);
+        msgBox.innerHTML = "⚠️ Failed to submit request. Please try again later.";
+        msgBox.style.color = "red";
+      }
+    }
+
+    function showLoginPage(){location.reload();}
+
+    /* === Expose for HTML === */
+    window.loginUser=loginUser;
+    window.resetPassword=resetPassword;
+    window.showRequestAccess=showRequestAccess;
+    window.submitAccessRequest=submitAccessRequest;
   </script>
 </body>
 </html>
