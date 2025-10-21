@@ -36,7 +36,7 @@
     .controls { display: flex; gap: 8px; }
     .controls select, .controls button { padding: 6px 10px; border-radius: 8px; border: 0; }
     .controls select { background: #fff; }
-    .controls button { background: var(--brand-dark-2); color: #fff; }
+    .controls button { background: var(--brand-dark-2); color: #fff; cursor: pointer; }
     nav { background: #fff; border-bottom: 1px solid #eaeaea; padding: 10px 14px; display: flex; gap: 15px; flex-wrap: wrap; position: sticky; top: 0; z-index: 100; }
     nav a { color: var(--brand-dark); font-weight: bold; text-decoration: none; }
     nav a.active { border-bottom: 2px solid var(--brand-dark); padding-bottom: 3px; }
@@ -71,7 +71,7 @@
     <a href="add_licenses.html"><i class="fas fa-id-card"></i> <span data-i18n="addLicense">Add License</span></a>
     <a href="users.html" class="active"><i class="fas fa-users-cog"></i> <span data-i18n="userManagement">User Management</span></a>
     <a id="navVerificationRequests" href="verification_requests.html"><i class="fas fa-inbox"></i> <span data-i18n="verificationRequests">Verification Requests</span></a>
-    <a href="request_access.html"><i class="fas fa-user-check"></i> Access Requests</a>
+    <a href="request_access.html"><i class="fas fa-user-check"></i> <span data-i18n="accessRequests">Access Requests</span></a>
     <a href="analytics.html"><i class="fas fa-chart-bar"></i> <span data-i18n="analytics">Analytics</span></a>
   </nav>
 
@@ -116,9 +116,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { 
-      getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, getDocs, getDoc 
-    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
@@ -135,13 +133,51 @@
 
     // 🌐 Translations
     const i18nResources = {
-      en:{translation:{dashboard:"Dashboard",verificationPortal:"Verification",addLicense:"Add License",userManagement:"User Management",verificationRequests:"Verification Requests",analytics:"Analytics",logout:"Logout",userTip:"Admins can add, edit, or remove users directly from here.",searchUsers:"Search users by name or email...",fullName:"Full Name",email:"Email",role:"Role",status:"Status",action:"Action",addUser:"Add User",exportUsers:"Export Users",updateUser:"Update",delete:"Delete",loading:"Loading...",emailPlaceholder:"Email"}},
-      fr:{translation:{dashboard:"Tableau de bord",verificationPortal:"Vérification",addLicense:"Ajouter un permis",userManagement:"Gestion des utilisateurs",verificationRequests:"Demandes de vérification",analytics:"Analytique",logout:"Déconnexion",userTip:"Les administrateurs peuvent ajouter, modifier ou supprimer des utilisateurs ici.",searchUsers:"Rechercher des utilisateurs par nom ou e-mail…",fullName:"Nom complet",email:"Email",role:"Rôle",status:"Statut",action:"Action",addUser:"Ajouter un utilisateur",exportUsers:"Exporter les utilisateurs",updateUser:"Mettre à jour",delete:"Supprimer",loading:"Chargement...",emailPlaceholder:"Email"}},
-      ja:{translation:{dashboard:"ダッシュボード",verificationPortal:"照合",addLicense:"免許を追加",userManagement:"ユーザー管理",verificationRequests:"照合リクエスト",analytics:"分析",logout:"ログアウト",userTip:"管理者はここでユーザーを追加・編集・削除できます。",searchUsers:"氏名またはメールで検索…",fullName:"氏名",email:"メール",role:"役割",status:"ステータス",action:"操作",addUser:"ユーザーを追加",exportUsers:"ユーザーをエクスポート",updateUser:"更新",delete:"削除",loading:"読み込み中…",emailPlaceholder:"メール"}}
+      en:{translation:{
+        dashboard:"Dashboard",verificationPortal:"Verification",addLicense:"Add License",userManagement:"User Management",verificationRequests:"Verification Requests",
+        analytics:"Analytics",accessRequests:"Access Requests",logout:"Logout",
+        userTip:"Admins can add, edit, or remove users directly from here.",searchUsers:"Search users by name or email...",
+        fullName:"Full Name",email:"Email",role:"Role",status:"Status",action:"Action",
+        addUser:"Add User",exportUsers:"Export Users",updateUser:"Update",delete:"Delete",loading:"Loading...",
+        emailPlaceholder:"Email",added:"✅ User added successfully",updated:"✅ User updated successfully",deleted:"🗑️ User deleted",
+        nameEmailRequired:"Name & Email required"
+      }},
+      fr:{translation:{
+        dashboard:"Tableau de bord",verificationPortal:"Vérification",addLicense:"Ajouter un permis",userManagement:"Gestion des utilisateurs",verificationRequests:"Demandes de vérification",
+        analytics:"Analytique",accessRequests:"Demandes d'accès",logout:"Déconnexion",
+        userTip:"Les administrateurs peuvent ajouter, modifier ou supprimer des utilisateurs ici.",searchUsers:"Rechercher des utilisateurs par nom ou e-mail…",
+        fullName:"Nom complet",email:"Email",role:"Rôle",status:"Statut",action:"Action",
+        addUser:"Ajouter un utilisateur",exportUsers:"Exporter les utilisateurs",updateUser:"Mettre à jour",delete:"Supprimer",loading:"Chargement...",
+        emailPlaceholder:"Email",added:"✅ Utilisateur ajouté avec succès",updated:"✅ Utilisateur mis à jour avec succès",deleted:"🗑️ Utilisateur supprimé",
+        nameEmailRequired:"Nom et e-mail requis"
+      }},
+      ja:{translation:{
+        dashboard:"ダッシュボード",verificationPortal:"照合",addLicense:"免許を追加",userManagement:"ユーザー管理",verificationRequests:"照合リクエスト",
+        analytics:"分析",accessRequests:"アクセス申請",logout:"ログアウト",
+        userTip:"管理者はここでユーザーを追加・編集・削除できます。",searchUsers:"氏名またはメールで検索…",
+        fullName:"氏名",email:"メール",role:"役割",status:"ステータス",action:"操作",
+        addUser:"ユーザーを追加",exportUsers:"ユーザーをエクスポート",updateUser:"更新",delete:"削除",loading:"読み込み中…",
+        emailPlaceholder:"メール",added:"✅ ユーザーが追加されました",updated:"✅ ユーザーが更新されました",deleted:"🗑️ ユーザーが削除されました",
+        nameEmailRequired:"名前とメールが必要です"
+      }}
     };
 
-    i18next.use(i18nextBrowserLanguageDetector).init({resources:i18nResources,fallbackLng:"en"},()=>{jqueryI18next.init(i18next,$,{useOptionsAttr:true});$("body").localize();});
-    document.getElementById("languageSwitcher").addEventListener("change",function(){i18next.changeLanguage(this.value,()=>$("body").localize());});
+    // 🌍 Initialize i18next
+    i18next.use(i18nextBrowserLanguageDetector).init(
+      {resources:i18nResources,fallbackLng:"en"},
+      ()=>{jqueryI18next.init(i18next,$,{useOptionsAttr:true});$("body").localize();}
+    );
+
+    // 🌐 Language switcher
+    document.getElementById("languageSwitcher").addEventListener("change",function(){
+      const lang=this.value;
+      i18next.changeLanguage(lang,()=>{
+        $("body").localize();
+        console.log("🌐 Language switched to:", lang);
+        document.querySelectorAll(".btn-update span").forEach(e=>e.textContent=i18next.t("updateUser"));
+        document.querySelectorAll(".btn-delete span").forEach(e=>e.textContent=i18next.t("delete"));
+      });
+    });
 
     // 🔒 Auth check
     onAuthStateChanged(auth, async(user)=>{
@@ -156,7 +192,6 @@
     const tbody=document.getElementById("usersTable");
     const rolesCache={};
 
-    // Listen for both users and roles
     onSnapshot(collection(db,"roles"),(roleSnap)=>{
       roleSnap.forEach(r=>rolesCache[r.id]=r.data().role||"verifier");
     });
@@ -173,8 +208,8 @@
           <td>${u.email}</td>
           <td><select data-field="role"><option ${role==="verifier"?"selected":""}>verifier</option><option ${role==="admin"?"selected":""}>admin</option></select></td>
           <td><select data-field="status"><option ${u.status==="approved"?"selected":""}>approved</option><option ${u.status==="pending"?"selected":""}>pending</option><option ${u.status==="disabled"?"selected":""}>disabled</option></select></td>
-          <td><button class="inline btn-update" data-email="${u.email}">${i18next.t("updateUser")}</button>
-              <button class="inline btn-delete" data-email="${u.email}">${i18next.t("delete")}</button></td>`;
+          <td><button class="inline btn-update" data-email="${u.email}"><span>${i18next.t("updateUser")}</span></button>
+              <button class="inline btn-delete" data-email="${u.email}"><span>${i18next.t("delete")}</span></button></td>`;
         tbody.appendChild(tr);
       });
     });
@@ -185,17 +220,18 @@
       const name=document.getElementById("newUserName").value.trim();
       const email=document.getElementById("newUserEmail").value.trim();
       const role=document.getElementById("newUserRole").value;
-      if(!name||!email)return alert("Name & Email required");
+      if(!name||!email)return alert(i18next.t("nameEmailRequired"));
       await setDoc(doc(db,"users",email),{fullName:name,email,role,status:"approved",approved:true},{merge:true});
       await setDoc(doc(db,"roles",email),{role},{merge:true});
-      e.target.reset();alert("✅ User added successfully");
+      e.target.reset();alert(i18next.t("added"));
     });
 
     // ✏️ Update / Delete user
     tbody.addEventListener("click",async(e)=>{
-      const t=e.target;
-      if(t.closest(".btn-update")){
-        const email=t.dataset.email;
+      const t=e.target.closest("button");
+      if(!t)return;
+      const email=t.dataset.email;
+      if(t.classList.contains("btn-update")){
         const tr=t.closest("tr");
         const updates={};
         tr.querySelectorAll("[data-field]").forEach(el=>{
@@ -205,15 +241,14 @@
         try{
           await setDoc(doc(db,"users",email),{fullName:updates.fullName,role:updates.role,status:updates.status,approved:(updates.status==="approved")},{merge:true});
           await setDoc(doc(db,"roles",email),{role:updates.role},{merge:true});
-          alert("✅ User updated successfully (role + status synced)");
+          alert(i18next.t("updated"));
         }catch(err){console.error(err);alert("❌ Failed to update user.");}
       }
-      if(t.closest(".btn-delete")){
-        const email=t.dataset.email;
-        if(!confirm(`Delete ${email}?`))return;
+      if(t.classList.contains("btn-delete")){
+        if(!confirm(`${i18next.t("delete")} ${email}?`))return;
         await deleteDoc(doc(db,"users",email));
         await deleteDoc(doc(db,"roles",email));
-        alert("🗑️ User deleted");
+        alert(i18next.t("deleted"));
       }
     });
 
@@ -234,7 +269,10 @@
         csv.push(Array.from(cols).map(c=>`"${c.innerText.replace(/"/g,'""')}"`).join(","));
       });
       const blob=new Blob([csv.join("\n")],{type:"text/csv"});
-      const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="users_export.csv";a.click();
+      const a=document.createElement("a");
+      a.href=URL.createObjectURL(blob);
+      a.download="users_export.csv";
+      a.click();
     });
   </script>
 </body>
