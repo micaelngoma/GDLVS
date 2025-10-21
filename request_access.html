@@ -344,14 +344,27 @@
         noData: "リクエストが見つかりません", loading: "読み込み中..."
       }}
     };
+
     await i18next.init({ resources, lng: "en", fallbackLng: "en" });
     jqueryI18next.init(i18next, $);
     $("body").localize();
+
+    // ✅ Fix: Language switcher with live re-localization
     document.getElementById("languageSwitcher").addEventListener("change", e => {
-      i18
-      i18next.changeLanguage(e.target.value, () => $("body").localize());
+      const lang = e.target.value;
+      i18next.changeLanguage(lang, ()
+      const lang = e.target.value;
+      i18next.changeLanguage(lang, () => {
+        $("body").localize();
+        console.log("🌐 Language switched to:", lang);
+
+        // ✅ Re-localize modal and table button labels dynamically
+        document.querySelectorAll(".btn-inline.btn-success").forEach(b => b.textContent = i18next.t("approve"));
+        document.querySelectorAll(".btn-inline.btn-danger").forEach(b => b.textContent = i18next.t("reject"));
+        document.querySelectorAll(".btn-inline.btn-pending").forEach(b => b.textContent = i18next.t("pending"));
+        document.querySelectorAll(".btn-inline.btn-delete").forEach(b => b.textContent = i18next.t("delete"));
+      });
     });
   </script>
-
 </body>
 </html>
