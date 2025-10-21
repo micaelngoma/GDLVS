@@ -65,7 +65,7 @@
       max-width:980px;
       margin:40px auto 20px;
       padding:30px 28px;
-      background:rgba(255,255,255,0.88); /* semi-transparent for background blend */
+      background:rgba(255,255,255,0.88);
       border-radius:12px;
       box-shadow:var(--shadow);
       text-align:center;
@@ -209,8 +209,16 @@
       {resources:i18nResources,fallbackLng:"en"},
       ()=>{jqueryI18next.init(i18next,$,{useOptionsAttr:true});$("body").localize();}
     );
-    document.getElementById("languageSwitcher").addEventListener("change",function(){
-      i18next.changeLanguage(this.value,()=>$("body").localize());
+
+    /* === Language Switcher === */
+    document.getElementById("languageSwitcher").addEventListener("change", function(){
+      const selectedLang = this.value;
+      i18next.changeLanguage(selectedLang, () => {
+        console.log("🌐 Language switched to:", selectedLang);
+        $("body").localize();
+        // ✅ if user is on request page, re-localize that section
+        if (document.getElementById("requestContainer")) $("body").localize();
+      });
     });
 
     /* === Helpers === */
@@ -242,21 +250,23 @@
     /* === Request Access (Firestore + EmailJS) === */
     function showRequestAccess(){
       const html = `
-        <div class="container">
-          <h2><i class="fas fa-user-plus"></i> ${i18next.t("requestAccess")}</h2>
+        <div class="container" id="requestContainer">
+          <h2><i class="fas fa-user-plus"></i> <span data-i18n="requestAccess">${i18next.t("requestAccess")}</span></h2>
           <form id="requestForm" onsubmit="submitAccessRequest(event)">
-            <input type="text" id="requestFullName" required placeholder="${i18next.t("fullNamePlaceholder")}" />
-            <input type="email" id="requestEmail" required placeholder="${i18next.t("emailPlaceholder")}" />
-            <input type="text" id="organization" required placeholder="${i18next.t("organizationPlaceholder")}" />
-            <input type="tel" id="phone" required placeholder="${i18next.t("phonePlaceholder")}" />
-            <textarea id="purpose" required rows="4" placeholder="${i18next.t("purposePlaceholder")}"></textarea>
-            <button type="submit"><i class="fas fa-paper-plane"></i> ${i18next.t("submitRequest")}</button>
+            <input type="text" id="requestFullName" required data-i18n="[placeholder]fullNamePlaceholder" placeholder="${i18next.t("fullNamePlaceholder")}" />
+            <input type="email" id="requestEmail" required data-i18n="[placeholder]emailPlaceholder" placeholder="${i18next.t("emailPlaceholder")}" />
+            <input type="text" id="organization" required data-i18n="[placeholder]organizationPlaceholder" placeholder="${i18next.t("organizationPlaceholder")}" />
+            <input type="tel" id="phone" required data-i18n="[placeholder]phonePlaceholder" placeholder="${i18next.t("phonePlaceholder")}" />
+            <textarea id="purpose" required rows="4" data-i18n="[placeholder]purposePlaceholder" placeholder="${i18next.t("purposePlaceholder")}"></textarea>
+            <button type="submit"><i class="fas fa-paper-plane"></i> <span data-i18n="submitRequest">${i18next.t("submitRequest")}</span></button>
           </form>
           <div id="msg"></div>
-          <p class="muted">${i18next.t("approvalNotice")}</p>
-          <p class="muted"><a href="#" onclick="showLoginPage()">${i18next.t("backToLogin")}</a></p>
+          <p class="muted" data-i18n="approvalNotice">${i18next.t("approvalNotice")}</p>
+          <p class="muted"><a href="#" onclick="showLoginPage()" data-i18n="backToLogin">${i18next.t("backToLogin")}</a></p>
         </div>`;
       document.getElementById("mainContainer").innerHTML = html;
+      $("body").localize();
+      console.log("🔄 Request access page localized in:", i18next.language);
     }
 
     async function submitAccessRequest(event) {
