@@ -123,7 +123,6 @@
     .btn-pending { background: #f1c40f; color: #000; }
     .btn-delete { background: #555; }
 
-    /* ===== MODAL ===== */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -228,9 +227,11 @@
       messagingSenderId: "358715790318",
       appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
     };
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
+
     onAuthStateChanged(auth, user => { if (!user) location.href = "index.html"; });
     document.getElementById("logoutBtn").onclick = () => signOut(auth).then(() => location.href = "index.html");
 
@@ -251,9 +252,9 @@
         </div>`;
       modalContainer.style.display = "block";
       modalContainer.querySelector(".cancel").onclick = () => modalContainer.style.display = "none";
-      modalContainer.querySelector(".confirm").onclick = async () => { 
-        await confirmAction(); 
-        modalContainer.style.display = "none"; 
+      modalContainer.querySelector(".confirm").onclick = async () => {
+        await confirmAction();
+        modalContainer.style.display = "none";
       };
     }
 
@@ -354,6 +355,11 @@
         const lang = e.target.value;
         i18next.changeLanguage(lang).then(() => {
           $("body").localize();
+          document.querySelector("#searchInput").placeholder = i18next.t("searchPlaceholder");
+          document.querySelectorAll(".btn-success").forEach(b => b.textContent = i18next.t("approve"));
+          document.querySelectorAll(".btn-danger").forEach(b => b.textContent = i18next.t("reject"));
+          document.querySelectorAll(".btn-pending").forEach(b => b.textContent = i18next.t("pending"));
+          document.querySelectorAll(".btn-delete").forEach(b => b.textContent = i18next.t("delete"));
           console.log("🌐 Language switched to:", lang);
         });
       });
