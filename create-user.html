@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GDLVS – Create User & Send Verification</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; background:#f6f8fb; margin:0; padding:24px; }
+    .card { max-width:520px; margin:0 auto; background:#fff; border-radius:12px; padding:24px; box-shadow:0 6px 18px rgba(0,0,0,.08); }
+    h1 { margin:0 0 12px; font-size:22px; }
+    label { display:block; font-weight:600; margin-top:14px; }
+    input, select { width:100%; padding:10px 12px; border:1px solid #cfd6e4; border-radius:8px; }
+    button { margin-top:18px; width:100%; padding:12px; border:0; border-radius:10px; font-weight:700; cursor:pointer; }
+    .primary { background:#004aad; color:#fff; }
+    .msg { margin-top:16px; padding:10px 12px; border-radius:8px; display:none; }
+    .ok { background:#e9f7ef; color:#11633c; border:1px solid #bfe8ce; }
+    .err { background:#fdecea; color:#7a231f; border:1px solid #f5c1bb; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Create User & Send Verification</h1>
+
+    <label>Email</label>
+    <input id="email" type="email" placeholder="user@example.com" required />
+
+    <label>Password</label>
+    <input id="password" type="password" placeholder="Minimum 6 characters" minlength="6" required />
+
+    <label>Language</label>
+    <select id="lang">
+      <option value="en">English</option>
+      <option value="fr">Français</option>
+      <option value="ja">日本語</option>
+    </select>
+
+    <button id="create" class="primary">Create Account & Send Verification</button>
+
+    <div id="ok" class="msg ok"></div>
+    <div id="err" class="msg err"></div>
+  </div>
+
+  <script type="module">
+    // Firebase v10 SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import {
+      getAuth, createUserWithEmailAndPassword, sendEmailVerification,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    import {
+      getFirestore, doc, setDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+    // ✅ Your GDLVS Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBiZN1G3ShoDOcPLe-bUILNf90NpdcCu6k",
+      authDomain: "gdlvs-2348e.firebaseapp.com",
+      projectId: "gdlvs-2348e",
+      storageBucket: "gdlvs-2348e.appspot.com",
+      messagingSenderId: "358715790318",
+      appId: "1:358715790318:web:9d4c85e0f71222cf1b34ff"
+    };
+
+    // ✅ Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // 🔧 UI handlers
+    const ok = document.getElementById('ok');
+    const err = document.getElementById('err');
+    function show(el, text) { el.style.display = 'block'; el.textContent = text; }
+    function hideAll() { ok.style.display = 'none'; err.style.display = 'none'; }
+
+    // ✅ Create user + send verification + save to Firestore
+    document.getElementById('create').addEventListener('click', async () => {
+      hideAll();
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const lang = document.getElementById('lang').value;
+
+      if (!email || !password) {
+        show(err, "Please enter email and password.");
+        return;
+      }
+
+      try {
+        // Set language for email
+        auth.languageCode = lang;
+
+        // Create user
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        const user = cred.user;
+
+        // Send verification email
+        await sendEmailVerification(user, {
+          url: "https://gdlvs-2348e.web.app/",
+          handleCodeInApp: false
+        });
+
+        // Save user data in Firestore (optional)
+        await setDoc(doc(db, "users", email), {
+          email: email,
+          role: "user",
+          createdAt: new Date().toISOString(),
+          verified: false
+        });
+
+        show(ok, `✅ User created and verification email sent to ${email}`);
+        await signOut(auth);
+
+      } catch (e) {
+        console.error(e);
+        const map = {
+          "auth/email-already-in-use": "That email is already in use.",
+          "auth/invalid-email": "The email is invalid.",
+          "auth/weak-password": "Password must be at least 6 characters.",
+          "auth/operation-not-allowed": "Email/Password sign-in is disabled."
+        };
+        show(err, map[e.code] || e.message);
+      }
+    });
+  </script>
+</body>
+</html>
